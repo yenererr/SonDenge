@@ -1,59 +1,57 @@
-# Takım Planı — Önce Ortak Çekirdek, Sonra Bölüm Bölüm
+# Takım Planı — Herkes Bir Bölüm, Ortak Parçaları Lead Kurar
 
-Hepimiz oyunu AI (Claude Code + Unity MCP) ile yapıyoruz. Bu yüzden iş, AI'a net tarif edilebilecek parçalara bölündü:
-önce herkesin kullanacağı **ortak parçalar (prefab)** yapılır, sonra herkes bu parçalarla **kendi bölümünü (sahnesini)** kurar.
+Oyunun nasıl olacağı: **[OYUN_TASARIMI.md](OYUN_TASARIMI.md)** (ana referans).
+Zorunlu kurallar: **[ZORUNLU_KURALLAR.md](ZORUNLU_KURALLAR.md)**. Kendi görev dosyan: `docs/tasks/`.
 
-Kendi görev dosyan: `docs/tasks/`. **Zorunlu kurallar: [ZORUNLU_KURALLAR.md](ZORUNLU_KURALLAR.md).**
+Hepimiz AI (Claude Code + Unity MCP) ile çalışıyoruz. Her kişi **bir bölüm sahnesinin** sahibi.
+Dört bölüm de aynı ev / mobilya / denge / HUD / rapor sistemini kullanır; bu ortak parçaları **Lead `Level1`'i yaparken** kurar
+ve prefab olarak paylaşır. Diğerleri o sırada kendi bölümlerine özel parçaları hazırlar.
 
-## Kim, hangi branch
+## Bölümler ve sahipleri
 
-| Kişi | Branch | Aşama 1 (çekirdek) | Aşama 2 (bölüm) |
-|---|---|---|---|
-| Kişi 1 — Lead | `kisi1-lead` | Oyun akışı, mobilya sürükleme, Furniture prefab | `Menu` + `Level1` (İlk Sarsıntı, öğretici) + bölümleri birleştirme |
-| Kişi 2 | `kisi2-fizik` | Ev dengesi (eğim) + deprem | `Level2` (Artan Tehlike) |
-| Kişi 3 | `kisi3-gorsel` | Görseller + HUD + paneller | `Level3` (Yeni Kat) |
-| Kişi 4 | `kisi4-hazirlik` | Bütçe, sabitleme, skor, farkındalık mesajları, ses | `Level4` (Büyük Sınav, final) |
+| Sahne | Kim | Branch | Afet | İçerik |
+|---|---|---|---|---|
+| `Level1` "İlk Sarsıntı" | Kişi 1 — Lead | `kisi1-level1` | Orta deprem | Öğretici: 2 katlı ev, 4 oda, az mobilya, temel sabitleme, adım adım ipuçları |
+| `Level2` "Artan Tehlike" | Kişi 2 | `kisi2-level2` | Güçlü deprem | Daha çok/ağır mobilya (gardırop, buzdolabı), biraz daha büyük bütçe, **mağaza** |
+| `Level3` "Yangın" | Kişi 3 | `kisi3-level3` | **Yangın** | Odada başlayıp yayılan yangın; yanan eşyanın kütlesi gider → denge değişir; duman dedektörü / söndürücü / sprinkler |
+| `Level4` "Büyük Sınav" | Kişi 4 | `kisi4-level4` | Şiddetli deprem (+ ops. fırtına) | **3. kat** eklenir, en zor bölüm, final raporu + "AFETE HAZIRLIK HAYAT KURTARIR." |
+| `Menu` + bağlantılar + build | Lead | `kisi1-level1` | — | OYNA / NASIL OYNANIR / AYARLAR, `Menu → Level1 → … → Level4`, Windows build |
 
-## Takvim
+## Kim ne zaman ne yapar
 
-| Saat | Ne olur | Kontrol |
-|---|---|---|
-| 0–2 | Herkes projeyi açar, MCP'yi bağlar, `CLAUDE.md` + kendi görev dosyasını okur | Herkes Play'e basabiliyor |
-| 2–10 | **Aşama 1:** herkes kendi çekirdek parçasını yapar, `CoreTest` / kendi sandbox'ında dener | Her parça tek başına çalışıyor |
-| 10–12 | **Birleştirme 1:** herkes PR açar, Lead merge eder, `CoreTest`'te hepsi birlikte denenir | Mobilya taşıyınca ev eğiliyor, deprem olunca kayıyor |
-| 12–14 | Herkes `git pull origin main` yapar → artık tüm prefab'lar herkeste | — |
-| 14–30 | **Aşama 2:** herkes kendi `LevelX` sahnesini kurar | Her bölüm baştan sona oynanıyor |
-| 30–32 | **Birleştirme 2:** bölümler merge edilir, Lead `Menu → Level1 → … → Level4` zincirini bağlar | Oyun baştan sona oynanıyor |
-| 32–40 | Ayar, hata düzeltme, ses, metinler | Kritik hata yok |
-| 40–44 | Özellik dondurma, Windows build, başka bilgisayarda test | Build açılıyor |
-| 44–48 | Teslim, video, sunum | Teslim edildi |
+| Saat | Kişi 1 — Lead | Kişi 2 | Kişi 3 | Kişi 4 |
+|---|---|---|---|---|
+| 0–2 | Proje + MCP kurulumu, herkes Play'e basabiliyor | aynı | aynı | aynı |
+| 2–12 | **Ortak çekirdek** (`CoreTest`'te): dönen ev + tork, sürükleme, sabitleme, deprem, HUD, AFET RAPORU | 6 mobilyanın **verileri**, **mağaza**, **sesler** | **Yangın sistemi** + alev/duman efektleri (kendi sandbox'ında) | **Görseller** (ev, kaya, arka plan, 6 mobilya), **eğitici mesajlar** |
+| 12 | **Birleştirme 1:** PR'lar merge edilir, `LevelTemplate` prefab'ı hazır | `git pull origin main` | `git pull origin main` | `git pull origin main` |
+| 12–30 | `Level1` + `Menu` | `Level2` | `Level3` | `Level4` (3. kat) |
+| 30–32 | **Birleştirme 2:** tüm bölümler merge, zincir bağlanır | PR | PR | PR |
+| 32–40 | Hata düzeltme, ayar, ses, metin | aynı | aynı | aynı |
+| 40–44 | Özellik dondurma, Windows build, başka bilgisayarda test | test | test | test |
+| 44–48 | Teslim, video, sunum | | | |
 
-**Kural:** 12. saatte çekirdek birlikte çalışmıyorsa herkes çekirdeğe yardım eder; bölümlere geçilmez.
-**Kural:** 24. saatte en az `Level1` oynanabilir değilse yangın / yeni kat iptal, bölümler sadece deprem olur.
+**Kural:** 12. saatte ortak çekirdek çalışmıyorsa herkes çekirdeğe yardım eder (Lead'in söylediği parçada).
+**Kural:** 24. saatte `Level1` oynanabilir değilse yangın ve fırtına iptal; `Level3` ve `Level4` deprem bölümü olur.
+**Öncelik sırası (OYUN_TASARIMI §16):** denge → sürükleme/sabitleme → deprem → döngü → görsel/ses → ek afet/kat.
 
-## Altın kurallar (AI'a da söyleyin)
+## Ortak parçalar (Lead kurar, herkes kullanır)
+- Pivot etrafında dönen ev: tork, atalet, sönümleme, GÜVENLİ/DENGESİZ/KRİTİK/ÇÖKÜŞ
+- Mobilya: sürükleme, hover bilgisi, sabitleme + çapa ikonu, kayma/devrilme/kırılma/düşme, düşen eşya dengeden çıkar
+- Deprem sistemi (şiddet + süre ayarlı), afet enerji göstergesi
+- HUD, "RADYO SİVRİTEPE" uyarısı, "AFET RAPORU" ekranı, ekonomi
+- `LevelSetup` (bölüm ayarları: bütçe, afet türü/şiddeti/süresi, mobilya listesi, sonraki sahne) ve `LevelTemplate` prefab'ı
 
-1. **Herkes sadece kendi dosyalarına dokunur.** Bölüm sahnende (`LevelX.unity`) ve `Assets/Levels/LevelX/` klasöründe istediğini yap; başkasınınkine dokunma.
-2. **Ortak prefab'ları bölümde değiştirme.** Sahnede ayar değiştirmek (override) serbest; prefab dosyasının kendisini değiştirmek gerekirse sahibine söyle.
-3. **`Contracts.cs`, `ProjectSettings/`, `Packages/`** — sadece takım onayıyla.
-4. **Küçük ve sık commit + push.** Her gün en az birkaç kez `git pull origin main`.
-5. **İki AI aynı Unity'ye bağlanmaz.** Herkes kendi bilgisayarında kendi Unity'si + kendi MCP'si.
-6. Bölüm sonu: `SceneLoader.Instance.Load("Level2")` gibi sonraki sahneye geçilir (Lead bağlar).
-
-## Bölüm sahnesi nasıl kurulur (Aşama 2, herkes için aynı)
-
-1. `Assets/Scenes/LevelX.unity`'yi aç.
-2. Ortak prefab'ları sürükle: `House`, mobilyalar, `HUD`, `LevelSetup` (Aşama 1'de oluşacak).
-3. `LevelSetup` üzerinde bölüm ayarlarını yap: bütçe, deprem şiddeti/süresi, hazırlık süresi, hangi mobilyalar, sonraki sahne.
-4. Bölüme özel her şeyi (yeni görsel, yeni script) `Assets/Levels/LevelX/` içine koy.
-5. Play'e bas, baştan sona oyna, PR aç.
+## Bölüm sahnesi nasıl kurulur (12. saatten sonra, herkes için aynı)
+1. `Assets/Scenes/LevelX.unity`'yi aç, `LevelTemplate` prefab'ını sürükle.
+2. `LevelSetup` üzerinde bölüm ayarlarını yap.
+3. Bölüme özel her şeyi `Assets/Levels/LevelX/` içine koy (dosya adları `LX_` önekiyle).
+4. Play ile baştan sona oyna, commit + push, PR aç.
 
 ## Her gün kullanılacak git komutları
-
 ```bash
 git pull origin main          # main'deki yenilikleri al
 git add .
-git commit -m "ne yaptım"
+git commit -m "Level2: ne yaptım"
 git push                      # kendi branch'ine gönder
 ```
-Bir parça bitince GitHub'da kendi branch'inden `main`'e **Pull Request** aç.
+Bir parça bitince GitHub'da kendi branch'inden `main`'e **Pull Request** aç; Lead merge eder.

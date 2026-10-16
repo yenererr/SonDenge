@@ -28,13 +28,13 @@
 
 | Kişi | Sahnesi | Yazabileceği klasörler |
 |---|---|---|
-| Kişi 1 (Lead) | `Menu`, `Level1`, `CoreTest` | `Scripts/Core/`, `Scripts/Player/`, `Prefabs/Furniture/`, `Levels/Level1/` |
-| Kişi 2 | `Level2` | `Scripts/Physics/`, `Scripts/Disasters/`, `Prefabs/Visual/House*`, `Levels/Level2/` |
-| Kişi 3 | `Level3` | `Art/`, `Prefabs/UI/`, `Prefabs/Visual/` (House hariç), `Scripts/UI/`, `Levels/Level3/` |
-| Kişi 4 | `Level4` | `Scripts/Preparation/`, `Economy/`, `Awareness/`, `Data/`, `Audio/`, `Levels/Level4/` |
+| Kişi 1 (Lead) | `Menu`, `Level1`, `CoreTest` | `Scripts/Core/`, `Player/`, `Physics/`, `Disasters/` (Fire/ ve Storm/ hariç), `UI/`, `Economy/`, `Preparation/`, `Assets/Prefabs/`, `Levels/Level1/` |
+| Kişi 2 | `Level2` | `Data/Furniture/`, `Scripts/Shop/`, `Audio/`, `Levels/Level2/` |
+| Kişi 3 | `Level3` | `Scripts/Disasters/Fire/`, `Art/FX/`, `Levels/Level3/` |
+| Kişi 4 | `Level4` | `Art/` (FX hariç), `Scripts/Awareness/`, `Scripts/Disasters/Storm/`, `Levels/Level4/` |
 
 7. **Başkasının sahnesini açıp kaydetme.** Sadece bakmak için açtıysan kaydetmeden kapat (Unity "Save?" diye sorarsa **Don't Save**).
-8. **Aşama 2'de bölüme özel her şey** (script, sprite, prefab, ses) `Assets/Levels/LevelX/` içine girer.
+8. **12. saatten sonra bölüme özel her şey** (script, sprite, prefab, ses) `Assets/Levels/LevelX/` içine girer.
 9. **Ortak prefab dosyasını değiştirme.** Sahnede override (Inspector'da değer değiştirme) serbest. Prefab'ın kendisinde değişiklik gerekiyorsa sahibine söyle.
 10. **Yasak dosyalar (yalnızca takım onayıyla):** `Assets/Scripts/Core/Contracts.cs`, `ProjectSettings/` (Tags, Layers, Sorting Layers, Input, Physics ayarları dahil), `Packages/` (yeni paket kurmak dahil), `Assets/Settings/` (URP ayarları).
 11. **Kişisel denemeler** `Assets/_Sandbox/<isim>/` içinde (git'e gitmez). Oradaki bir şey lazım olursa kendi klasörüne taşı.
