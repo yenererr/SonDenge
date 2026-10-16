@@ -27,14 +27,23 @@ namespace Jam.Levels.Level1
             var plaster = Material("L1_WarmPlaster", new Color(0.80f, 0.66f, 0.49f));
             var timber = Material("L1_DarkTimber", new Color(0.26f, 0.13f, 0.075f));
             var warmWood = Material("L1_WarmWood", new Color(0.48f, 0.25f, 0.11f));
+            var agedWood = Material("L1_AgedWood", new Color(0.49f, 0.29f, 0.16f));
             var planks = Material("L1_OakPlanks", new Color(0.86f, 0.72f, 0.56f));
             planks.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(
                 LevelRoot + "/Art/L1_OakFloor_Diffuse.tga"));
+            agedWood.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(
+                LevelRoot + "/Art/L1_OakFloor_Diffuse.tga"));
+            EditorUtility.SetDirty(agedWood);
             var roof = Material("L1_RoofClay", new Color(0.49f, 0.21f, 0.13f));
             var stone = Material("L1_PivotStone", new Color(0.40f, 0.37f, 0.34f));
             var olive = Material("L1_OliveFabric", new Color(0.30f, 0.39f, 0.19f));
             var cream = Material("L1_CreamCloth", new Color(0.87f, 0.73f, 0.53f));
             var glass = Material("L1_WindowGlass", new Color(0.38f, 0.62f, 0.68f));
+            var agedIron = Material("L1_AgedIron", new Color(0.16f, 0.12f, 0.09f));
+            var ember = Material("L1_AmberEmber", new Color(0.98f, 0.43f, 0.13f));
+            ember.SetColor("_EmissionColor", new Color(1.25f, 0.35f, 0.05f));
+            ember.EnableKeyword("_EMISSION");
+            EditorUtility.SetDirty(ember);
 
             ImportSprite(LevelRoot + "/Art/L1_DuskSky.png", false);
             ImportSprite(LevelRoot + "/Art/L1_RockSpire.png", true);
@@ -70,9 +79,13 @@ namespace Jam.Levels.Level1
                         var shutter = wall.transform.Find("Window");
                         if (shutter != null) shutter.gameObject.SetActive(false);
                     }
+                    // A real opening is left beside the central post on the upper
+                    // floor so the ladder connects both walkable levels.
+                    var upperLeft = floor == 1 && side < 0;
                     FitPrefab(Tavern + "Floor Tile.prefab", house.transform,
-                        $"Floor {floor + 1} {Side(side)} tavern boards", new Vector3(x, baseY + 0.16f, -0.05f),
-                        new Vector3(4.03f, 0.18f, 1.90f));
+                        $"Floor {floor + 1} {Side(side)} tavern boards",
+                        new Vector3(upperLeft ? -2.52f : x, baseY + 0.16f, -0.05f),
+                        new Vector3(upperLeft ? 3.09f : 4.03f, 0.18f, 1.90f));
                     if (!doorway)
                     {
                         for (var strip = 0; strip < 3; strip++)
@@ -81,9 +94,26 @@ namespace Jam.Levels.Level1
                                 new Vector3(3.63f, 0.16f, 0.055f), planks);
                     }
                     Block(house.transform, $"Floor {floor + 1} {Side(side)} lower beam",
-                        new Vector3(x, baseY + 0.02f, -0.51f), new Vector3(4.12f, 0.18f, 0.30f), timber);
+                        new Vector3(upperLeft ? -2.54f : x, baseY + 0.02f, -0.51f),
+                        new Vector3(upperLeft ? 3.18f : 4.12f, 0.18f, 0.30f), timber);
                     Block(house.transform, $"Floor {floor + 1} {Side(side)} lintel",
-                        new Vector3(x, baseY + 2.57f, -0.54f), new Vector3(4.12f, 0.16f, 0.29f), warmWood);
+                        new Vector3(floor == 0 && side < 0 ? -2.54f : x, baseY + 2.57f, -0.54f),
+                        new Vector3(floor == 0 && side < 0 ? 3.18f : 4.12f, 0.16f, 0.29f), warmWood);
+
+                    // Weathered boards surround the original Tavern window/door
+                    // prefabs, keeping their openings visible.
+                    foreach (var offset in new[] { -1.23f, 1.23f })
+                    {
+                        for (var row = 0; row < 9; row++)
+                            Block(house.transform, $"Aged plank {floor} {side} {offset} {row}",
+                                new Vector3(x + offset, baseY + 0.48f + row * 0.235f, 0.685f),
+                                new Vector3(1.17f, 0.205f, 0.065f), row % 3 == 0 ? planks : agedWood);
+                        Block(house.transform, $"Weathered plank seam {floor} {side} {offset}",
+                            new Vector3(x + offset, baseY + 1.41f, 0.725f),
+                            new Vector3(0.09f, 2.14f, 0.09f), warmWood);
+                    }
+                    SlimBrace(house.transform, $"Old diagonal timber {floor} {side}",
+                        new Vector3(x - 1.53f, baseY + 1.53f, -0.48f), -22f, 1.80f, agedWood);
                 }
             }
 
@@ -96,25 +126,51 @@ namespace Jam.Levels.Level1
             }
             foreach (var y in new[] { 0.09f, 2.70f, 5.37f })
             {
-                FitPrefab(Interiors + "SM_LPI_Struct_Beam_01.prefab", house.transform,
-                    $"Front timber beam {y}", new Vector3(0, y, -0.66f), new Vector3(8.65f, 0.20f, 0.30f));
+                if (y < 2.69f || y > 2.71f)
+                    FitPrefab(Interiors + "SM_LPI_Struct_Beam_01.prefab", house.transform,
+                        $"Front timber beam {y}", new Vector3(0, y, -0.66f), new Vector3(8.65f, 0.20f, 0.30f));
+                else
+                {
+                    FitPrefab(Interiors + "SM_LPI_Struct_Beam_01.prefab", house.transform,
+                        "Front beam left of ladder opening", new Vector3(-2.59f, y, -0.66f),
+                        new Vector3(3.46f, 0.20f, 0.30f));
+                    FitPrefab(Interiors + "SM_LPI_Struct_Beam_01.prefab", house.transform,
+                        "Front beam right of ladder opening", new Vector3(2.12f, y, -0.66f),
+                        new Vector3(4.42f, 0.20f, 0.30f));
+                }
+            }
+            foreach (var y in new[] { 0.10f, 2.70f })
+            {
+                for (var board = 0; board < 16; board++)
+                {
+                    var x = -3.91f + board * 0.52f;
+                    if (y > 2f && x > -0.95f && x < 0.05f) continue;
+                    Block(house.transform, $"Uneven oak floor fascia {y} {board}",
+                        new Vector3(x, y + (board % 4 == 0 ? 0.022f : 0f), -0.85f),
+                        new Vector3(0.49f, 0.21f, 0.12f), board % 3 == 0 ? agedWood : warmWood);
+                }
+            }
+            foreach (var x in new[] { -3.70f, -1.83f, 1.83f, 3.70f })
+            {
+                SlimBrace(house.transform, $"Hand-hewn floor corbel {x}",
+                    new Vector3(x, 2.39f, -0.46f), x < 0 ? -35f : 35f, 0.68f, agedWood);
             }
 
-            // Warm plaster side cheeks give depth without closing the dollhouse front.
+            // Timber clad side cheeks give depth without closing the dollhouse front.
             foreach (var x in new[] { -4.24f, 4.24f })
             {
                 for (var floor = 0; floor < 2; floor++)
-                    Block(house.transform, $"Side plaster {x} {floor}",
+                    Block(house.transform, $"Weathered timber side {x} {floor}",
                         new Vector3(x, floor * 2.65f + 1.40f, 0.15f),
-                        new Vector3(0.13f, 2.34f, 1.35f), plaster);
+                        new Vector3(0.13f, 2.34f, 1.35f), agedWood);
             }
 
             // A filled gable and the original timber roof parts give the cutaway
             // a complete house silhouette rather than an empty triangular frame.
-            var gable = Child(house.transform, "Warm plaster attic gable");
+            var gable = Child(house.transform, "Aged timber attic gable");
             var gableFilter = gable.AddComponent<MeshFilter>();
             gableFilter.sharedMesh = GableMesh();
-            gable.AddComponent<MeshRenderer>().sharedMaterial = plaster;
+            gable.AddComponent<MeshRenderer>().sharedMaterial = agedWood;
             Block(house.transform, "Attic window glass", new Vector3(0, 5.90f, 0.53f),
                 new Vector3(0.69f, 0.55f, 0.07f), glass);
             Block(house.transform, "Attic window upper frame", new Vector3(0, 6.22f, 0.46f),
@@ -126,23 +182,39 @@ namespace Jam.Levels.Level1
                     new Vector3(0.10f, 0.68f, 0.14f), timber);
             Block(house.transform, "Attic window mullion", new Vector3(0, 5.90f, 0.43f),
                 new Vector3(0.07f, 0.58f, 0.12f), timber);
-            RoofBeam(house.transform, "Left roof slope", new Vector3(-2.18f, 5.94f, 0.08f), 18.5f, 4.65f, roof);
-            RoofBeam(house.transform, "Right roof slope", new Vector3(2.18f, 5.94f, 0.08f), -18.5f, 4.65f, roof);
+            RoofBeam(house.transform, "Long left roof slope", new Vector3(-1.52f, 6.16f, 0.08f), 15.7f, 5.46f, roof);
+            RoofBeam(house.transform, "Steep right roof slope", new Vector3(2.63f, 6.16f, 0.08f), -25.8f, 3.42f, roof);
+            // Short overlapping wooden shingles break up the clean roof line.
+            for (var section = 0; section < 10; section++)
+            {
+                var leftX = -3.82f + section * 0.50f;
+                RoofShingle(house.transform, $"Old left roof shingle {section}",
+                    new Vector3(leftX, 5.51f + (leftX + 4.13f) * 0.281f, -0.96f),
+                    15.7f, section % 4 == 0 ? warmWood : agedWood);
+            }
+            for (var section = 0; section < 6; section++)
+            {
+                var rightX = 3.79f - section * 0.49f;
+                RoofShingle(house.transform, $"Old right roof shingle {section}",
+                    new Vector3(rightX, 5.51f + (4.13f - rightX) * 0.480f, -0.96f),
+                    -25.8f, section % 4 == 0 ? warmWood : agedWood);
+            }
             FitPrefab(Tavern + "Side Roof.prefab", house.transform, "Tavern left timber roof",
-                new Vector3(-2.18f, 5.90f, -0.78f), new Vector3(4.72f, 1.42f, 0.20f));
+                new Vector3(-1.52f, 6.16f, -0.78f), new Vector3(5.45f, 1.56f, 0.20f));
             var rightRoof = FitPrefab(Tavern + "Side Roof.prefab", house.transform, "Tavern right timber roof",
-                new Vector3(2.18f, 5.90f, -0.78f), new Vector3(4.72f, 1.42f, 0.20f));
+                new Vector3(2.63f, 6.16f, -0.78f), new Vector3(3.43f, 1.56f, 0.20f));
             rightRoof.transform.localScale = new Vector3(-rightRoof.transform.localScale.x,
                 rightRoof.transform.localScale.y, rightRoof.transform.localScale.z);
-            CenterPrefab(rightRoof, house.transform.TransformPoint(new Vector3(2.18f, 5.90f, -0.78f)));
+            CenterPrefab(rightRoof, house.transform.TransformPoint(new Vector3(2.63f, 6.16f, -0.78f)));
             FitPrefab(Tavern + "Line Roof.prefab", house.transform, "Tavern roof detailing",
-                new Vector3(0, 6.65f, 0.24f), new Vector3(1.22f, 0.22f, 1.45f));
+                new Vector3(1.10f, 6.88f, 0.24f), new Vector3(1.22f, 0.22f, 1.45f));
             var chimney = FitPrefab(Interiors + "SM_LPI_Struct_Chimney_01.prefab", house.transform,
                 "Stone chimney", new Vector3(-3.18f, 6.65f, 0.52f), new Vector3(0.56f, 1.50f, 0.56f));
             foreach (var renderer in chimney.GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = stone;
-            FitPrefab(Interiors + "SM_LPI_Struct_BrickWall_01.prefab", house.transform,
+            var chimneyFace = FitPrefab(Interiors + "SM_LPI_Struct_BrickWall_01.prefab", house.transform,
                 "Brickwork on chimney face", new Vector3(-3.18f, 6.63f, 0.19f),
                 new Vector3(0.52f, 1.38f, 0.08f));
+            foreach (var renderer in chimneyFace.GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = stone;
             Block(house.transform, "Chimney cap", new Vector3(-3.18f, 7.42f, 0.52f),
                 new Vector3(0.72f, 0.15f, 0.71f), stone);
 
@@ -153,6 +225,8 @@ namespace Jam.Levels.Level1
             FitPrefab("Assets/EmaceArt/Fences 2026/Prefabs/Fence/Beam/PRE/EA03_Fence_Beam_01a_PRE.prefab",
                 house.transform, "Rough balcony rail", new Vector3(4.94f, 3.14f, -0.77f),
                 new Vector3(1.64f, 0.72f, 0.20f));
+            FitPrefab(TavernProps + "Standing Barrel.prefab", house.transform, "Balcony ale barrel",
+                new Vector3(4.70f, 3.14f, 0.34f), new Vector3(0.43f, 0.63f, 0.43f));
             RoofBeam(house.transform, "Angled balcony brace", new Vector3(4.65f, 2.26f, 0.18f),
                 35f, 1.60f, timber);
             Block(house.transform, "Delivery crane beam", new Vector3(5.02f, 5.20f, -0.10f),
@@ -171,6 +245,33 @@ namespace Jam.Levels.Level1
                 new Vector3(1.15f, 0.65f, 0.19f));
             SlimBrace(house.transform, "Lookout diagonal support", new Vector3(-4.43f, -0.17f, 0.15f),
                 -29f, 0.91f, timber);
+
+            // The asset ladder reaches an actual gap in the upper floor. The
+            // trigger handles a future Rigidbody player tagged Player with W/S.
+            var ladder = FitPrefab(Doll + "20_Utility/SM_LPI_Util_Ladder_01.prefab", house.transform,
+                "Weathered wooden inter-floor ladder", new Vector3(-0.49f, 1.56f, -0.60f),
+                new Vector3(0.68f, 2.86f, 0.23f));
+            foreach (var renderer in ladder.GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = agedWood;
+            foreach (var collider in ladder.GetComponentsInChildren<Collider>()) collider.enabled = false;
+            Block(house.transform, "Upper ladder opening left trim",
+                new Vector3(-1.02f, 2.79f, -0.57f), new Vector3(0.12f, 0.26f, 0.32f), timber);
+            Block(house.transform, "Upper ladder opening right trim",
+                new Vector3(-0.06f, 2.79f, -0.57f), new Vector3(0.12f, 0.26f, 0.32f), timber);
+            var ladderZone = Child(house.transform, "Ladder climb area");
+            ladderZone.transform.localPosition = new Vector3(-0.49f, 1.80f, -0.58f);
+            var trigger = ladderZone.AddComponent<BoxCollider>();
+            trigger.isTrigger = true;
+            trigger.size = new Vector3(0.80f, 3.25f, 0.75f);
+            var lowerLanding = Child(house.transform, "Lower ladder landing");
+            lowerLanding.transform.localPosition = new Vector3(-0.49f, 0.55f, -0.58f);
+            var ladderTop = Child(house.transform, "Ladder top");
+            ladderTop.transform.localPosition = new Vector3(-0.49f, 3.26f, -0.58f);
+            var upperLanding = Child(house.transform, "Upper ladder landing");
+            upperLanding.transform.localPosition = new Vector3(-1.27f, 3.34f, -0.58f);
+            var climb = ladderZone.AddComponent<L1_LadderClimb>();
+            climb.bottom = lowerLanding.transform;
+            climb.top = ladderTop.transform;
+            climb.upperLanding = upperLanding.transform;
 
             DressRooms(house.transform, olive, cream);
 
@@ -195,15 +296,39 @@ namespace Jam.Levels.Level1
                 {
                     var lamp = Child(house.transform, $"Warm room light {floor} {side}");
                     lamp.transform.localPosition = new Vector3(side * 1.72f, floor * 2.65f + 2.16f, -0.14f);
-                    FitPrefab("Assets/LowPolyInteriorsFree/Prefabs/13_Lighting/SM_LPI_Light_Lantern_01.prefab",
+                    var lantern = FitPrefab("Assets/LowPolyInteriorsFree/Prefabs/13_Lighting/SM_LPI_Light_Lantern_01.prefab",
                         lamp.transform, "Hanging asset lantern", Vector3.zero,
-                        new Vector3(0.25f, 0.38f, 0.25f));
+                        new Vector3(0.31f, 0.46f, 0.31f));
+                    foreach (var renderer in lantern.GetComponentsInChildren<Renderer>())
+                        renderer.sharedMaterial = agedIron;
+                    Block(lamp.transform, "Amber lantern core", new Vector3(0f, -0.02f, -0.14f),
+                        new Vector3(0.10f, 0.16f, 0.07f), ember);
+                    Block(house.transform, $"Lantern chain {floor} {side}",
+                        new Vector3(side * 1.72f, floor * 2.65f + 2.43f, -0.14f),
+                        new Vector3(0.025f, 0.22f, 0.025f), agedIron);
                     var light = lamp.AddComponent<Light>();
                     light.type = LightType.Point;
                     light.color = new Color(1f, 0.67f, 0.36f);
-                    light.intensity = 1.36f;
+                    light.intensity = 1.04f;
                     light.range = 3.1f;
                     light.shadows = LightShadows.None;
+
+                    var sconce = Child(house.transform, $"Tavern wall sconce {floor} {side}");
+                    sconce.transform.localPosition = new Vector3(side < 0 ? -1.42f : 0.86f,
+                        floor * 2.65f + 2.04f, 0.44f);
+                    var tavernLamp = FitPrefab(TavernProps + "Iron Torch Bracket.prefab", sconce.transform,
+                        "Stylized Cozy Tavern iron torch lamp", Vector3.zero,
+                        new Vector3(0.34f, 0.54f, 0.28f));
+                    foreach (var renderer in tavernLamp.GetComponentsInChildren<Renderer>())
+                        renderer.sharedMaterial = agedIron;
+                    Block(sconce.transform, "Warm ember in iron torch",
+                        new Vector3(0f, 0.12f, -0.13f), new Vector3(0.09f, 0.16f, 0.08f), ember);
+                    var sconceLight = sconce.AddComponent<Light>();
+                    sconceLight.type = LightType.Point;
+                    sconceLight.color = new Color(1f, 0.52f, 0.20f);
+                    sconceLight.intensity = 0.90f;
+                    sconceLight.range = 2.50f;
+                    sconceLight.shadows = LightShadows.None;
                 }
             }
 
@@ -213,6 +338,9 @@ namespace Jam.Levels.Level1
                 daylight.color = new Color(1f, 0.82f, 0.68f);
                 daylight.intensity = 0.66f;
             }
+
+            var mainCamera = SceneRoot("Main Camera")?.GetComponent<Camera>();
+            if (mainCamera != null) mainCamera.transform.position = new Vector3(0f, 2.35f, -12.0f);
 
             pivot.transform.localScale = Vector3.one * 0.82f;
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
@@ -270,6 +398,13 @@ namespace Jam.Levels.Level1
             foreach (var renderer in cushion.GetComponentsInChildren<Renderer>()) renderer.sharedMaterial = cream;
             FitPrefab(Doll + "05_Tables/SM_LPI_Table_Coffee_02.prefab", rooms, "Low tea table",
                 new Vector3(2.53f, 0.49f, -0.53f), new Vector3(0.82f, 0.42f, 0.53f));
+            FitPrefab(Doll + "16_Textiles/SM_LPI_Text_RugRect_01.prefab", rooms,
+                "Worn sitting-room rug", new Vector3(1.98f, 0.29f, -0.56f),
+                new Vector3(2.35f, 0.035f, 0.79f));
+            FitPrefab(TavernProps + "Full Foam Tankard.prefab", rooms, "Tea table tankard",
+                new Vector3(2.69f, 0.80f, -0.51f), new Vector3(0.16f, 0.18f, 0.15f));
+            FitPrefab(TavernProps + "Single Candle 3.prefab", rooms, "Tea table candle",
+                new Vector3(2.32f, 0.81f, -0.47f), new Vector3(0.14f, 0.22f, 0.14f));
             FitPrefab(Doll + "21_Fireplace/SM_LPI_Fire_Surround_01.prefab", rooms,
                 "Living-room brick fireplace", new Vector3(3.32f, 1.24f, 0.49f),
                 new Vector3(1.15f, 1.89f, 0.45f));
@@ -331,19 +466,20 @@ namespace Jam.Levels.Level1
         private static Mesh GableMesh()
         {
             var path = LevelRoot + "/Art/L1_GablePanel.asset";
-            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            if (existing != null) return existing;
-            var mesh = new Mesh { name = "L1 Gable Panel" };
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            var created = mesh == null;
+            if (created) mesh = new Mesh { name = "L1 Gable Panel" };
             mesh.vertices = new[]
             {
                 new Vector3(-4.13f, 5.43f, 0.72f),
-                new Vector3(0f, 6.67f, 0.72f),
+                new Vector3(1.10f, 6.90f, 0.72f),
                 new Vector3(4.13f, 5.43f, 0.72f)
             };
             mesh.uv = new[] { new Vector2(0, 0), new Vector2(.5f, 1), new Vector2(1, 0) };
             mesh.triangles = new[] { 0, 1, 2 };
             mesh.RecalculateNormals();
-            AssetDatabase.CreateAsset(mesh, path);
+            if (created) AssetDatabase.CreateAsset(mesh, path);
+            else EditorUtility.SetDirty(mesh);
             return mesh;
         }
 
@@ -443,6 +579,18 @@ namespace Jam.Levels.Level1
             beam.transform.localRotation = Quaternion.Euler(0, 0, angle);
             beam.transform.localScale = new Vector3(length, 0.12f, 0.18f);
             beam.GetComponent<Renderer>().sharedMaterial = material;
+        }
+
+        private static void RoofShingle(Transform parent, string name, Vector3 position,
+            float angle, Material material)
+        {
+            var shingle = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            shingle.name = name;
+            shingle.transform.SetParent(parent, false);
+            shingle.transform.localPosition = position;
+            shingle.transform.localRotation = Quaternion.Euler(0, 0, angle);
+            shingle.transform.localScale = new Vector3(0.52f, 0.12f, 1.72f);
+            shingle.GetComponent<Renderer>().sharedMaterial = material;
         }
 
         private static GameObject FitPrefab(string path, Transform parent, string name, Vector3 center, Vector3 size)

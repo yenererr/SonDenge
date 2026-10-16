@@ -17,8 +17,8 @@ Mesh:
     firstVertex: 0
     vertexCount: 3
     localAABB:
-      m_Center: {x: 0, y: 6.05, z: 0.72}
-      m_Extent: {x: 4.13, y: 0.6200001, z: 0}
+      m_Center: {x: 0, y: 6.165, z: 0.72}
+      m_Extent: {x: 4.13, y: 0.73500013, z: 0}
   m_Shapes:
     vertices: []
     shapes: []
@@ -97,7 +97,7 @@ Mesh:
       format: 0
       dimension: 0
     m_DataSize: 96
-    _typelessdata: f62884c08fc2ad40ec51383f0000000000000000000080bf000000000000000000000000a470d540ec51383f0000000000000000000080bf0000003f0000803ff62884408fc2ad40ec51383f0000000000000000000080bf0000803f00000000
+    _typelessdata: f62884c08fc2ad40ec51383f0000000000000000000080bf0000000000000000cdcc8c3fcdccdc40ec51383f0000000000000000000080bf0000003f0000803ff62884408fc2ad40ec51383f0000000000000000000080bf0000803f00000000
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
