@@ -14,7 +14,7 @@ namespace Jam.Levels.Level1
         private const string Doll = "Assets/LowPolyInteriorsFree/Prefabs/";
         private const string SmallProps = "Assets/3Digitalis/LowPolyInteriorPropsPack/Prefabs/";
 
-        [MenuItem("Son Denge/Level1/Gorsel Ev ve Dagi Kur")]
+        [MenuItem("Son Denge/Level1/Arsiv/Eski 3D Taslagi Kur")]
         private static void Build()
         {
             if (EditorSceneManager.GetActiveScene().path != "Assets/Scenes/Level1.unity")
