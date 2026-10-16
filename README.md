@@ -13,7 +13,7 @@ Oyun tasarımı: [docs/OYUN_TASARIMI.md](docs/OYUN_TASARIMI.md) · Plan: [docs/G
 4. Çekirdek sistemler (GameManager, AudioManager, SceneLoader) her sahnede otomatik kurulur; sahneye eklemeyin.
 5. Küçük ve sık commit. Commit'ten önce `git pull`. Herkes kendi branch'inde (`kisi1-level1`, `kisi2-level2`, `kisi3-level3`, `kisi4-level4`).
 6. `main` her zaman çalışır durumda olur. `Contracts.cs`, `ProjectSettings/`, `Packages/` değişikliği takım onayı ister.
-7. AI ajanları için kurallar: [CLAUDE.md](CLAUDE.md).
+7. AI ajanları için kurallar: [CLAUDE.md](CLAUDE.md). Unity MCP kurulumu: [docs/MCP_KURULUM.md](docs/MCP_KURULUM.md).
 
 ## 1. Kurulum (sadece Lead, bir kez)
 

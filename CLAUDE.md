@@ -20,7 +20,8 @@ Menu.unity and CoreTest.unity belong to the Lead (Kisi 1).
 Do NOT modify ProjectSettings or Packages without approval.
 Always preserve Unity .meta files, avoid reimport churn, and keep scripts compilable.
 Write small, testable C# components; prefer clarity to abstractions.
-When MCP is enabled, use only capabilities verified to exist in the installed MCP server.
+Unity MCP: MCP for Unity (CoplayDev) v10.0.0, server `unityMCP` at http://localhost:8080/mcp (see docs/MCP_KURULUM.md).
+When MCP is enabled, use only capabilities verified to exist in the installed MCP server. Save the scene after MCP edits.
 Before coding, state planned files. After coding, report files changed, test result,
 manual Unity steps, and open issues. Never claim tests ran if they did not.
 Safety: clearly distinguish fantasy furniture manipulation from real-life earthquake advice.
