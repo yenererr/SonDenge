@@ -3,7 +3,7 @@
 Hepimiz oyunu AI (Claude Code + Unity MCP) ile yapıyoruz. Bu yüzden iş, AI'a net tarif edilebilecek parçalara bölündü:
 önce herkesin kullanacağı **ortak parçalar (prefab)** yapılır, sonra herkes bu parçalarla **kendi bölümünü (sahnesini)** kurar.
 
-Kendi görev dosyan: `docs/tasks/` (kendi branch'inde).
+Kendi görev dosyan: `docs/tasks/`. **Zorunlu kurallar: [ZORUNLU_KURALLAR.md](ZORUNLU_KURALLAR.md).**
 
 ## Kim, hangi branch
 

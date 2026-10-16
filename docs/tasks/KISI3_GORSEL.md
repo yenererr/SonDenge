@@ -1,6 +1,6 @@
 # Kişi 3 — Görsel & UI · branch `kisi3-gorsel`
 
-Önce oku: `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md`, `docs/API_CONTRACTS.md`.
+Önce oku: **`docs/ZORUNLU_KURALLAR.md`**, `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md`, `docs/API_CONTRACTS.md`.
 Senin dosyaların: `Assets/Art/`, `Assets/Prefabs/UI/`, `Assets/Prefabs/Visual/` (House hariç), `Assets/Scripts/UI/`, `Level3.unity`, `Assets/Levels/Level3/`.
 Denemeler için: `Assets/_Sandbox/kisi3/` içinde kendi test sahneni aç (git'e gitmez).
 
@@ -30,7 +30,7 @@ Kontrol: HUD 16:9'da okunaklı, `RefreshHUD` ile değerler değişiyor, paneller
 
 ```text
 I own art and UI in Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
-Read CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI3_GORSEL.md.
+Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI3_GORSEL.md.
 Start with Phase 1: build a HUD prefab (balance bar, countdown, budget, disaster alert) with a single public
 RefreshHUD(float danger, float timeLeft, int budget, string alert) method, plus preparation, results, pause and
 game-over panels that work with the existing StatePanels.cs. Use placeholder sprites until final art exists.

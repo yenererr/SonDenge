@@ -5,6 +5,8 @@ Oyun tasarımı: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs
 
 ## 0. Takım kuralları (önce bunu okuyun)
 
+> **Zorunlu kurallar:** [docs/ZORUNLU_KURALLAR.md](docs/ZORUNLU_KURALLAR.md) — herkes ve her AI ajanı okumak zorunda.
+
 1. **Herkes aynı Unity sürümünü kullanır:** `6000.3.26f1` (Unity 6.3 LTS), Universal 2D şablonu.
 2. **Önce ortak çekirdek, sonra bölüm bölüm:** plan [docs/TEAM_PLAN.md](docs/TEAM_PLAN.md). Herkes yalnızca kendi `LevelX.unity` sahnesine ve `Assets/Levels/LevelX/` klasörüne dokunur; `Menu` ve `CoreTest` Lead'in.
 3. Çekirdek parçalar `CoreTest` sahnesinde denenir. Kişisel denemeler `Assets/_Sandbox/<isim>/` içinde (git'e gitmez).

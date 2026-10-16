@@ -1,6 +1,6 @@
 # Kişi 1 — Lead · branch `kisi1-lead`
 
-Önce oku: `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md`, `docs/API_CONTRACTS.md`.
+Önce oku: **`docs/ZORUNLU_KURALLAR.md`**, `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md`, `docs/API_CONTRACTS.md`.
 Senin dosyaların: `Assets/Scripts/Core/`, `Assets/Scripts/Player/`, `Assets/Prefabs/Furniture/`, `Menu.unity`, `CoreTest.unity`, `Level1.unity`, `Assets/Levels/Level1/`.
 
 ---
@@ -28,7 +28,7 @@ Kontrol: `CoreTest`'te mobilyayı sağa taşıyınca ev sağa eğiliyor; deprem 
 
 ```text
 I am the lead on Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
-Read CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI1_LEAD.md.
+Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI1_LEAD.md.
 Start with Phase 1: build RoundController (Preparation -> Disaster -> Results/GameOver using the existing GameManager),
 mouse drag-and-drop for furniture during Preparation (new Input System), and a LevelSetup component with
 Inspector settings (prep time, budget, quake intensity/duration, critical tilt, next scene).

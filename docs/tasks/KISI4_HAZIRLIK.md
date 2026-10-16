@@ -1,6 +1,6 @@
 # Kişi 4 — Hazırlık, Ekonomi & Farkındalık · branch `kisi4-hazirlik`
 
-Önce oku: `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md`, `docs/API_CONTRACTS.md`.
+Önce oku: **`docs/ZORUNLU_KURALLAR.md`**, `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md`, `docs/API_CONTRACTS.md`.
 Senin dosyaların: `Assets/Scripts/Preparation/`, `Economy/`, `Awareness/`, `Assets/Data/`, `Assets/Audio/`, `Level4.unity`, `Assets/Levels/Level4/`.
 Denemeler için: `Assets/_Sandbox/kisi4/` içinde kendi test sahneni aç (git'e gitmez).
 
@@ -30,7 +30,7 @@ Kontrol: sabitleme bütçeden düşüyor; afet sırasında sabitleme yapılamıy
 
 ```text
 I own preparation, economy and awareness in Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
-Read CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI4_HAZIRLIK.md.
+Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI4_HAZIRLIK.md.
 Start with Phase 1: create a FurnitureData ScriptableObject and 4 assets (wardrobe, sofa, table, bookshelf),
 a Furniture component implementing IFurnitureItem from Assets/Scripts/Core/Contracts.cs, a Wallet with OnBudgetChanged,
 a PreparationManager (IPreparationService) that only allows anchoring during GamePhase.Preparation, and a ScoreCalculator

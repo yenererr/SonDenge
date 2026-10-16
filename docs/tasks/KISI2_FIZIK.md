@@ -1,6 +1,6 @@
 # Kişi 2 — Fizik & Deprem · branch `kisi2-fizik`
 
-Önce oku: `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md` (§3 Denge sistemi), `docs/API_CONTRACTS.md`.
+Önce oku: **`docs/ZORUNLU_KURALLAR.md`**, `CLAUDE.md`, `docs/TEAM_PLAN.md`, `docs/GDD.md` (§3 Denge sistemi), `docs/API_CONTRACTS.md`.
 Senin dosyaların: `Assets/Scripts/Physics/`, `Assets/Scripts/Disasters/`, `Assets/Prefabs/Visual/House*` (ev prefab'ının fizik kısmı), `Level2.unity`, `Assets/Levels/Level2/`.
 Denemeler için: `Assets/_Sandbox/kisi2/` içinde kendi test sahneni aç (git'e gitmez) — `CoreTest` Lead'in.
 
@@ -30,7 +30,7 @@ Kontrol: kutuyu sağa taşıyınca ev sağa eğiliyor, sola taşıyınca düzeli
 
 ```text
 I own physics and earthquakes in Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
-Read CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI2_FIZIK.md.
+Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and docs/tasks/KISI2_FIZIK.md.
 Start with Phase 1: implement HouseBalanceController (IBalanceService) and EarthquakeController (IDisasterService)
 from Assets/Scripts/Core/Contracts.cs, plus a House prefab with placeholder visuals.
 Furniture mass and position must tilt the house; anchored furniture must not slide in an earthquake.
