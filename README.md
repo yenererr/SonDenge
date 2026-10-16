@@ -77,4 +77,9 @@ docs/            ← GDD, API sözleşmesi, görev panosu, playtest
 
 ## Atıflar
 
-_(Üçüncü taraf asset ve sesler buraya.)_
+- **DOLLHOUSE - FREE - Modular Low Poly Interiors: Furniture & Room Kit** (ForgeWorks): Level1 ön direkleri, kirişleri, baca ve fenerleri. [Unity Asset Store](https://assetstore.unity.com/packages/3d/props/interior/dollhouse-free-modular-low-poly-interiors-furniture-room-kit-411314). Lisans: Standard Unity Asset Store EULA.
+- **Stylized Tavern Prop Pack (Free Starter Edition)** (VEE-TREX): Level1 pencereli duvarları, zemin parçaları ve çatı detayı. [Yayıncı sayfası](https://assetstore.unity.com/publishers/vee-trex). Lisans: Unity Asset Store üzerinden edinilen paketin Standard Unity Asset Store EULA koşulları.
+- **Yughues Free Wooden Floor Materials** (Nobiax / Yughues): Level1 ahşap platform kaplaması. [Unity Asset Store](https://assetstore.unity.com/packages/2d/textures-materials/wood/yughues-free-wooden-floor-materials-13213). Lisans: Standard Unity Asset Store EULA.
+- **Low Poly Interior Props Pack** (3Digitalis): Level1 raf, kitap, saat ve saksı dekorları. Kaynak: Unity Asset Store, 3Digitalis. Lisans: Standard Unity Asset Store EULA.
+- **Roadside Tales Free - Modular Fence Narrative Pack** (EmacEArt): Level1 balkon ve seyir terası korkulukları. [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/landscapes/roadside-tales-free-modular-fence-narrative-pack-133601). Lisans: Standard Unity Asset Store EULA.
+- **Level1 dağ ve gün batımı görselleri:** Bu proje için konsept referanslarından üretilmiş özgün görseller; `Assets/Levels/Level1/Art/` içinde.
