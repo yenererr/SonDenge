@@ -7,10 +7,11 @@ keep your level scene self-contained so the Lead can chain all scenes into one b
 We are building a 48-hour Unity 2D game jam MVP about disaster preparedness.
 The team has no prior game-dev experience: explain Unity steps simply, prefer Inspector-tunable
 components and prefabs, and give step-by-step manual instructions when MCP cannot do something.
-Goal: a playable Preparation -> Earthquake -> Results loop.
+Goal: a playable Preparation -> Earthquake -> AFET RAPORU loop, then 4 level scenes (Level1-4) chained from Menu.
+All visible game text must be Turkish.
 Unity version: 6000.3.26f1 (Unity 6.3 LTS), URP 2D, new Input System.
 
-Read docs/ZORUNLU_KURALLAR.md, docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and your file in docs/tasks/ before editing.
+Read docs/ZORUNLU_KURALLAR.md, docs/OYUN_TASARIMI.md (main game design reference), docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and your file in docs/tasks/ before editing.
 Do NOT expand scope beyond your assigned feature.
 Do NOT change public interfaces (Assets/Scripts/Core/Contracts.cs) without approval.
 Each person owns exactly one level scene (Assets/Scenes/LevelX.unity) and Assets/Levels/LevelX/.

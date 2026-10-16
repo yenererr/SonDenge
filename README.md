@@ -1,7 +1,7 @@
 # Son Denge (Last Balance)
 
 Afete hazırlık temalı 2D fizik/strateji oyunu. Sivri bir kayanın tepesindeki evin dengesini koru, afet gelmeden önce hazırlan.
-Oyun tasarımı: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) · Görevler: [docs/TASK_BOARD.md](docs/TASK_BOARD.md)
+Oyun tasarımı: [docs/OYUN_TASARIMI.md](docs/OYUN_TASARIMI.md) · Plan: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) · Görevler: [docs/TASK_BOARD.md](docs/TASK_BOARD.md)
 
 ## 0. Takım kuralları (önce bunu okuyun)
 
@@ -11,7 +11,7 @@ Oyun tasarımı: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs
 2. **Önce ortak çekirdek, sonra bölüm bölüm:** plan [docs/TEAM_PLAN.md](docs/TEAM_PLAN.md). Herkes yalnızca kendi `LevelX.unity` sahnesine ve `Assets/Levels/LevelX/` klasörüne dokunur; `Menu` ve `CoreTest` Lead'in.
 3. Çekirdek parçalar `CoreTest` sahnesinde denenir. Kişisel denemeler `Assets/_Sandbox/<isim>/` içinde (git'e gitmez).
 4. Çekirdek sistemler (GameManager, AudioManager, SceneLoader) her sahnede otomatik kurulur; sahneye eklemeyin.
-5. Küçük ve sık commit. Commit'ten önce `git pull`. Herkes kendi branch'inde (`kisi1-lead`, `kisi2-fizik`, `kisi3-gorsel`, `kisi4-hazirlik`).
+5. Küçük ve sık commit. Commit'ten önce `git pull`. Herkes kendi branch'inde (`kisi1-level1`, `kisi2-level2`, `kisi3-level3`, `kisi4-level4`).
 6. `main` her zaman çalışır durumda olur. `Contracts.cs`, `ProjectSettings/`, `Packages/` değişikliği takım onayı ister.
 7. AI ajanları için kurallar: [CLAUDE.md](CLAUDE.md).
 
@@ -66,11 +66,10 @@ Assets/
   Prefabs/ (Furniture, Visual, UI)    Scenes/ (Menu, Level1-4, CoreTest)  Settings/ (URP)
   Levels/Level1..4/   ← bölüme özel dosyalar (sahibi o bölümün kişisi)
   Scripts/
-    Core/        ← GameManager, Contracts (Kişi 1)
-    Player/      ← oyuncu etkileşimi (Kişi 1)
-    Physics/ Disasters/                  (Kişi 2)
-    UI/                                  (Kişi 3)
-    Preparation/ Economy/ Awareness/     (Kişi 4)
+    Core/ Player/ Physics/ Disasters/ UI/ Economy/ Preparation/   ← ortak çekirdek (Kişi 1)
+    Shop/                 (Kişi 2)     Disasters/Fire/    (Kişi 3)
+    Awareness/            (Kişi 4)     Disasters/Storm/   (Kişi 4)
+  Data/Furniture/ Audio/  (Kişi 2)     Art/ (Kişi 4) · Art/FX/ (Kişi 3)
   Editor/        ← proje ayarları + build menüsü
   _Sandbox/      ← kişisel deneme alanı (git'e gitmez)
 docs/            ← GDD, API sözleşmesi, görev panosu, playtest

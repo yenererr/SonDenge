@@ -53,7 +53,7 @@ Sahibi olan servis tanımlar; isimler sabittir:
 | Event | Sahibi |
 |---|---|
 | `OnPhaseChanged(GamePhase)` | GameManager (Kişi 1) |
-| `OnFurnitureLost(string itemId)` | Physics (Kişi 2) |
-| `OnDisasterStarted(DisasterType)` | Disasters (Kişi 2) |
-| `OnDisasterEnded()` | Disasters (Kişi 2) |
-| `OnBudgetChanged(int)` | Economy (Kişi 4) |
+| `OnFurnitureLost(string itemId)` | Physics (Kişi 1) |
+| `OnDisasterStarted(DisasterType)` | Disasters (Kişi 1; yangın Kişi 3, fırtına Kişi 4) |
+| `OnDisasterEnded()` | Disasters (Kişi 1; yangın Kişi 3, fırtına Kişi 4) |
+| `OnBudgetChanged(int)` | Economy (Kişi 1) |
