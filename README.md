@@ -1,13 +1,13 @@
 # Son Denge (Last Balance)
 
-Afete hazırlık temalı 2D fizik/strateji oyunu. Sivri bir kayanın tepesindeki evin dengesini koru, afet gelmeden önce hazırlan.
+Afete hazırlık temalı 3D (sabit yandan kamera) fizik/strateji oyunu. Sivri bir kayanın tepesindeki evin dengesini koru, afet gelmeden önce hazırlan.
 Oyun tasarımı: [docs/OYUN_TASARIMI.md](docs/OYUN_TASARIMI.md) · Plan: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) · Görevler: [docs/TASK_BOARD.md](docs/TASK_BOARD.md)
 
 ## 0. Takım kuralları (önce bunu okuyun)
 
 > **Zorunlu kurallar:** [docs/ZORUNLU_KURALLAR.md](docs/ZORUNLU_KURALLAR.md) — herkes ve her AI ajanı okumak zorunda.
 
-1. **Herkes aynı Unity sürümünü kullanır:** `6000.3.26f1` (Unity 6.3 LTS), Universal 2D şablonu.
+1. **Herkes aynı Unity sürümünü kullanır:** `6000.3.26f1` (Unity 6.3 LTS), Universal 3D şablonu (URP).
 2. **Önce ortak çekirdek, sonra bölüm bölüm:** plan [docs/TEAM_PLAN.md](docs/TEAM_PLAN.md). Herkes yalnızca kendi `LevelX.unity` sahnesine ve `Assets/Levels/LevelX/` klasörüne dokunur; `Menu` ve `CoreTest` Lead'in.
 3. Çekirdek parçalar `CoreTest` sahnesinde denenir. Kişisel denemeler `Assets/_Sandbox/<isim>/` içinde (git'e gitmez).
 4. Çekirdek sistemler (GameManager, AudioManager, SceneLoader) her sahnede otomatik kurulur; sahneye eklemeyin.

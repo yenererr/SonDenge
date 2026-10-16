@@ -4,12 +4,12 @@
 Key points: commit + push after every working step; never commit to main; stay inside your own scene and folders;
 keep your level scene self-contained so the Lead can chain all scenes into one build at the end.
 
-We are building a 48-hour Unity 2D game jam MVP about disaster preparedness.
+We are building a 48-hour Unity 3D game jam MVP (fixed side-view camera, 2.5D gameplay) about disaster preparedness.
 The team has no prior game-dev experience: explain Unity steps simply, prefer Inspector-tunable
 components and prefabs, and give step-by-step manual instructions when MCP cannot do something.
 Goal: a playable Preparation -> Earthquake -> AFET RAPORU loop, then 4 level scenes (Level1-4) chained from Menu.
 All visible game text must be Turkish.
-Unity version: 6000.3.26f1 (Unity 6.3 LTS), URP 2D, new Input System.
+Unity version: 6000.3.26f1 (Unity 6.3 LTS), URP 3D (Universal 3D template), new Input System. 3D physics: Rigidbody/Collider (not 2D), see docs/OYUN_TASARIMI.md §0.
 
 Read docs/ZORUNLU_KURALLAR.md, docs/OYUN_TASARIMI.md (main game design reference), docs/TEAM_PLAN.md, docs/GDD.md, docs/API_CONTRACTS.md and your file in docs/tasks/ before editing.
 Do NOT expand scope beyond your assigned feature.

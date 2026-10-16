@@ -32,7 +32,7 @@ Denemeler: `Assets/_Sandbox/kisi3/` (git'e gitmez).
 ## Claude Code'a ilk mesaj (kopyala-yapıştır)
 
 ```text
-I own Level3 (fire) in Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
+I own Level3 (fire) in Son Denge, a 48-hour Unity 3D game jam (fixed side-view camera, see OYUN_TASARIMI §0). I have no game-dev experience; explain Unity steps simply.
 Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/OYUN_TASARIMI.md (§11 Fire), docs/TEAM_PLAN.md,
 docs/API_CONTRACTS.md and docs/tasks/KISI3_LEVEL3.md.
 First build a standalone fire system in Assets/Scripts/Disasters/Fire/: fire starts in a room, spreads to nearby

@@ -14,7 +14,7 @@ Senin alanın: `Assets/Scripts/Core/`, `Player/`, `Physics/`, `Disasters/` (Fire
 5. [ ] **Döngü + HUD + rapor**: Hazırlık ("RADYO SİVRİTEPE" uyarısı, 100 para) → Afet → "AFET RAPORU" (Ev Durumu, Hazırlık Puanı, Korunan/Kaybedilen Eşya, Kazanılan Para, Güvenlik Puanı; ödül tur başına bir kez). HUD yerleşimi OYUN_TASARIMI §12'deki gibi.
 6. [ ] **`LevelSetup`** (Inspector): bütçe, afet türü, şiddet, süre, mobilya listesi, sonraki sahne. **`LevelTemplate` prefab'ı**: ev + HUD + rapor + `LevelSetup`.
 
-Diğerlerinin parçaları hazır değilse placeholder kullan (kutu görseller, sabit mobilya değerleri). 12. saatte PR'ları merge et (Birleştirme 1), herkese haber ver.
+Diğerlerinin parçaları hazır değilse placeholder kullan (küp placeholder modeller, sabit mobilya değerleri). 12. saatte PR'ları merge et (Birleştirme 1), herkese haber ver.
 
 ## 12–30. saat — `Level1` + `Menu`
 
@@ -26,7 +26,7 @@ Diğerlerinin parçaları hazır değilse placeholder kullan (kutu görseller, s
 ## Claude Code'a ilk mesaj (kopyala-yapıştır)
 
 ```text
-I am the lead on Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
+I am the lead on Son Denge, a 48-hour Unity 3D game jam (fixed side-view camera, see OYUN_TASARIMI §0). I have no game-dev experience; explain Unity steps simply.
 Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/OYUN_TASARIMI.md, docs/TEAM_PLAN.md,
 docs/API_CONTRACTS.md and docs/tasks/KISI1_LEVEL1.md.
 Build the shared core in CoreTest.unity, in this priority order: (1) a 2-story house on a sharp rock that really

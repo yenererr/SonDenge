@@ -1,5 +1,7 @@
 # SON DENGE — GAME JAM MASTER PLAN
 
+> **Not:** Bu ilk plandır. Oyun artık **3D** (sabit yandan kamera) ve görev dağılımı değişti. Güncel kaynaklar: `OYUN_TASARIMI.md`, `TEAM_PLAN.md`, `ZORUNLU_KURALLAR.md`, `tasks/`.
+
 **Tema:** Afete Hazırlık ve Farkındalık  
 **Tür:** 2D physics / strategy / disaster preparedness  
 **Motor:** Unity 2D (ekibin birlikte sabitleyeceği tek Unity Editor sürümü)  

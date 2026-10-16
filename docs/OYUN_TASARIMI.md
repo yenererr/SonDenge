@@ -1,12 +1,22 @@
 # SON DENGE (LAST BALANCE) — Oyun Tasarımı (Ana Referans)
 
 > Bu dosya oyunun **nasıl olacağını** anlatır. Sayılar ve kurallar bağlayıcıdır; değiştirmek için takım onayı gerekir.
-> Motor: Unity 6.3 LTS, 2D (URP). Tüm görünen yazılar **Türkçe**.
+> Motor: Unity 6.3 LTS, **3D (URP, Universal 3D)**, sabit yandan kamera. Tüm görünen yazılar **Türkçe**.
 > Ana mesaj: **"Afet geldiğinde değil, gelmeden önce hazırlan."** · Son mesaj: **"AFETE HAZIRLIK HAYAT KURTARIR."**
 
 Oynanabilir bir oyun yapıyoruz: konsept, mockup, slayt veya sadece menü değil.
 Temel mekanik: sivri bir dağ zirvesinde, pivot üzerinde dengede duran çok katlı bir ev. Mobilyaların kütlesi ve konumu dengeyi etkiler, afetler dengeyi bozar.
 
+## 0. 3D teknik kurallar (herkes uyar)
+- Oyun **3D**, ama oynanış **yan düzlemde (XY)**: kamera `-Z` yönünden sabit bakar (sahnelerdeki `Main Camera`: konum `(0, 2, -14)`, perspektif, FOV 40). Kamerayı oyun sırasında döndürme.
+- Ev, pivot etrafında yalnızca **Z ekseninde** döner (sağa/sola eğim).
+- 3D fizik kullanılır: `Rigidbody` + `BoxCollider`/`MeshCollider` (**2D bileşenler kullanılmaz**). Mobilya `Rigidbody`'lerinde: *Freeze Position Z*, *Freeze Rotation X ve Y* — eşyalar sadece yan düzlemde kayar/devrilir.
+- Ev odaları **kesit (bebek evi)**: kameraya bakan ön duvar yok; arka duvar, zemin, yan duvarlar, çatı var.
+- Fareyle seçme: kameradan `Physics.Raycast`; sürükleme mobilyanın bulunduğu Z düzleminde.
+- Ölçek: 1 birim = 1 metre. Bir oda ≈ 4 m genişlik × 3 m yükseklik.
+- Modeller: stilize **low-poly**, düşük poligon (mobilya başına ≤ 5k üçgen), URP/Lit materyal, palet renkleri. Kaynak: lisanslı ücretsiz paketler (ör. Kenney, Quaternius, Poly Pizza — CC0) veya MCP ile üretim; kaynak README "Atıflar"a.
+- Işık: 1 `Directional Light` (sıcak), gölgeler açık; afette ton değişimi (Volume) serbest.
+- UI 2D kalır: Screen Space – Overlay Canvas.
 ## 1. Hikâye ve dünya
 - Kurgusal dağ köyü **Sivritepe**. İnanılmaz ince ve sivri bir dağın tepesinde tuhaf, ahşap bir ev.
 - İçindeki her eşya evin dengesini etkiler. Afetler giderek tehlikeli hale geliyor.
@@ -15,15 +25,15 @@ Temel mekanik: sivri bir dağ zirvesinde, pivot üzerinde dengede duran çok kat
 - Dünya hafif fantastik, esprili, abartılı; ama afet bilinci dersleri gerçek güvenlik ilkelerine dayanır.
 
 ## 2. Görsel yön
-- El yapımı çizgi film tarzı, premium görünümlü 2D indie. Var olan oyun/karakterleri kopyalama.
-- 2D yandan görünüş; ev **kesit / bebek evi** görünümünde; altında sivri kayalık dağ net görünür.
+- El yapımı çizgi film tarzı, premium görünümlü, stilize **low-poly 3D** indie. Var olan oyun/karakterleri kopyalama.
+- Sabit yandan görünüş (3D modeller, 2.5D oynanış); ev **kesit / bebek evi** görünümünde; altında sivri kayalık dağ net görünür.
 - Sıcak pastel renkler, ahşap duvar/zemin, yumuşak ışık, belirgin mobilya silüetleri, net oda sınırları, renkli hava efektleri.
 - Palet: sıcak krem, tozlu turuncu, zeytin yeşili, yumuşak teal, kahverengi ahşap, soluk gök mavisi, sıcak sarı vurgular.
 - Kaçın: kurumsal web estetiği, neon/cyberpunk, kalabalık görsel, korku, fotogerçekçi mobilya, **final oyunda düz renkli placeholder dikdörtgenler**.
 - Ağırlık, dengesizlik ve yaklaşan tehlike görsel olarak hissedilmeli. **16:9** yatay.
 
 ## 3. Kamera ve bölüm yapısı
-- Sabit 2D yandan kamera; ev her zaman tamamen görünür.
+- Sabit 3D yandan kamera (perspektif); ev her zaman tamamen görünür.
 - Başlangıç: tek ince kayalık zirve, **2 katlı ahşap ev, her katta 2 oda**, görünür merkezi **pivot**, zemin, duvar, çatı, hareketli mobilyalar, illüstrasyon dağ arka planı, uzakta köy ve bulutlar.
 - **Tüm ev pivot etrafında sağa/sola gerçekten döner.** Ev eğilirken mobilyalar görünür kalır.
 - Düz zeminde normal ev **yok**: sivri zirve oyunun özü.
@@ -150,7 +160,7 @@ Tema menü yazısında değil, oynanışta görünmeli. Önleyici önlemler öd�
 Ana menü oyunu başlatır · mobilya seçilir ve sürüklenir · kütleler farklı · taşıma dengeyi görünür şekilde değiştirir · ev sağa/sola eğilir · gösterge gerçek eğimle eşleşir · sabitleme çalışır · afet başlat butonu çalışır · deprem gerçek fiziksel bozulma yaratır · eşyalar kaybolabilir · kaybolan eşya dengeyi etkilemez · afet biter · ödüller hesaplanır · sonuç ekranı açılır · oyuncu yeniden başlatabilir veya devam edebilir.
 
 Kararlı, basit fizik. Bir özellik zorsa oyuncunun gördüğü davranışı koruyarak basitleştir.
-Oyunu tıklama oyununa, teste, sıra tabanlı metin oyununa veya statik bulmacaya **dönüştürme**. Etkileşimli 2D ev ve mobilya fiziği korunmalı.
+Oyunu tıklama oyununa, teste, sıra tabanlı metin oyununa veya statik bulmacaya **dönüştürme**. Etkileşimli 3D ev ve mobilya fiziği korunmalı.
 
 ## 16. Öncelikler
 1. Oynanabilir ev dengesi
