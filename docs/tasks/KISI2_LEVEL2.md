@@ -18,7 +18,7 @@ Denemeler: `Assets/_Sandbox/kisi2/` (git'e gitmez).
   | Kitaplık | 4 | 30 | 15 |
   | Gardırop | 5 | 40 | 20 |
   | Buzdolabı | 6 | 50 | 25 |
-  Alanlar: ad (Türkçe), kütle, değer, sabitleme bedeli, satın alma fiyatı, dayanıklılık, sprite referansı.
+  Alanlar: ad (Türkçe), kütle, değer, sabitleme bedeli, satın alma fiyatı, dayanıklılık, model/prefab referansı.
 - [ ] **Mağaza** (`Scripts/Shop/`): hazırlıkta yeni mobilya satın alma paneli; para yetmezse alınamaz. Lead'in ekonomi API'sini kullanır (hazır değilse basit bir arayüzle bekle).
 - [ ] **Sesler** (`Assets/Audio/`): mobilya seçme, yerleştirme, ağır darbe, kırılma, ahşap gıcırtısı, deprem gürültüsü, kritik denge uyarısı, ortam müziği. Ücretsiz/lisanslı kaynak → README "Atıflar". `AudioManager.Instance.PlaySfx(clip)`.
 
@@ -33,7 +33,7 @@ Denemeler: `Assets/_Sandbox/kisi2/` (git'e gitmez).
 ## Claude Code'a ilk mesaj (kopyala-yapıştır)
 
 ```text
-I own Level2 in Son Denge, a 48-hour Unity 2D game jam. I have no game-dev experience; explain Unity steps simply.
+I own Level2 in Son Denge, a 48-hour Unity 3D game jam (fixed side-view camera, see OYUN_TASARIMI §0). I have no game-dev experience; explain Unity steps simply.
 Read docs/ZORUNLU_KURALLAR.md (mandatory), CLAUDE.md, docs/OYUN_TASARIMI.md, docs/TEAM_PLAN.md,
 docs/API_CONTRACTS.md and docs/tasks/KISI2_LEVEL2.md.
 First task: create a FurnitureData ScriptableObject and the 6 furniture assets with the exact values in my task file

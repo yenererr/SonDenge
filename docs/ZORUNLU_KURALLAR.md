@@ -34,7 +34,7 @@
 | Kişi 4 | `Level4` | `Art/` (FX hariç), `Scripts/Awareness/`, `Scripts/Disasters/Storm/`, `Levels/Level4/` |
 
 7. **Başkasının sahnesini açıp kaydetme.** Sadece bakmak için açtıysan kaydetmeden kapat (Unity "Save?" diye sorarsa **Don't Save**).
-8. **12. saatten sonra bölüme özel her şey** (script, sprite, prefab, ses) `Assets/Levels/LevelX/` içine girer.
+8. **12. saatten sonra bölüme özel her şey** (script, model, materyal, prefab, ses) `Assets/Levels/LevelX/` içine girer.
 9. **Ortak prefab dosyasını değiştirme.** Sahnede override (Inspector'da değer değiştirme) serbest. Prefab'ın kendisinde değişiklik gerekiyorsa sahibine söyle.
 10. **Yasak dosyalar (yalnızca takım onayıyla):** `Assets/Scripts/Core/Contracts.cs`, `ProjectSettings/` (Tags, Layers, Sorting Layers, Input, Physics ayarları dahil), `Packages/` (yeni paket kurmak dahil), `Assets/Settings/` (URP ayarları).
 11. **Kişisel denemeler** `Assets/_Sandbox/<isim>/` içinde (git'e gitmez). Oradaki bir şey lazım olursa kendi klasörüne taşı.
@@ -44,7 +44,7 @@
 12. **Sahne tek başına çalışmalı:** `LevelX.unity` açıp Play'e basınca bölüm baştan sona oynanmalı. Başka sahnede duran bir nesneye ihtiyaç duymamalı.
 13. **Menüden gelince de çalışmalı:** sahne `SceneLoader` ile yüklendiğinde de aynı şekilde çalışmalı (sahne zaten yüklenmiş bir `[Systems]` nesnesi bulabilir — bu normaldir).
 14. **Çekirdek sistemleri sahneye ekleme.** `GameManager`, `AudioManager`, `SceneLoader` otomatik kurulur (`Bootstrap`). Sahneye ikinci bir kopya koyma.
-15. **Her sahnede tam olarak:** 1 `Main Camera` (tag: MainCamera, Orthographic), 1 `AudioListener` (kamerada), en fazla 1 `EventSystem` (UI varsa; **Input System UI Input Module** ile).
+15. **Her sahnede tam olarak:** 1 `Main Camera` (tag: MainCamera, perspektif, konum (0, 2, -14) — sahnelerde hazır, yerini değiştirme), 1 `Directional Light`, 1 `AudioListener` (kamerada), en fazla 1 `EventSystem` (UI varsa; **Input System UI Input Module** ile).
 16. **`DontDestroyOnLoad` kullanma.** Bölüme ait hiçbir nesne sahne değişince yaşamaya devam etmemeli.
 17. **Sahne geçişi yalnızca `SceneLoader` ile:** `SceneLoader.Instance.Load("Level3")`. `SceneManager.LoadScene` doğrudan çağrılmaz. Sonraki sahne adı koda gömülmez; `LevelSetup` üzerindeki Inspector alanından okunur.
 18. **Sahne adları sabittir:** `Menu`, `Level1`, `Level2`, `Level3`, `Level4`, `CoreTest`. Sahne yeniden adlandırılmaz, taşınmaz, yeni build sahnesi eklenmez (gerekirse Lead ekler).
@@ -65,8 +65,8 @@
 ## 5. Görsel, UI ve asset standardı — bölümler birbirine benzesin
 
 29. **Çözünürlük 16:9.** Her Canvas: Render Mode *Screen Space – Overlay*, Canvas Scaler *Scale With Screen Size*, referans **1920×1080**, Match **0.5**.
-30. **Sprite sıralaması (Order in Layer) aralıkları:** Arka plan `-100…-1` · Kaya/ev gövdesi `0…9` · Mobilya `10…49` · Efekt `50…99`. Yeni Sorting Layer ekleme.
-31. **Görsel boyutu en fazla 2048 px**, Sprite import: *Sprite (2D and UI)*. Ses: müzik `.ogg`, efekt `.wav`/`.ogg`, kısa.
+30. **3D fizik kuralı:** yalnızca 3D bileşenler (`Rigidbody`, `Collider`); `Rigidbody2D`/`Collider2D` **yasak**. Hareketli eşyalarda *Freeze Position Z* + *Freeze Rotation X, Y*. Oynanış XY düzleminde, ev Z ekseninde döner (OYUN_TASARIMI §0).
+31. **Asset standardı:** low-poly modeller (mobilya ≤ 5k üçgen), `.fbx`; dokular ≤ 2048 px; materyal *Universal Render Pipeline/Lit*; ölçek 1 birim = 1 m, pivot model tabanında. Ses: müzik `.ogg`, efekt `.wav`/`.ogg`, kısa.
 32. **Her dış kaynaklı asset/ses README "Atıflar" bölümüne yazılır** (kaynak + lisans). Lisansı belirsiz asset kullanılmaz.
 33. **Eğitim mesajları** gerçek hayatla çelişmez: oyundaki "eşya taşıma gücü" fantastiktir, gerçek deprem tavsiyesi değildir. Gerçek tavsiye = önceden sabitle, ağır eşyalar alta, deprem anında Çök–Kapan–Tutun.
 
