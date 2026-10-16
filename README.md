@@ -6,10 +6,10 @@ Oyun tasarımı: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs
 ## 0. Takım kuralları (önce bunu okuyun)
 
 1. **Herkes aynı Unity sürümünü kullanır:** `6000.3.26f1` (Unity 6.3 LTS), Universal 2D şablonu.
-2. **Ana sahneye (`Assets/Scenes/Main.unity`) yalnızca Kişi 1 (Lead) dokunur.**
-3. Herkes kendi sandbox sahnesinde çalışır (`PhysicsSandbox`, `UISandbox`, `PreparationSandbox`). Kişisel denemeler `Assets/_Sandbox/<isim>/` içinde (git'e gitmez).
+2. **Önce ortak çekirdek, sonra bölüm bölüm:** plan [docs/TEAM_PLAN.md](docs/TEAM_PLAN.md). Herkes yalnızca kendi `LevelX.unity` sahnesine ve `Assets/Levels/LevelX/` klasörüne dokunur; `Menu` ve `CoreTest` Lead'in.
+3. Çekirdek parçalar `CoreTest` sahnesinde denenir. Kişisel denemeler `Assets/_Sandbox/<isim>/` içinde (git'e gitmez).
 4. Çekirdek sistemler (GameManager, AudioManager, SceneLoader) her sahnede otomatik kurulur; sahneye eklemeyin.
-5. Küçük ve sık commit. Commit'ten önce `git pull`. Herkes kendi branch'inde (`feature/...`).
+5. Küçük ve sık commit. Commit'ten önce `git pull`. Herkes kendi branch'inde (`kisi1-lead`, `kisi2-fizik`, `kisi3-gorsel`, `kisi4-hazirlik`).
 6. `main` her zaman çalışır durumda olur. `Contracts.cs`, `ProjectSettings/`, `Packages/` değişikliği takım onayı ister.
 7. AI ajanları için kurallar: [CLAUDE.md](CLAUDE.md).
 
@@ -25,7 +25,7 @@ Oyun tasarımı: [docs/GDD.md](docs/GDD.md) · API: [docs/API_CONTRACTS.md](docs
 ```bash
 git lfs install
 git clone <github-repo-url>
-git checkout -b feature/<alanınız>
+git checkout kisiN-...   # kendi branch'iniz, bkz. docs/TEAM_PLAN.md
 ```
 Unity Hub > **Add > Add project from disk** ile klasörü ekleyin ve **6000.3.26f1** ile açın. İlk açılış birkaç dakika sürer, normal.
 
@@ -61,7 +61,8 @@ _(Oyun kontrolleri buraya yazılacak.)_ ESC: duraklat.
 ```
 Assets/
   Art/ (Environment, Furniture, UI)   Audio/   Data/Furniture/
-  Prefabs/ (Furniture, Visual, UI)    Scenes/  Settings/ (URP)
+  Prefabs/ (Furniture, Visual, UI)    Scenes/ (Menu, Level1-4, CoreTest)  Settings/ (URP)
+  Levels/Level1..4/   ← bölüme özel dosyalar (sahibi o bölümün kişisi)
   Scripts/
     Core/        ← GameManager, Contracts (Kişi 1)
     Player/      ← oyuncu etkileşimi (Kişi 1)
