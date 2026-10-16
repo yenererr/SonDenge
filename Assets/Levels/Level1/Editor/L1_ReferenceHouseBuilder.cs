@@ -15,14 +15,14 @@ namespace Jam.Levels.Level1
         private const float ImageHeight = 1448f;
         private const float PivotPixelY = 1350f;
 
-        [MenuItem("Son Denge/Level1/Gorsel Ev ve Dagi Kur")]
+        [MenuItem("Son Denge/Level1/Arsiv/Resim Tabanli Evi Kur")]
         public static void Build()
         {
             BuildHouse(File.Exists(Art + "L1_ReferenceHouse_Furnished.png")
                 ? "L1_ReferenceHouse_Furnished.png" : "L1_ReferenceHouse_Empty.png");
         }
 
-        [MenuItem("Son Denge/Level1/Referanstaki Bos Evi Goster")]
+        [MenuItem("Son Denge/Level1/Arsiv/Referanstaki Bos Evi Goster")]
         private static void BuildOriginal() => BuildHouse("L1_ReferenceHouse_Empty.png");
 
         private static void BuildHouse(string file)

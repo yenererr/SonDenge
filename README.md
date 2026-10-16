@@ -77,12 +77,13 @@ docs/            ← GDD, API sözleşmesi, görev panosu, playtest
 
 ## Atıflar
 
-Aktif Level1 görünümü aşağıdaki referans görselini kullanır. Önceki 3D taslakta kullanılan paketlerin atıfları arşiv kurulum için korunmuştur.
+Aktif Level1 evi gerçek 3D geometri ve aşağıdaki paketlerin modellerinden oluşur. Dağ ve gökyüzü sprite olarak kalır. Ev referans resimleri yalnız arşivde tutulur, aktif sahnede kullanılmaz.
 
-- **Level1 referans ev:** Kullanıcının sağladığı şeffaf ev görseli (`L1_ReferenceHouse_Empty.png`); mobilyalı varyant, kullanıcının iki referansı kullanılarak yerleşik ImageGen ile düzenlendi (`L1_ReferenceHouse_Furnished.png`). Yeni bir Asset Store paketi indirilmedi. Kaynak ve üretim istemi: [L1_ReferenceHouse_SOURCE.md](Assets/Levels/Level1/Art/L1_ReferenceHouse_SOURCE.md).
+- **Arşivdeki Level1 referans ev:** Kullanıcının sağladığı şeffaf ev görseli (`L1_ReferenceHouse_Empty.png`); mobilyalı varyant kullanıcının iki referansı kullanılarak ImageGen ile düzenlendi (`L1_ReferenceHouse_Furnished.png`). Kaynak ve üretim istemi: [L1_ReferenceHouse_SOURCE.md](Assets/Levels/Level1/Art/L1_ReferenceHouse_SOURCE.md).
 
-- **DOLLHOUSE - FREE - Modular Low Poly Interiors: Furniture & Room Kit** (ForgeWorks): Level1 ön direkleri, kirişleri, baca, fener ve katlar arası ahşap merdiven. [Unity Asset Store](https://assetstore.unity.com/packages/3d/props/interior/dollhouse-free-modular-low-poly-interiors-furniture-room-kit-411314). Lisans: Standard Unity Asset Store EULA.
-- **Stylized Cozy Tavern: Low Poly Single Material Props / Stylized Tavern Prop Pack (Free Starter Edition)** (VEE-TREX): Level1 pencereli duvarları, zemin parçaları, çatı detayı, meşale lambaları ve mobilyalar. [Yayıncı sayfası](https://assetstore.unity.com/publishers/vee-trex). Lisans: Unity Asset Store üzerinden edinilen paketin Standard Unity Asset Store EULA koşulları.
+- **DOLLHOUSE - FREE - Modular Low Poly Interiors: Furniture & Room Kit** (ForgeWorks): Level1 yatak, kanepe, küvet, kitaplık, tekstiller, fener ve ahşap merdiven modelleri. [Unity Asset Store](https://assetstore.unity.com/packages/3d/props/interior/dollhouse-free-modular-low-poly-interiors-furniture-room-kit-411314). Lisans: Standard Unity Asset Store EULA.
+- **Stylized Cozy Tavern: Low Poly Single Material Props / Stylized Tavern Prop Pack (Free Starter Edition)** (VEE-TREX): Level1 demir lamba parçaları, masa, sandalye, tezgâh, sandık, fıçı, tabure, şişeler ve mumlar. [Yayıncı sayfası](https://assetstore.unity.com/publishers/vee-trex). Lisans: Unity Asset Store üzerinden edinilen paketin Standard Unity Asset Store EULA koşulları.
+- **Modular Sewer Props** (Ata Khani): `Wooden_Plank_01` modelinden kullanılan döşeme mesh'i ve `Trim_Wood_basecolor` dokusu Level1 içine kopyalandı; yerel URP materyali oluşturuldu. [Unity Asset Store](https://assetstore.unity.com/packages/3d/props/modular-sewer-props-277458). Lisans: Standard Unity Asset Store EULA. Projede zaten bulunan paket kullanıldı; yeni indirme yapılmadı.
 - **Yughues Free Wooden Floor Materials** (Nobiax / Yughues): Level1 ahşap platform kaplaması. [Unity Asset Store](https://assetstore.unity.com/packages/2d/textures-materials/wood/yughues-free-wooden-floor-materials-13213). Lisans: Standard Unity Asset Store EULA.
 - **Low Poly Interior Props Pack** (3Digitalis): Level1 raf, kitap, saat ve saksı dekorları. Kaynak: Unity Asset Store, 3Digitalis. Lisans: Standard Unity Asset Store EULA.
 - **Roadside Tales Free - Modular Fence Narrative Pack** (EmacEArt): Level1 balkon ve seyir terası korkulukları. [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/landscapes/roadside-tales-free-modular-fence-narrative-pack-133601). Lisans: Standard Unity Asset Store EULA.
@@ -90,12 +91,22 @@ Aktif Level1 görünümü aşağıdaki referans görselini kullanır. Önceki 3D
 
 ## Level1 ev önizlemesi
 
-![Referans görselinden üç katlı Level1 evi](Assets/Levels/Level1/Art/L1_ReferenceHouse_Preview.png)
+![Gerçek 3D üç katlı Level1 evi](Assets/Levels/Level1/Art/L1_Playable3D_Preview.png)
 
-Sahne `Son Denge > Level1 > Gorsel Ev ve Dagi Kur` ile yeniden kurulabilir. `Referanstaki Bos Evi Goster` aynı yapının kullanıcının verdiği boş görselini açar. Önceki model tabanlı kurulum `Arsiv > Eski 3D Taslagi Kur` menüsündedir. Bu komutlar Level1 görsel kökünü yeniden oluşturur; elle yapılan kök altı düzenlemeleri değiştirir.
+Sahne `Son Denge > Level1 > Oynanabilir 3D Cozy Evi Kur` ile yeniden kurulabilir. Komut Play kapalıyken çalışır ve Level1 görsel kökünü yeniden oluşturur; bu kökün altındaki elle düzenlemeleri değiştirir. Önceki resim tabanlı sürüm `Arsiv` menüsüne alınmıştır.
 
-Aktif ev **görsel tabanlı 2.5D** olarak kurulmuştur: şeffaf ev resmi, ayrı 3D zemin çarpışmaları ve üç merdiven tetikleyicisi aynı denge pivotu altındadır. Yıpranmış ahşap, mobilyalar ve fener görüntüleri resmin parçasıdır; bağımsız taşınabilir 3D eşya değildir. Fener noktalarında ayrıca karakteri/3D eşyaları aydınlatabilecek sıcak ışıklar bulunur.
+Ev, kemerli pencere açıklıkları, ahşap kapılar, eğimli kiremit çatı, pahlı eğri kirişler, balkon, demir çiviler ve aşınmış döşemelerle gerçek 3D olarak kurulur. Mobilyalar paket prefab'larıdır. Sıva dokusu kodla üretilen yüzey malzemesidir. Evin cephesinde resim kullanılmaz. Sahnede yalnız dağ ve gökyüzü için iki SpriteRenderer vardır.
 
-Merdiven bileşeni `Player` etiketli 3D `Rigidbody` için `W/S` veya yukarı/aşağı ok girişini kullanır. Sahnede oyuncu olmadığı için karakter kontrolcüsüyle katlar arası oynanış henüz doğrulanmadı. Mevcut çalışma ev/dağ görseli ve fizik alanlarının yerleşimidir.
+### Kullanım
 
-Görmek için `Assets/Scenes/Level1.unity` sahnesini açıp **Game** görünümünü 16:9 yapın. `Referans Ev Onizleme Kaydet` menüsü kameradan 1920×1080 önizleme kaydeder. Unity Console hata/uyarı taraması ve sahne doğrulamasında eksik script veya bozuk prefab bulunmadı.
+1. `Assets/Scenes/Level1.unity` sahnesini açın, Game görünümünü 16:9 yapıp Play'e basın.
+2. `A/D` veya sağ/sol okla karakteri yürütün.
+3. Alt katta sağdaki merdivenin yanında `W`/yukarı okla orta kata çıkın. Orta katta soldaki merdiven çatı katına çıkar. Üst girişte `S`/aşağı okla inin. Tırmanırken kapak açılır; karakterin ilgili kat zeminiyle çarpışması geçici olarak kaldırılıp çıkışta geri açılır.
+4. Sol fareyle mobilyayı tutup sürükleyin, bırakınca fizik tekrar zemine oturtur. 12 mobilya bağımsız Rigidbody ve BoxCollider kullanır. Taşıma mevcut kat içinde, başlangıç yüksekliğinin ±1.1 metresiyle sınırlıdır; katlar arası eşya taşıma veya karakterin elinde taşıma eklenmedi.
+5. `ESC` mevcut ortak duraklatma sistemidir. `3D Ev Onizleme Kaydet` menüsü 1920×1080 kamera görüntüsü kaydeder.
+
+### Kapsam ve kontrol durumu
+
+Bu çalışma 3D ev, karakter hareketi, merdiven geçişi ve fizik tabanlı eşya sürükleme altyapısını ekler. Denge/deprem/ekonomi oyun döngüsü bu değişikliğin parçası değildir. Dekoratif raflar, kapılar ve vinç sandığı sabittir; taşınabilir mobilyaların üstündeki yastık, örtü, kupa ve kitaplar mobilyayla birlikte hareket eder.
+
+Editör derlemesi ve kamera önizlemesi kontrol edildi. Kontrollerin tamamını kapsayan Play testi veya platform build'i çalıştırılmadı. Sahnede 1 karakter kontrolcüsü, 2 merdiven rotası ve 12 taşınabilir eşya bulunur. Kod ve kurulum `Assets/Levels/Level1/` altında tutulur; ortak paket, ayar ve arayüz dosyaları değiştirilmez.
