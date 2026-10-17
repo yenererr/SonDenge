@@ -89,6 +89,14 @@ namespace Jam.Levels.Level1
         public AudioClip disasterMusic;
         [Tooltip("Level 1 tek katlı oturma odasıyla oynanır; market eşyaları alt kata gelir.")]
         public bool singleFloorLevel = true;
+        [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
+        public bool absoluteTorque = true;
+        [Tooltip("Hazırlıkta serbest eşyalar eğimde kendiliğinden kaymaz; kayma yalnız afette olur.")]
+        public bool holdFurnitureWhilePlanning = true;
+        [Tooltip("Devrilme açısı (derece) ve bu açıda kesintisiz kalma süresi (saniye).")]
+        public float collapseAngle = 26f;
+        public float collapseHoldSeconds = 1f;
+        private float collapseClock;
 
         private readonly HashSet<string> equipment = new HashSet<string>();
         private readonly List<FireSpot> fires = new List<FireSpot>();
@@ -317,6 +325,15 @@ namespace Jam.Levels.Level1
             foreach (var item in furniture)
             {
                 if (item == null || !item.gameObject.activeInHierarchy || item.IsAnchored || item.Body == null || item.Body.isKinematic) continue;
+                if (holdFurnitureWhilePlanning && state == RoundState.Planning)
+                {
+                    // Hazırlıkta eğim, eşyayı kendiliğinden kaydırıp zincirleme devrilme yaratmasın.
+                    var right = houseRoot.right;
+                    item.Body.AddForce(-Vector3.Project(UnityEngine.Physics.gravity, right), ForceMode.Acceleration);
+                    var slide = Vector3.Dot(item.Body.linearVelocity, right);
+                    item.Body.AddForce(-right * slide * 8f, ForceMode.Acceleration);
+                    continue;
+                }
                 // Gravity already pulls props down the rotated floor. A small,
                 // continuous assist overcomes contact friction without a sudden threshold.
                 var slope = -Mathf.Sin(houseAngle) * 2.5f;
@@ -334,7 +351,7 @@ namespace Jam.Levels.Level1
             // Filter the moving furniture's torque and ignore tiny settling jitter.
             smoothedTorque = Mathf.Lerp(smoothedTorque, ComputeTorque(),
                 1f - Mathf.Exp(-Time.fixedDeltaTime / 0.95f));
-            var torqueDelta = smoothedTorque - baselineTorque;
+            var torqueDelta = smoothedTorque - (absoluteTorque ? 0f : baselineTorque);
             // A soft dead zone removes tiny settling jitter while keeping the
             // response continuous as a resident or prop crosses the center.
             torqueDelta = Mathf.Sign(torqueDelta) *
@@ -350,8 +367,13 @@ namespace Jam.Levels.Level1
                 1.55f, 0.15f, Time.fixedDeltaTime);
             balancePivot.localRotation = Quaternion.Euler(0f, 0f, houseAngle * Mathf.Rad2Deg);
             maxTilt = Mathf.Max(maxTilt, Mathf.Abs(houseAngle * Mathf.Rad2Deg));
-            if (state == RoundState.Disaster && level <= 2 && Mathf.Abs(houseAngle) > 26f * Mathf.Deg2Rad)
-                Lose("Ev denge sınırını aşıp devrildi.");
+            // Anlık sıçrama oyunu bitirmez; açı eşiğin üstünde kesintisiz kalmalı.
+            if (state == RoundState.Disaster && level <= 2 && Mathf.Abs(houseAngle) >= collapseAngle * Mathf.Deg2Rad)
+            {
+                collapseClock += Time.fixedDeltaTime;
+                if (collapseClock >= collapseHoldSeconds) Lose("Ev denge sınırını aşıp devrildi.");
+            }
+            else collapseClock = 0f;
         }
 
         private float ComputeTorque()
@@ -365,8 +387,10 @@ namespace Jam.Levels.Level1
                 var local = houseRoot.InverseTransformPoint(item.Body.position);
                 // Ease out a prop's load as it leaves the platform. Dropping it
                 // from the sum at one coordinate made the whole house snap back.
-                var edgeWeight = 1f - Mathf.SmoothStep(3.25f, 4.65f, Mathf.Abs(local.x));
-                var heightWeight = Mathf.SmoothStep(-2.8f, -1.8f, local.y);
+                // Mathf.SmoothStep(a, b, t) a→b arası enterpolasyondur; eşik geçişi için
+                // önce t'yi 0–1 aralığına çevirmek gerekir.
+                var edgeWeight = 1f - Smooth01(3.25f, 4.65f, Mathf.Abs(local.x));
+                var heightWeight = Smooth01(-2.8f, -1.8f, local.y);
                 torque += item.Mass * local.x * edgeWeight * heightWeight;
             }
             if (drag != null && drag.Carried != null && drag.Carried.Body != null)
@@ -380,6 +404,9 @@ namespace Jam.Levels.Level1
                 torque += 8f * houseRoot.InverseTransformPoint(resident.transform.position).x;
             return torque;
         }
+
+        private static float Smooth01(float edge0, float edge1, float value) =>
+            Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(edge0, edge1, value));
 
         private void TickDisaster(float dt, Keyboard keyboard)
         {

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Jam.Core;
 
@@ -10,7 +11,8 @@ namespace Jam.Levels.Level1
         public Transform houseRoot;
         public float followGain = 7f;
         public float maxSpeed = 2.8f;
-        public float maxLift = 1.1f;
+        [Tooltip("Fareyle sürüklemek için karakterin eşyaya yakın olması gereksin mi? Level 1'de kapalı.")]
+        public bool mouseRequiresReach = false;
         public float contactGap = 0.025f;
         public float interactionReach = 1.35f;
         public bool canDrag = true;
@@ -25,7 +27,8 @@ namespace Jam.Levels.Level1
         private BoxCollider carriedCollider;
         private Vector3 offset;
         private Vector3 target;
-        private float startY;
+        private Vector3 startLocal;
+        private Vector3 startWorld;
         private bool previousGravity;
         private bool previousKinematic;
         private bool carriedGravity;
@@ -61,6 +64,9 @@ namespace Jam.Levels.Level1
             var pointerPosition = pointerIsTouch ? touch.position.ReadValue() : mouse.position.ReadValue();
             var pressedThisFrame = pointerIsTouch ? touch.press.wasPressedThisFrame : mouse.leftButton.wasPressedThisFrame;
             var isPressed = pointerIsTouch ? touchPressed : mouse.leftButton.isPressed;
+            if (held != null && !pointerIsTouch && mouse.rightButton.wasPressedThisFrame) { CancelDrag(); return; }
+            if (held == null && pressedThisFrame && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            { hover = null; return; }
             if (held == null && pointerIsTouch && L1_TouchControls.IsControlPosition(pointerPosition))
             { hover = null; return; }
             var ray = sceneCamera.ScreenPointToRay(pointerPosition);
@@ -75,7 +81,7 @@ namespace Jam.Levels.Level1
             if (pressedThisFrame && hover != null)
             {
                 Selected = hover;
-                if (hover.IsAnchored || !CanReach(hover)) return;
+                if (hover.IsAnchored || (mouseRequiresReach && !CanReach(hover))) return;
                 usingTouch = pointerIsTouch;
                 held = hover;
                 heldCollider = held.GetComponent<BoxCollider>();
@@ -85,7 +91,8 @@ namespace Jam.Levels.Level1
                 held.Body.angularVelocity = Vector3.zero;
                 held.Body.useGravity = false;
                 held.Body.isKinematic = true;
-                startY = held.Body.position.y;
+                startWorld = held.Body.position;
+                startLocal = houseRoot != null ? houseRoot.InverseTransformPoint(startWorld) : startWorld;
                 var plane = new Plane(Vector3.forward, held.Body.position);
                 if (plane.Raycast(ray, out var d)) offset = held.Body.position - ray.GetPoint(d);
                 target = held.Body.position;
@@ -96,7 +103,12 @@ namespace Jam.Levels.Level1
                 if (plane.Raycast(ray, out var d))
                 {
                     target = ray.GetPoint(d) + offset;
-                    target.y = Mathf.Clamp(target.y, startY - maxLift, startY + maxLift);
+                    // Yalnız yatay: evin yerel X'i değişir; yükseklik ve derinlik sabit kalır.
+                    if (houseRoot != null)
+                    {
+                        var local = houseRoot.InverseTransformPoint(target);
+                        target = houseRoot.TransformPoint(new Vector3(local.x, startLocal.y, startLocal.z));
+                    }
                     target.z = held.Body.position.z;
                     ClampToFloor();
                 }
@@ -177,6 +189,15 @@ namespace Jam.Levels.Level1
             held = null;
             heldCollider = null;
             usingTouch = false;
+        }
+        private void CancelDrag()
+        {
+            if (held == null) return;
+            var item = held;
+            var back = houseRoot != null ? houseRoot.TransformPoint(startLocal) : startWorld;
+            ReleasePointer();
+            item.Body.position = back;
+            item.transform.position = back;
         }
         private bool CanReach(L1_MovableProp item)
         {
@@ -279,14 +300,14 @@ namespace Jam.Levels.Level1
             var hintY = Selected != null ? Screen.height - 122 : Screen.height - 64;
             var hintRect = new Rect(22, hintY, 795, 42);
             L1_PaperGui.Panel(hintRect, L1_PaperGui.Parchment, L1_PaperGui.Edge);
-            GUI.Label(hintRect, "A / D  Yürü    •    W / S  Merdiven    •    E  Yakındaki eşyayı al / bırak    •    Sol fare  Sürükle", label);
+            GUI.Label(hintRect, "Sol fare  Tut ve sağa–sola sürükle    •    Sağ fare  İptal    •    F  Sabitle    •    Tekerlek  Yakınlaş", label);
             var item = carried != null ? carried : held != null ? held : hover;
             if (item != null)
             {
                 var itemRect = new Rect(22, hintY - 44, 440, 38);
                 L1_PaperGui.Panel(itemRect, L1_PaperGui.Parchment, L1_PaperGui.Edge);
                 GUI.Label(itemRect, item.displayName + "  •  " + item.Mass + " kg" +
-                    (carried != null ? "  •  Taşınıyor" : CanReach(item) ? "  •  E ile al" : "  •  Yanına yaklaş"), label);
+                    (carried != null ? "  •  Taşınıyor" : item.IsAnchored ? "  •  Sabitli" : "  •  Sürükle"), label);
             }
             if (Time.unscaledTime < dropBlockedUntil)
             {
