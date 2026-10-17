@@ -14,10 +14,14 @@ namespace Jam.Levels.Level1
         private const string Doll = "Assets/LowPolyInteriorsFree/Prefabs/";
         private const string Tavern = "Assets/Low Poly Tarvern Pack/Prefabs/Probs/";
         private const string Decor = "Assets/3Digitalis/LowPolyInteriorPropsPack/Prefabs/";
+        private const string StylArts = "Assets/StylArts/StylizedHouseInterior/Level1/";
         private static Material wood, lightWood, plaster, iron, stone, olive, cream, glow, tile;
         private static Mesh beamMesh;
         private static Mesh salvagedBoards;
         private static Material salvagedWood;
+        private static Material mixSofaMaterial, mixBookshelfMaterial;
+        private static Material stylArtsTvMaterial, stylArtsFridgeMaterial, stylArtsBathMaterial, stylArtsStoveMaterial;
+        private static Material stylArtsKitchenMaterial, stylArtsChairMaterial;
         private static int meshIndex;
         private static Transform house;
         private static readonly float[] Floors = { -1.15f, 1.1f, 3.35f };
@@ -46,6 +50,14 @@ namespace Jam.Levels.Level1
             glow = Mat("L1_3D_LanternGlow", new Color(1,.62f,.18f));
             glow.EnableKeyword("_EMISSION"); glow.SetColor("_EmissionColor",new Color(3,1.25f,.25f));
             EditorUtility.SetDirty(glow);
+            mixSofaMaterial = MixPbrMaterial("L1_MIX_BigSofa_URP", "Assets/ZNS3D/Mix_Furniture_Pack/Textures/Big_Sofa_1", "big_sofa_big_sofa");
+            mixBookshelfMaterial = MixPbrMaterial("L1_MIX_Bookshelf_URP", "Assets/ZNS3D/Mix_Furniture_Pack/Textures/Bookshelf_1", "bookshelf_Mat_Bookshelf_1");
+            stylArtsTvMaterial = StylArtsMaterial("L1_StylArts_TV_URP",new Color(.39f,.23f,.15f));
+            stylArtsFridgeMaterial = StylArtsMaterial("L1_StylArts_Fridge_URP",Color.white,"T_Fridge_SM_D.TGA","T_Fridge_SM_N.TGA");
+            stylArtsBathMaterial = StylArtsMaterial("L1_StylArts_Bathtub_URP",new Color(.93f,.88f,.78f));
+            stylArtsStoveMaterial = StylArtsMaterial("L1_StylArts_Stove_URP",Color.white,"T_Stove_A_D.TGA","T_Stove_A_N.TGA");
+            stylArtsKitchenMaterial = StylArtsMaterial("L1_StylArts_Kitchen_URP",Color.white,"T_Kitchen_Mat_D.TGA","T_Kitchen_Mat_N.TGA");
+            stylArtsChairMaterial = StylArtsMaterial("L1_StylArts_Chair_URP",Color.white,"T_LeatherCouch_BC.TGA","T_LeatherCouch_N.TGA");
             beamMesh = CreateBeam(); PrepareSalvagedBoards(); meshIndex = 0;
             foreach (var root in EditorSceneManager.GetActiveScene().GetRootGameObjects())
                 if (root.name == "[L1] World Visuals" || root.name.StartsWith("[L1] Asset Review"))
@@ -160,9 +172,12 @@ namespace Jam.Levels.Level1
             Beam(back,"Yatay duvar ahşabı",new Vector3(-1.55f,y+1.25f,1.03f),new Vector3(3.28f,y+1.29f,1.03f),.085f,.10f,wood);
             Door(back,2.50f,y+.03f);
             for(int l=0;l<2;l++) Lamp(floor,new Vector3(l==0?-.5f:2.1f,y+1.77f,.25f));
-            Shelf(floor,new Vector3(level==1?.3f:-.25f,y+1.3f,.86f),1.2f);
-            Shelf(floor,new Vector3(level==1?.45f:-.15f,y+1.68f,.86f),1.05f);
-            Prop(Decor+"P_Plant.prefab",floor,"Raf üzerindeki sarmaşık",new Vector3(.65f,y+1.91f,.8f),new Vector3(.32f,.40f,.26f));
+            if(level!=1)
+            {
+                Shelf(floor,new Vector3(-.25f,y+1.3f,.86f),1.2f);
+                Shelf(floor,new Vector3(-.15f,y+1.68f,.86f),1.05f);
+                Prop(Decor+"P_Plant.prefab",floor,"Raf üzerindeki sarmaşık",new Vector3(.65f,y+1.91f,.8f),new Vector3(.32f,.40f,.26f));
+            }
         }
 
         private static void BuildRoof()
@@ -210,23 +225,31 @@ namespace Jam.Levels.Level1
         private static void DressRooms()
         {
             var p=Node(house,"Bağımsız 3D mobilyalar");
-            Movable(Doll+"12_Bathroom/SM_LPI_Bath_Tub_01.prefab",p,"Küvet",-2.5f,0,new Vector3(1.05f,.58f,.7f),5);
-            var counter=Movable(Tavern+"Bar Counter.prefab",p,"Mutfak tezgâhı",-.55f,0,new Vector3(1.3f,.73f,.65f),4);
-            Prop(Tavern+"Fat Mead Jug.prefab",counter,"Tezgahtaki sürahi",new Vector3(-.32f,.48f,0),new Vector3(.20f,.25f,.20f));
-            Prop(Tavern+"Wooden Serving Plate.prefab",counter,"Ahşap servis tabağı",new Vector3(.25f,.39f,0),new Vector3(.33f,.05f,.28f));
-            Movable(Tavern+"Standard Stool.prefab",p,"Tabure",.65f,0,new Vector3(.4f,.5f,.4f),1);
-            Movable(Tavern+"Standing Barrel.prefab",p,"Ahşap fıçı",2.65f,0,new Vector3(.55f,.72f,.55f),3);
-            var sofa=Movable(Doll+"04_Seating/SM_LPI_Seat_Sofa_01.prefab",p,"Yeşil kanepe",-2.1f,1,new Vector3(1.45f,.78f,.68f),3,olive);
-            Prop(Doll+"16_Textiles/SM_LPI_Text_Cushion_01.prefab",sofa,"Keten yastık",new Vector3(-.35f,.12f,-.18f),new Vector3(.30f,.24f,.13f),cream);
-            Movable(Tavern+"Wooden Chest.prefab",p,"Ahşap sandık",.30f,1,new Vector3(.8f,.55f,.5f),2);
-            var table=Movable(Tavern+"Dining Table.prefab",p,"Yemek masası",1.75f,1,new Vector3(1.1f,.7f,.65f),2);
-            Prop(Tavern+"Single Candle 3.prefab",table,"Masa mumu",new Vector3(-.28f,.46f,.02f),new Vector3(.13f,.23f,.13f));
-            Prop(Tavern+"Full Foam Tankard.prefab",table,"Masa kupası",new Vector3(.25f,.43f,-.02f),new Vector3(.15f,.17f,.15f));
-            Movable(Tavern+"Backing Chair.prefab",p,"Ahşap sandalye",2.75f,1,new Vector3(.42f,.78f,.43f),1);
+            var bathtub=Movable(StylArts+"Meshes/SM_Bathtub.fbx",p,"StylArts — küvet",-2.55f,0,new Vector3(1.20f,.68f,.85f),5,stylArtsBathMaterial);
+            bathtub.localRotation=Quaternion.Euler(0,180,0);
+            Movable(StylArts+"Meshes/SM_Bathroom_Sink.fbx",p,"StylArts — banyo lavabosu ve musluğu",-1.5f,0,new Vector3(.56f,.77f,.45f),3,stylArtsBathMaterial);
+            Prop(Doll+"12_Bathroom/SM_LPI_Bath_Mirror_01.prefab",p,"Banyo aynası",new Vector3(-1.5f,Floors[0]+1.46f,.96f),new Vector3(.48f,.62f,.07f));
+            var kitchenSink=Movable(StylArts+"Meshes/SM_Kitchen_Countertop_A.fbx",p,"StylArts — mutfak evyesi ve çeşmesi",-.55f,0,new Vector3(1.13f,.77f,.62f),4,stylArtsKitchenMaterial);
+            kitchenSink.localRotation=Quaternion.Euler(0,180,0);
+            var kitchenFaucet=Prop(StylArts+"Meshes/SM_Bathroom_Sink.fbx",kitchenSink,"StylArts — tezgâh üstü evye ve musluk",new Vector3(0,.37f,0),new Vector3(.62f,.48f,.45f),stylArtsBathMaterial);
+            kitchenFaucet.transform.localRotation=Quaternion.Euler(0,180,0);
+            var kitchenBox=kitchenSink.GetComponent<BoxCollider>();
+            kitchenBox.size=new Vector3(1.13f,1.02f,.62f);kitchenBox.center=new Vector3(0,.125f,0);
+            var stove=Movable(StylArts+"Meshes/SM_Stove_A.fbx",p,"StylArts — ocak ve fırın",.63f,0,new Vector3(.74f,.84f,.65f),4,stylArtsStoveMaterial);
+            stove.localRotation=Quaternion.Euler(0,180,0);
+            Prop(Doll+"10_Kitchenware/SM_LPI_Ware_Kettle_01.prefab",stove,"Ocaktaki çaydanlık",new Vector3(.13f,.47f,-.03f),new Vector3(.19f,.22f,.18f));
+            Movable(StylArts+"Meshes/SM_Fridge.fbx",p,"StylArts — buzdolabı",2.3f,0,new Vector3(.80f,1.45f,.66f),5,stylArtsFridgeMaterial);
+            // MIX FBX furniture uses replacement URP materials; the source pack's HDRP shader is missing in this URP project.
+            var mixSofa=Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/big_sofa.fbx",p,"MIX — yıpranmış deri kanepe",-2.25f,1,new Vector3(1.75f,.9f,.82f),5,mixSofaMaterial);
+            mixSofa.localRotation=Quaternion.Euler(0,180,0);
+            Movable(StylArts+"Meshes/SM_LeatherCouch.fbx",p,"StylArts — orta kat tekli koltuk",2.62f,1,new Vector3(.92f,.82f,.72f),2,stylArtsChairMaterial);
+            Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/tea_table.fbx",p,"MIX — sehpa",.12f,1,new Vector3(.60f,.46f,.54f),2,lightWood);
+            Movable(StylArts+"Meshes/SM_TVSet.fbx",p,"StylArts — eski televizyon",.86f,1,new Vector3(1.03f,.80f,.53f),3,stylArtsTvMaterial);
             var bed=Movable(Doll+"07_Bedroom/SM_LPI_Bed_Double_01.prefab",p,"Ahşap yatak",-2.1f,2,new Vector3(1.65f,.72f,.9f),4);
             Prop(Doll+"16_Textiles/SM_LPI_Text_Throw_01.prefab",bed,"Yatak örtüsü",new Vector3(.1f,.10f,-.02f),new Vector3(1.05f,.09f,.72f),olive);
             Movable(Doll+"07_Bedroom/SM_LPI_Bed_Nightstand_01.prefab",p,"Komodin",-.65f,2,new Vector3(.5f,.57f,.45f),1);
-            var bookcase=Movable(Doll+"06_Storage/SM_LPI_Storage_Bookcase_03.prefab",p,"Kitaplık",1.3f,2,new Vector3(.85f,1.55f,.4f),4);
+            var bookcase=Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/bookshelf.fbx",p,"MIX — dokulu kitaplık",1.3f,2,new Vector3(.95f,1.48f,.48f),4,mixBookshelfMaterial);
+            bookcase.localRotation=Quaternion.Euler(0,180,0);
             for(int shelf=0;shelf<3;shelf++) Prop(Decor+"P_Books_02.prefab",bookcase,"Kitaplar",new Vector3(-.1f,.10f+shelf*.25f,-.10f),new Vector3(.5f,.18f,.18f));
             Movable(Tavern+"Wooden Chest.prefab",p,"Çeyiz sandığı",2.65f,2,new Vector3(.7f,.5f,.48f),2);
             for(int level=0;level<3;level++)
@@ -243,7 +266,7 @@ namespace Jam.Levels.Level1
             var box=root.gameObject.AddComponent<BoxCollider>();box.size=size;
             var body=root.gameObject.AddComponent<Rigidbody>();body.mass=mass;body.interpolation=RigidbodyInterpolation.Interpolate;
             body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.linearDamping=.7f;body.angularDamping=2f;
-            body.constraints=RigidbodyConstraints.FreezePositionZ|RigidbodyConstraints.FreezeRotationX|RigidbodyConstraints.FreezeRotationY;
+            body.constraints=RigidbodyConstraints.FreezePositionZ|RigidbodyConstraints.FreezeRotation;
             var movable=root.gameObject.AddComponent<L1_MovableProp>();movable.displayName=name;movable.itemId="l1-"+name;
             return root;
         }
@@ -377,11 +400,29 @@ namespace Jam.Levels.Level1
             var source=AssetDatabase.LoadAssetAtPath<GameObject>(path);if(source==null)throw new InvalidOperationException(path);
             var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,parent);instance.name=name;instance.transform.localPosition=Vector3.zero;instance.transform.localRotation=Quaternion.identity;instance.transform.localScale=Vector3.one;
             foreach(var c in instance.GetComponentsInChildren<Collider>()) c.enabled=false;
-            var renderers=instance.GetComponentsInChildren<Renderer>();var bounds=renderers[0].bounds;foreach(var r in renderers)bounds.Encapsulate(r.bounds);
+            var renderers=instance.GetComponentsInChildren<Renderer>();
+            bool isStylArts=path.StartsWith(StylArts,StringComparison.Ordinal);
+            Renderer sizeRenderer=null;
+            foreach(var r in renderers)
+            {
+                if(isStylArts && r.name.EndsWith("_ConvexHulls",StringComparison.Ordinal))
+                { r.enabled=false;continue; }
+                if(sizeRenderer==null && (!isStylArts || r.name.EndsWith("_LOD0",StringComparison.Ordinal)))sizeRenderer=r;
+            }
+            if(sizeRenderer==null)throw new InvalidOperationException("Görünür model bulunamadı: "+path);
+            var bounds=sizeRenderer.bounds;
+            if(!isStylArts)foreach(var r in renderers)bounds.Encapsulate(r.bounds);
             instance.transform.localScale=new Vector3(size.x/Mathf.Max(.001f,bounds.size.x),size.y/Mathf.Max(.001f,bounds.size.y),size.z/Mathf.Max(.001f,bounds.size.z));
-            bounds=renderers[0].bounds;foreach(var r in renderers)bounds.Encapsulate(r.bounds);
+            bounds=sizeRenderer.bounds;
+            if(!isStylArts)foreach(var r in renderers)bounds.Encapsulate(r.bounds);
             instance.transform.position+=parent.TransformPoint(center)-bounds.center;
             if(material!=null)foreach(var r in renderers){var mats=r.sharedMaterials;for(int i=0;i<mats.Length;i++)mats[i]=material;r.sharedMaterials=mats;}
+            if(isStylArts)foreach(var group in instance.GetComponentsInChildren<LODGroup>(true))
+            {
+                var lods=group.GetLODs();
+                for(int i=0;i<lods.Length;i++)lods[i].screenRelativeTransitionHeight=.001f*(lods.Length-i);
+                group.SetLODs(lods);group.RecalculateBounds();
+            }
             return instance;
         }
         private static void PrepareSalvagedBoards()
@@ -433,6 +474,74 @@ namespace Jam.Levels.Level1
             mat.color=color;mat.SetFloat("_Smoothness",.10f);mat.SetFloat("_Cull",0);
             if(texture)mat.SetTexture("_BaseMap",AssetDatabase.LoadAssetAtPath<Texture2D>(RootPath+"Art/L1_OakFloor_Diffuse.tga"));
             EditorUtility.SetDirty(mat);return mat;
+        }
+        private static Material MixPbrMaterial(string name,string sourceFolder,string texturePrefix)
+        {
+            string basePath=sourceFolder+"/"+texturePrefix+"_BaseColor.png";
+            string sourceNormal=sourceFolder+"/"+texturePrefix+"_Normal.png";
+            var baseMap=AssetDatabase.LoadAssetAtPath<Texture2D>(basePath);
+            if(baseMap==null)throw new InvalidOperationException("MIX mobilya dokusu bulunamadı: "+basePath);
+            string normalPath=RootPath+"Art/"+name+"_Normal.png";
+            if(AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath)==null)
+            {
+                if(!AssetDatabase.CopyAsset(sourceNormal,normalPath))throw new InvalidOperationException("MIX normal haritası kopyalanamadı: "+sourceNormal);
+            }
+            var importer=AssetImporter.GetAtPath(normalPath) as TextureImporter;
+            if(importer!=null && importer.textureType!=TextureImporterType.NormalMap)
+            { importer.textureType=TextureImporterType.NormalMap;importer.SaveAndReimport(); }
+            var normal=AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
+            string materialPath=RootPath+"Materials/"+name+".mat";
+            var material=AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+            if(material==null)
+            {
+                material=new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                AssetDatabase.CreateAsset(material,materialPath);
+            }
+            material.shader=Shader.Find("Universal Render Pipeline/Lit");
+            material.color=Color.white;
+            material.SetTexture("_BaseMap",baseMap);
+            material.SetTexture("_BumpMap",normal);
+            material.SetFloat("_BumpScale",.65f);
+            material.SetFloat("_Metallic",.03f);
+            material.SetFloat("_Smoothness",.18f);
+            material.EnableKeyword("_NORMALMAP");
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+        private static Material StylArtsMaterial(string name,Color tint,string diffuseFile=null,string normalFile=null)
+        {
+            var material=Mat(name,tint);
+            var textureFolder=StylArts+"Textures/";
+            if(diffuseFile!=null)
+            {
+                var diffusePath=textureFolder+diffuseFile;
+                var diffuse=AssetDatabase.LoadAssetAtPath<Texture2D>(diffusePath);
+                if(diffuse==null)
+                { AssetDatabase.ImportAsset(diffusePath,ImportAssetOptions.ForceSynchronousImport);diffuse=AssetDatabase.LoadAssetAtPath<Texture2D>(diffusePath); }
+                if(diffuse==null)throw new InvalidOperationException("StylArts doku bulunamadı: "+diffusePath);
+                var diffuseImporter=AssetImporter.GetAtPath(diffusePath) as TextureImporter;
+                if(diffuseImporter!=null && diffuseImporter.maxTextureSize>2048)
+                { diffuseImporter.maxTextureSize=2048;diffuseImporter.SaveAndReimport(); }
+                material.SetTexture("_BaseMap",diffuse);
+            }
+            else material.SetTexture("_BaseMap",null);
+            if(normalFile!=null)
+            {
+                var normalPath=textureFolder+normalFile;
+                var importer=AssetImporter.GetAtPath(normalPath) as TextureImporter;
+                if(importer==null)
+                { AssetDatabase.ImportAsset(normalPath,ImportAssetOptions.ForceSynchronousImport);importer=AssetImporter.GetAtPath(normalPath) as TextureImporter; }
+                if(importer==null)throw new InvalidOperationException("StylArts normal haritası bulunamadı: "+normalPath);
+                if(importer.textureType!=TextureImporterType.NormalMap || importer.maxTextureSize>2048)
+                { importer.textureType=TextureImporterType.NormalMap;importer.maxTextureSize=2048;importer.SaveAndReimport(); }
+                material.SetTexture("_BumpMap",AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath));
+                material.SetFloat("_BumpScale",.55f);
+                material.EnableKeyword("_NORMALMAP");
+            }
+            material.SetFloat("_Metallic",.03f);
+            material.SetFloat("_Smoothness",.22f);
+            EditorUtility.SetDirty(material);
+            return material;
         }
         private static Transform Node(Transform parent,string name){var go=new GameObject(name);go.transform.SetParent(parent,false);return go.transform;}
         private static GameObject Root(string name){foreach(var r in EditorSceneManager.GetActiveScene().GetRootGameObjects())if(r.name==name)return r;throw new InvalidOperationException(name);}
