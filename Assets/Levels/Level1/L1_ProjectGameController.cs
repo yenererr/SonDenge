@@ -32,8 +32,11 @@ namespace Jam.Levels.Level1
         private sealed class FireSpot
         {
             public GameObject visual;
+            public GameObject smoke;
+            public L1_MovableProp target;
             public float health;
             public float spreadClock;
+            public float burnClock;
             public int floor;
             public float x;
         }
@@ -161,6 +164,7 @@ namespace Jam.Levels.Level1
             RefreshFurniture();
             CacheFurnitureTemplates();
             CacheHangingLamps();
+            PrepareExtinguisherModel();
             SpawnWilson();
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
@@ -464,40 +468,7 @@ namespace Jam.Levels.Level1
         {
             if (level == 3)
             {
-                var spraying = equipment.Contains("yangin_tupu") &&
-                    ((keyboard != null && (keyboard.eKey.isPressed || keyboard.enterKey.isPressed)) || L1_TouchControls.ActionHeld);
-                spraying &= resident != null && !resident.IsClimbing;
-                ShowFoam(spraying);
-                for (var i = fires.Count - 1; i >= 0; i--)
-                {
-                    var fire = fires[i];
-                    fire.spreadClock += dt;
-                    if (spraying && resident != null)
-                    {
-                        var player = houseRoot.InverseTransformPoint(resident.transform.position);
-                        var playerFloor = Mathf.Clamp(Mathf.RoundToInt(
-                            (player.y - resident.footOffset - FloorY[0]) / 2.25f), 0, 2);
-                        var delta = fire.x - player.x;
-                        if (fire.floor == playerFloor && Mathf.Abs(delta) < 1.75f &&
-                            delta * resident.Facing >= -0.35f)
-                            fire.health -= dt * 75f;
-                    }
-                    if (fire.health <= 0f)
-                    {
-                        Destroy(fire.visual);
-                        fires.RemoveAt(i);
-                        extinguishedFires++;
-                        score += 300;
-                        if (sfx != null) sfx.Play("level");
-                    }
-                    else if (fire.spreadClock > 16f && fires.Count < 4 && fire.health > 60f)
-                    {
-                        fire.spreadClock = 0f;
-                        SpawnFire(UnityEngine.Random.Range(0, 3), UnityEngine.Random.Range(-1.2f, 1.2f), 75f);
-                        fireSpreads++;
-                    }
-                }
-                if (fires.Count == 0) CompleteLevel();
+                TickFireDisaster(dt, keyboard);
             }
             else if (level == 4)
             {
@@ -553,8 +524,9 @@ namespace Jam.Levels.Level1
             if (level == 3)
             {
                 extinguishedFires = fireSpreads = 0;
+                BeginFireDisaster();
                 var source = UnityEngine.Random.Range(0, 4);
-                var floor = source == 1 ? 1 : source == 2 ? 2 : 0;
+                var floor = Mathf.Clamp(source == 1 ? 1 : source == 2 ? 2 : 0, 0, FloorCount - 1);
                 var x = source == 0 ? -0.2f : source == 1 ? 1.1f : source == 2 ? -0.7f : 0.8f;
                 fireCause = source == 0 ? "Mutfakta aşırı ısınan ocak" : source == 1 ?
                     "Oturma odasında aşırı yüklü priz" : source == 2 ?
@@ -700,6 +672,7 @@ namespace Jam.Levels.Level1
             state = next;
             if (next != RoundState.Disaster && resident != null) resident.SetHiding(false);
             if (next != RoundState.Disaster && foamVisual != null) foamVisual.SetActive(false);
+            if (next != RoundState.Disaster) PoseExtinguisher(false);
             if (drag != null) drag.canDrag = next == RoundState.Planning;
             if (GameManager.Instance != null)
                 GameManager.Instance.SetPhase(next == RoundState.Planning ? GamePhase.Preparation :
@@ -727,6 +700,7 @@ namespace Jam.Levels.Level1
                 if (Application.isPlaying) Destroy(paperFont);
                 else DestroyImmediate(paperFont);
             }
+            ReleaseFireMaterials();
             L1_PaperGui.Release();
         }
 
@@ -744,44 +718,6 @@ namespace Jam.Levels.Level1
             return null;
         }
 
-        private void SpawnFire(int floor, float x, float health)
-        {
-            var sprite = Icon("fire_flame");
-            var visual = new GameObject("Yangın alevi — " + (floor + 1) + ". kat");
-            visual.transform.SetParent(houseRoot, false);
-            visual.transform.localPosition = new Vector3(x, FloorY[floor] + 0.45f, -0.66f);
-            var renderer = visual.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
-            renderer.sharedMaterial = projectSpriteMaterial;
-            if (sprite != null) visual.transform.localScale = new Vector3(0.65f / sprite.bounds.size.x, 0.9f / sprite.bounds.size.y, 1f);
-            fires.Add(new FireSpot { visual = visual, health = health, floor = floor, x = x });
-        }
-
-        private void ShowFoam(bool spraying)
-        {
-            if (!spraying || resident == null)
-            {
-                if (foamVisual != null) foamVisual.SetActive(false);
-                return;
-            }
-            if (foamVisual == null)
-            {
-                var sprite = Icon("foam_cloud");
-                if (sprite == null) return;
-                foamVisual = new GameObject("Yangın tüpü köpüğü");
-                foamVisual.transform.SetParent(houseRoot, false);
-                foamVisual.transform.localScale = new Vector3(0.7f / sprite.bounds.size.x, 0.35f / sprite.bounds.size.y, 1f);
-                var renderer = foamVisual.AddComponent<SpriteRenderer>();
-                renderer.sprite = sprite;
-                renderer.sharedMaterial = projectSpriteMaterial;
-            }
-            var player = houseRoot.InverseTransformPoint(resident.transform.position);
-            foamVisual.transform.localPosition = new Vector3(player.x + resident.Facing * 0.48f,
-                player.y + 0.22f, -1.5f);
-            foamVisual.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 19f) * 12f);
-            foamVisual.SetActive(true);
-        }
-
         private void Purchase(ShopItem item)
         {
             if (state != RoundState.Planning || IsLocked(item)) return;
@@ -795,6 +731,7 @@ namespace Jam.Levels.Level1
             {
                 equipment.Add(item.id);
                 if (item.id == "deprem_cantasi") SpawnBag();
+                else if (item.id == "yangin_tupu") PrepareExtinguisherModel();
                 else ShowEquipmentImage(item.id);
             }
             Warn(item.title + " eklendi.");

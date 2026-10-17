@@ -17600,6 +17600,9 @@ MonoBehaviour:
   floorHeight: 2.25
   growSeconds: 1.6
   lowestFloorTop: -1.15
+  fireVfxPrefab: {fileID: 7251879486380165639, guid: c2f6a8962aac3814aa56cb9647c93470, type: 3}
+  smokeVfxPrefab: {fileID: 104829970813648393, guid: d3015b7eea383f64d8b81f965cc466e7, type: 3}
+  extinguisherPrefab: {fileID: 4307560395867504668, guid: bf0ea4a7b2c279047a7d801bff445913, type: 3}
   quakeDuration: 10
   quakeAcceleration: 6
   quakeFrequencyA: 1.3
