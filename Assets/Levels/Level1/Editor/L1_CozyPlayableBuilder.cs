@@ -107,14 +107,6 @@ namespace Jam.Levels.Level1
 
             var world = new GameObject("[L1] World Visuals").transform;
 
-            // Arka plan: Alacakaranlıkta Sisli Dağ Vadisi
-            var bgSprite = Sprite(world, "Sisli Dağ Vadisi — arka plan", "L1_MistyMountainValley.png", new Vector3(0, 1.20f, 12f), 2.35f, -20);
-            if (bgSprite != null)
-            {
-                bgSprite.gameObject.SetActive(true);
-                bgSprite.color = Color.white;
-            }
-
             house = Node(world, "3D Ev — ahşap yapı ve bağımsız eşyalar");
             FloorsPhysics.Clear();
 
@@ -161,6 +153,7 @@ namespace Jam.Levels.Level1
             RenderSettings.ambientGroundColor = new Color(0.05f, 0.04f, 0.03f);
 
             L1_ProjectFilesInstaller.Apply(false);
+            L1_CloudSeaBuilder.BuildInto(world);
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
