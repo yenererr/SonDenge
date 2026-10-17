@@ -731,9 +731,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Jam.Levels.Level1.L1_WallVariation
   wallMaterial: {fileID: 2100000, guid: 1f25551eea18885429a0a1c700265b6f, type: 2}
-  cleanChance: 0.6
-  crackTilingRange: {x: 0.16, y: 0.5}
-  cleanTint: {r: 0.93, g: 0.88, b: 0.8, a: 1}
+  plasterTint: {r: 0.93, g: 0.88, b: 0.8, a: 1}
+  patchMaterials:
+  - {fileID: 2100000, guid: 427785fe0c21517499404344a004046f, type: 2}
+  - {fileID: 2100000, guid: 226ae8bc13e7eed4884be1d79f1789ad, type: 2}
+  - {fileID: 2100000, guid: e2a0081a805f2cd468549e222f136ad5, type: 2}
+  - {fileID: 2100000, guid: 4214e5cf30f84774cb8d3d7a3cec0915, type: 2}
+  damagedWallChance: 0.6
+  patchesPerWall: {x: 1, y: 4}
+  patchSize: {x: 0.45, y: 2.1}
+  skipOpenings: 1
   seed: 17
 --- !u!1 &6387161880238933835
 GameObject:
