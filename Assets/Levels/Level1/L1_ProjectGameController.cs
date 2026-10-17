@@ -125,6 +125,7 @@ namespace Jam.Levels.Level1
         private RoundState state = RoundState.StartMenu;
         private int level = 1, budget = 750, score, anchors;
         private float timer = 45f, houseAngle, angularVelocity, baselineTorque, smoothedTorque;
+        private bool levelEntryBalanceLocked;
         private float maxTilt;
         private float buildingHealth = 100f, water, indoorFlood, lightningClock, lightningFlash;
         private float evacuatedWater, waterSensorCooldown;
@@ -161,6 +162,7 @@ namespace Jam.Levels.Level1
             roof = houseRoot.Find("Asimetrik kiremit çatı");
             SetUpperFloorVisible(false);
             if (drag != null) drag.floorTopsProvider = FloorTops;
+            if (drag != null) drag.ManipulationStarted += ReleaseLevelEntryBalance;
             RefreshFurniture();
             CacheFurnitureTemplates();
             CacheHangingLamps();
@@ -312,6 +314,7 @@ namespace Jam.Levels.Level1
             score = anchors = 0;
             timer = 45f;
             maxTilt = 0f;
+            LockLevelEntryBalance();
             evacuatedWater = waterSensorCooldown = 0f;
             extinguishedFires = fireSpreads = lightningHits = lightningBlocked = 0;
             marketOpen = menuOpen = howToOpen = false;
@@ -367,6 +370,15 @@ namespace Jam.Levels.Level1
                 state == RoundState.Report || state == RoundState.GameOver || state == RoundState.Victory ||
                 growing || menuOpen || howToOpen) return;
             TrackLostFurniture();
+            if (state == RoundState.Planning && levelEntryBalanceLocked)
+            {
+                // Yeni katın eşyaları yerleşirken oluşan pasif tork farkı evi yatırmasın.
+                baselineTorque = ComputeTorque();
+                smoothedTorque = baselineTorque;
+                houseAngle = angularVelocity = 0f;
+                balancePivot.localRotation = Quaternion.identity;
+                return;
+            }
             var disturbance = 0f;
             var quake = 0f;
             if (state == RoundState.Disaster && level == 1)
@@ -464,6 +476,17 @@ namespace Jam.Levels.Level1
         private static float Smooth01(float edge0, float edge1, float value) =>
             Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(edge0, edge1, value));
 
+        private void LockLevelEntryBalance()
+        {
+            levelEntryBalanceLocked = true;
+            baselineTorque = ComputeTorque();
+            smoothedTorque = baselineTorque;
+            houseAngle = angularVelocity = 0f;
+            if (balancePivot != null) balancePivot.localRotation = Quaternion.identity;
+        }
+
+        private void ReleaseLevelEntryBalance() => levelEntryBalanceLocked = false;
+
         private void TickDisaster(float dt, Keyboard keyboard)
         {
             if (level == 3)
@@ -518,6 +541,12 @@ namespace Jam.Levels.Level1
         private void StartDisaster(bool forced = false)
         {
             if (!CanStartDisaster(forced)) return;
+            if (levelEntryBalanceLocked)
+            {
+                baselineTorque = ComputeTorque();
+                smoothedTorque = baselineTorque;
+            }
+            ReleaseLevelEntryBalance();
             marketOpen = false;
             timer = level == 1 ? quakeDuration : level == 2 ? 12f : level == 3 ? 30f : 25f;
             if (level == 1) BeginQuakeRecord();
@@ -611,6 +640,7 @@ namespace Jam.Levels.Level1
             }
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
+            LockLevelEntryBalance();
             categoryIndex = level == 2 ? 0 : level == 3 ? 3 : level == 4 ? 4 : 5;
             marketOpen = !growDownward;
             SetState(RoundState.Planning);
@@ -687,6 +717,7 @@ namespace Jam.Levels.Level1
 
         private void OnDestroy()
         {
+            if (drag != null) drag.ManipulationStarted -= ReleaseLevelEntryBalance;
             if (looseFurnitureMaterial != null) Destroy(looseFurnitureMaterial);
             if (mediumFurnitureMaterial != null) Destroy(mediumFurnitureMaterial);
             if (heavyFurnitureMaterial != null) Destroy(heavyFurnitureMaterial);
@@ -724,6 +755,7 @@ namespace Jam.Levels.Level1
             if (budget < item.cost) { Warn("Yeterli altın yok."); return; }
             if (item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id)) { Warn("Bu ekipman zaten kurulu."); return; }
             if (item.category == "Mobilya" && !SpawnFurniture(item)) { Warn("Açık katlarda yeni eşya için yer yok. Bir eşyayı satabilirsin."); return; }
+            if (item.category == "Mobilya") ReleaseLevelEntryBalance();
             budget -= item.cost;
             if (item.category == "Mobilya") RefreshFurniture();
             if (item.id == "sabitleme_aparati") anchors++;
@@ -961,6 +993,7 @@ namespace Jam.Levels.Level1
             if (item.IsAnchored) anchors++;
             if (item.itemId == "deprem_cantasi") equipment.Remove("deprem_cantasi");
             furniture.Remove(item);
+            ReleaseLevelEntryBalance();
             Destroy(item.gameObject);
             Warn("Eşya satıldı. +" + refund + " altın");
             if (sfx != null) sfx.Play("coin");

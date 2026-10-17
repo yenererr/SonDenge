@@ -151,6 +151,7 @@ namespace Jam.Levels.Level1
             CacheHangingLamps();
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
+            LockLevelEntryBalance();
             Warn("Ev büyüdü: yeni katta " + placed + " eşya hazır.");
             growing = false;
             marketOpen = true;

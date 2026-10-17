@@ -32,6 +32,7 @@ namespace Jam.Levels.Level1
         [Tooltip("Eski IMGUI kontrol ipucu çubuğu. uGUI HUD varken kapalı.")]
         public bool showLegacyHint = false;
         public L1_MovableProp Selected { get; private set; }
+        public event System.Action ManipulationStarted;
         public L1_MovableProp Carried => carried;
         public float CarriedLocalX => carryLocalPosition.x;
         private L1_MovableProp held;
@@ -51,6 +52,7 @@ namespace Jam.Levels.Level1
         private bool carriedKinematic;
         private Vector3 carryLocalPosition;
         private bool usingTouch;
+        private bool heldManipulationNotified;
         private bool actionWasHeld;
         private float dropBlockedUntil;
         private GUIStyle label;
@@ -119,6 +121,7 @@ namespace Jam.Levels.Level1
                     (mouseRequiresReach && !CanReach(hover))) return;
                 usingTouch = pointerIsTouch;
                 held = hover;
+                heldManipulationNotified = false;
                 heldCollider = held.GetComponent<BoxCollider>();
                 previousGravity = held.Body.useGravity;
                 previousKinematic = held.Body.isKinematic;
@@ -163,6 +166,12 @@ namespace Jam.Levels.Level1
                     }
                     target.z = held.Body.position.z;
                     if (!freeDrag) ClampToFloor();
+                }
+                if (!heldManipulationNotified && houseRoot != null &&
+                    Vector3.Distance(houseRoot.InverseTransformPoint(target), startLocal) > 0.08f)
+                {
+                    heldManipulationNotified = true;
+                    ManipulationStarted?.Invoke();
                 }
                 if (!isPressed) ReleasePointer();
             }
@@ -352,6 +361,7 @@ namespace Jam.Levels.Level1
             held = null;
             heldCollider = null;
             usingTouch = false;
+            heldManipulationNotified = false;
         }
         private void CancelDrag()
         {
@@ -390,6 +400,7 @@ namespace Jam.Levels.Level1
             if (nearest == null) return;
             ReleasePointer();
             Selected = carried = nearest;
+            ManipulationStarted?.Invoke();
             carriedCollider = carried.GetComponent<BoxCollider>();
             carriedGravity = carried.Body.useGravity;
             carriedKinematic = carried.Body.isKinematic;
