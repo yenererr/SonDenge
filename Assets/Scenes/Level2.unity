@@ -308,9 +308,73 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2000000000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2000000001}
+  - component: {fileID: 2000000002}
+  m_Layer: 0
+  m_Name: Level2Shop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2000000001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a3e7c1b5d2f4a6e8b0c1d3f5e7a9b2c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  catalog:
+  - {fileID: 11400000, guid: 8c4011f6c2c948bf9cf5bbf1b2b2934a, type: 2}
+  - {fileID: 11400000, guid: 1f5c1d7f8a7e4b0a9f4c2f2b1b8a2f5c, type: 2}
+  - {fileID: 11400000, guid: 2e6aab3c9f1c4a0aaf7a3f1d6d4e8b9c, type: 2}
+  - {fileID: 11400000, guid: 3a7b1c2d4e5f67890123456789abcdef, type: 2}
+  - {fileID: 11400000, guid: 4b8c2d3e5f6a7890123456789abcdef0, type: 2}
+  - {fileID: 11400000, guid: 5c9d3e4f6a7b890123456789abcdef01, type: 2}
+  startingBudget: 140
+  autoCreateUi: 1
+  showOnStart: 1
+  shopContent: {fileID: 0}
+  itemListRoot: {fileID: 0}
+  itemButtonPrefab: {fileID: 0}
+  budgetText: {fileID: 0}
+  feedbackText: {fileID: 0}
+  closeButton: {fileID: 0}
+  onFurniturePurchased:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1297112129}
   - {fileID: 880944364}
+  - {fileID: 2000000001}
