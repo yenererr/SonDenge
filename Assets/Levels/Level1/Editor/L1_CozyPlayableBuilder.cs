@@ -144,6 +144,7 @@ namespace Jam.Levels.Level1
 
             var controls = Node(world, "Eşya taşıma").gameObject.AddComponent<L1_PropDrag>();
             controls.sceneCamera = camera;
+            controls.houseRoot = house;
 
             // Warm key sunlight coming softly from top-right / front
             var sun = Root("Directional Light").GetComponent<Light>();
@@ -159,6 +160,7 @@ namespace Jam.Levels.Level1
             RenderSettings.ambientEquatorColor = new Color(0.16f, 0.12f, 0.09f);
             RenderSettings.ambientGroundColor = new Color(0.05f, 0.04f, 0.03f);
 
+            L1_ProjectFilesInstaller.Apply(false);
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
@@ -456,27 +458,27 @@ namespace Jam.Levels.Level1
             // ==========================================
             // KAT 1 MOBİLYALARI
             // ==========================================
-            var bathtub = Movable(StylArts + "Meshes/SM_Bathtub.fbx", p, "StylArts — küvet", -2.55f, 0, new Vector3(1.20f, 0.68f, 0.85f), 5, stylArtsBathMaterial);
+            var bathtub = Movable(StylArts + "Meshes/SM_Bathtub.fbx", p, "StylArts — küvet", -2.35f, 0, new Vector3(1.20f, 0.68f, 0.85f), 5, stylArtsBathMaterial);
             bathtub.localRotation = Quaternion.Euler(0, 180, 0);
 
-            Movable(StylArts + "Meshes/SM_Bathroom_Sink.fbx", p, "StylArts — banyo lavabosu ve musluğu", -1.5f, 0, new Vector3(0.56f, 0.77f, 0.45f), 3, stylArtsBathMaterial);
+            Movable(StylArts + "Meshes/SM_Bathroom_Sink.fbx", p, "StylArts — banyo lavabosu ve musluğu", -1.25f, 0, new Vector3(0.56f, 0.77f, 0.45f), 3, stylArtsBathMaterial);
             Prop(Doll + "12_Bathroom/SM_LPI_Bath_Mirror_01.prefab", p, "Banyo aynası", new Vector3(-1.5f, Floors[0] + 1.46f, 0.96f), new Vector3(0.48f, 0.62f, 0.07f));
 
             // Ocak ve fırın (Düzgün orantılı, kameraya dönük, yanında lavabo yok)
-            var stove = Movable(StylArts + "Meshes/SM_Stove_A.fbx", p, "StylArts — ocak ve fırın", -0.10f, 0, new Vector3(0.85f, 0.90f, 0.85f), 4, stylArtsStoveMaterial, Quaternion.Euler(0, 180, 0));
+            var stove = Movable(StylArts + "Meshes/SM_Stove_A.fbx", p, "StylArts — ocak ve fırın", 0f, 0, new Vector3(0.85f, 0.90f, 0.85f), 4, stylArtsStoveMaterial, Quaternion.Euler(0, 180, 0));
             Prop(Doll + "10_Kitchenware/SM_LPI_Ware_Kettle_01.prefab", stove, "Ocaktaki çaydanlık", new Vector3(0.10f, 0.48f, 0.05f), new Vector3(0.20f, 0.22f, 0.20f));
 
             // Buzdolabı (Düzgün orantılı, merdivene çarpmayan, kapak kameraya dönük)
-            var fridge = Movable(StylArts + "Meshes/SM_Fridge.fbx", p, "StylArts — buzdolabı", 0.75f, 0, new Vector3(0.82f, 1.65f, 0.82f), 5, stylArtsFridgeMaterial, Quaternion.identity);
+            var fridge = Movable(StylArts + "Meshes/SM_Fridge.fbx", p, "StylArts — buzdolabı", 1.35f, 0, new Vector3(0.82f, 1.65f, 0.82f), 5, stylArtsFridgeMaterial, Quaternion.identity);
 
             // ==========================================
             // KAT 2 MOBİLYALARI
             // ==========================================
-            var mixSofa = Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/big_sofa.fbx", p, "MIX — yıpranmış deri kanepe", -2.25f, 1, new Vector3(1.75f, 0.9f, 0.82f), 5, mixSofaMaterial);
+            var mixSofa = Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/big_sofa.fbx", p, "MIX — yıpranmış deri kanepe", -1.50f, 1, new Vector3(1.75f, 0.9f, 0.82f), 5, mixSofaMaterial);
             mixSofa.localRotation = Quaternion.Euler(0, 180, 0);
 
             Movable(StylArts + "Meshes/SM_LeatherCouch.fbx", p, "StylArts — orta kat tekli koltuk", 2.62f, 1, new Vector3(0.92f, 0.82f, 0.72f), 2, stylArtsChairMaterial);
-            Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/tea_table.fbx", p, "MIX — sehpa", 0.12f, 1, new Vector3(0.60f, 0.46f, 0.54f), 2, lightWood);
+            Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/tea_table.fbx", p, "MIX — sehpa", -0.08f, 1, new Vector3(0.60f, 0.46f, 0.54f), 2, lightWood);
             Movable(StylArts + "Meshes/SM_TVSet.fbx", p, "StylArts — eski televizyon", 0.86f, 1, new Vector3(1.03f, 0.80f, 0.53f), 3, stylArtsTvMaterial);
 
             // ==========================================

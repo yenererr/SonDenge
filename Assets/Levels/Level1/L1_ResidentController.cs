@@ -21,6 +21,9 @@ namespace Jam.Levels.Level1
         private float horizontal;
         private float vertical;
         private float walkTime;
+        private int facing = 1;
+        public int Facing => facing;
+        public bool IsClimbing => route != null;
         private void Awake()
         {
             body = GetComponent<Rigidbody>();
@@ -33,6 +36,10 @@ namespace Jam.Levels.Level1
                 - (k.aKey.isPressed || k.leftArrowKey.isPressed ? 1 : 0);
             vertical = k == null ? 0 : (k.wKey.isPressed || k.upArrowKey.isPressed ? 1 : 0)
                 - (k.sKey.isPressed || k.downArrowKey.isPressed ? 1 : 0);
+            horizontal = Mathf.Clamp(horizontal + L1_TouchControls.Horizontal, -1f, 1f);
+            vertical = Mathf.Clamp(vertical + L1_TouchControls.Vertical, -1f, 1f);
+            if (horizontal > 0.01f) facing = 1;
+            else if (horizontal < -0.01f) facing = -1;
             if (Time.timeScale <= 0f) return;
             walkTime += Time.deltaTime * (route == null ? Mathf.Abs(horizontal) : Mathf.Abs(vertical)) * 12f;
             if (leftFoot != null) leftFoot.localRotation = Quaternion.Euler(0, 0, Mathf.Sin(walkTime) * 20f);
@@ -47,6 +54,7 @@ namespace Jam.Levels.Level1
             {
                 foreach (var candidate in ladders)
                 {
+                    if (candidate == null || !candidate.gameObject.activeInHierarchy) continue;
                     var entry = vertical > 0 ? candidate.bottom.position : candidate.top.position;
                     if (Mathf.Abs(body.position.x - entry.x) < ladderReach && Mathf.Abs(body.position.y - entry.y) < 0.22f)
                     {
@@ -76,7 +84,17 @@ namespace Jam.Levels.Level1
                 }
                 else body.MovePosition(next);
             }
-            else body.linearVelocity = new Vector3(horizontal * walkSpeed, body.linearVelocity.y, 0);
+            else
+            {
+                // The house rotates around its balance pivot. Walk along its floor,
+                // otherwise world-horizontal velocity drives the capsule into uphill boards.
+                var floorRight = transform.parent != null ? transform.parent.right : Vector3.right;
+                var floorUp = transform.parent != null ? transform.parent.up : Vector3.up;
+                var normalVelocity = Vector3.Project(body.linearVelocity, floorUp);
+                var walkVelocity = floorRight * (horizontal * walkSpeed) + normalVelocity;
+                walkVelocity.z = 0f;
+                body.linearVelocity = walkVelocity;
+            }
         }
         private void OnDisable() => EndClimb();
         private void EndClimb()

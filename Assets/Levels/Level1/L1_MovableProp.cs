@@ -20,5 +20,18 @@ namespace Jam.Levels.Level1
             IsAnchored = anchored;
             if (Body != null) Body.isKinematic = anchored;
         }
+
+        public void AllowFallAtEdges(Transform houseRoot)
+        {
+            var box = GetComponent<BoxCollider>();
+            if (box == null || houseRoot == null || !box.enabled) return;
+            // Side walls stop the resident, while loose furniture may pass through
+            // them and lose support at either end of the floor.
+            foreach (var wall in houseRoot.GetComponentsInChildren<BoxCollider>(true))
+            {
+                if (wall.name != "Yan duvar çarpışması" || !wall.gameObject.activeInHierarchy) continue;
+                Physics.IgnoreCollision(box, wall, true);
+            }
+        }
     }
 }
