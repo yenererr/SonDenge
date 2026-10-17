@@ -212,7 +212,9 @@ namespace Jam.Shop
             layout.padding = new RectOffset(18, 18, 8, 8);
             layout.spacing = 8f;
             layout.childControlWidth = true;
-            layout.childControlHeight = true;
+            // Butonların RectTransform yüksekliğini koru; aksi halde layout
+            // sistemi tercih edilen yüksekliği 0 hesaplayıp butonları gizler.
+            layout.childControlHeight = false;
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
             ContentSizeFitter fitter = list.GetComponent<ContentSizeFitter>();
