@@ -202,6 +202,9 @@ namespace Jam.Shop
             {
                 if (furniture == null) continue;
                 var card = Surface("Kart_" + furniture.ItemId, itemListRoot, new Vector2(284, 310), Vector2.zero, _cardSurface);
+                Image previewBackdrop = Surface("GorselArkaPlani", card.transform, new Vector2(250, 160), new Vector2(0, -12),
+                    MakePreviewBackdrop(_catalogItems.Count));
+                previewBackdrop.raycastTarget = false;
                 var picture = new GameObject("MobilyaGorseli", typeof(RectTransform), typeof(RawImage)).GetComponent<RawImage>();
                 picture.transform.SetParent(card.transform, false);
                 TopRect(picture.rectTransform, new Vector2(250, 160), new Vector2(0, -12));
@@ -352,6 +355,44 @@ namespace Jam.Shop
                 c.a = Mathf.Clamp01(-d);
                 pixels[y * width + x] = c;
             }
+            texture.SetPixels(pixels);
+            texture.Apply(false, true);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), Vector2.one * 0.5f, 100);
+            _visualResources.Add(sprite);
+            _visualResources.Add(texture);
+            return sprite;
+        }
+
+        // Mobilya önizlemelerinin arkasında eşyanın siluetini öne çıkaran, renkli stüdyo ışığı.
+        private Sprite MakePreviewBackdrop(int variant)
+        {
+            const int width = 250, height = 160;
+            Color[] pixels = new Color[width * height];
+            Color accent = Color.HSVToRGB(Mathf.Repeat(0.54f + variant * 0.065f, 1f), 0.58f, 0.88f);
+            Color secondary = Color.HSVToRGB(Mathf.Repeat(0.93f + variant * 0.045f, 1f), 0.62f, 0.92f);
+
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                float u = x / (width - 1f);
+                float v = y / (height - 1f);
+                Color baseColor = Color.Lerp(new Color(0.018f, 0.028f, 0.075f), new Color(0.055f, 0.10f, 0.16f), v);
+                float leftGlow = Mathf.Exp(-((u - 0.18f) * (u - 0.18f) + (v - 0.30f) * (v - 0.30f)) * 12f);
+                float rightGlow = Mathf.Exp(-((u - 0.86f) * (u - 0.86f) + (v - 0.78f) * (v - 0.78f)) * 18f);
+                float diagonal = Mathf.Clamp01(0.5f + Mathf.Sin((u + v) * 18f) * 0.5f) * 0.035f;
+                Color color = baseColor + accent * (leftGlow * 0.34f) + secondary * (rightGlow * 0.22f);
+                color += new Color(diagonal, diagonal * 0.8f, diagonal * 0.55f);
+
+                float edgeX = Mathf.Abs(x - (width - 1) * 0.5f) - (width * 0.5f - 14f);
+                float edgeY = Mathf.Abs(y - (height - 1) * 0.5f) - (height * 0.5f - 14f);
+                float distance = new Vector2(Mathf.Max(edgeX, 0f), Mathf.Max(edgeY, 0f)).magnitude
+                    + Mathf.Min(Mathf.Max(edgeX, edgeY), 0f) - 14f;
+                color.a = Mathf.Clamp01(-distance) * 0.96f;
+                pixels[y * width + x] = color;
+            }
+
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
             texture.SetPixels(pixels);
             texture.Apply(false, true);
             texture.wrapMode = TextureWrapMode.Clamp;
