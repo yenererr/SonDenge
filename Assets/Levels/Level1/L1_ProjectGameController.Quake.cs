@@ -87,7 +87,7 @@ namespace Jam.Levels.Level1
         }
 
         private readonly List<QuakeRecord> quakeRecords = new List<QuakeRecord>();
-        private float quakeStartTime, quakePhase, shakeClock;
+        private float quakeStartTime, quakePhase;
         private bool levelRewardGiven, houseSurvived;
         private int safetyScore;
 
@@ -165,12 +165,12 @@ namespace Jam.Levels.Level1
             if (level != 1) return;
             if (cameraRig == null && sceneCamera != null) cameraRig = sceneCamera.GetComponent<L1_CameraController>();
             if (cameraRig == null) return;
-            shakeClock -= Time.deltaTime;
-            if (shakeClock > 0f) return;
-            shakeClock = 0.2f;
-            var strength = cameraShakeStrength * Mathf.Abs(QuakeAcceleration()) / Mathf.Max(0.1f, quakeAcceleration);
+            var progress = Mathf.Clamp01((Time.time - quakeStartTime) / Mathf.Max(0.1f, quakeDuration));
+            var envelope = quakeEnvelope.Evaluate(progress);
+            var acceleration = Mathf.Abs(QuakeAcceleration()) / Mathf.Max(0.1f, quakeAcceleration);
+            var strength = cameraShakeStrength * (0.35f * envelope + 0.65f * acceleration);
             if (GameSettings.ReduceShake) strength *= 0.2f;
-            cameraRig.Shake(0.25f, strength);
+            cameraRig.Shake(0.08f, strength);
         }
 
         private void CompleteEarthquakeLevel(bool survived, string reason)

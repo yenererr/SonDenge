@@ -32,8 +32,7 @@ namespace Jam.Levels.Level1
         private Vector2 targetPan, pan, panVelocity;
         private bool panning;
         private Vector2 panStartMouse, panStartValue;
-        private float shakeUntil, shakeDuration, shakeStrength;
-        private Vector3 shakeOffset;
+        private float shakeUntil, shakeStrength, currentShakeStrength, shakeVelocity;
         private Quaternion restRotation;
 
         private void Awake()
@@ -75,9 +74,8 @@ namespace Jam.Levels.Level1
         /// <summary>Kameraya kısa sarsıntı ekler (gerçek zoom/pan konumunu değiştirmez).</summary>
         public void Shake(float duration, float strength)
         {
-            shakeDuration = Mathf.Max(0.01f, duration);
-            shakeUntil = Time.unscaledTime + duration;
-            shakeStrength = strength;
+            shakeUntil = Time.unscaledTime + Mathf.Max(0.01f, duration);
+            shakeStrength = Mathf.Max(0f, strength);
         }
 
         private void Update()
@@ -119,11 +117,17 @@ namespace Jam.Levels.Level1
             cam.fieldOfView = Mathf.SmoothDamp(cam.fieldOfView, targetFov, ref fovVelocity, smoothTime, Mathf.Infinity, dt);
             pan = Vector2.SmoothDamp(pan, ClampPan(targetPan), ref panVelocity, smoothTime, Mathf.Infinity, dt);
 
-            shakeOffset = Vector3.zero;
-            if (Time.unscaledTime < shakeUntil)
+            var shakeTarget = Time.unscaledTime < shakeUntil ? shakeStrength : 0f;
+            currentShakeStrength = Mathf.SmoothDamp(currentShakeStrength, shakeTarget,
+                ref shakeVelocity, 0.12f, Mathf.Infinity, dt);
+            var shakeOffset = Vector3.zero;
+            if (currentShakeStrength > 0.0001f)
             {
-                var damper = (shakeUntil - Time.unscaledTime) / shakeDuration;
-                shakeOffset = (Vector3)(Random.insideUnitCircle * shakeStrength * damper);
+                var t = Time.unscaledTime;
+                shakeOffset = new Vector3(
+                    Mathf.PerlinNoise(t * 16f, 10.37f) * 2f - 1f,
+                    Mathf.PerlinNoise(t * 19f, 47.21f) * 2f - 1f,
+                    0f) * currentShakeStrength;
             }
             transform.SetPositionAndRotation(restPosition + new Vector3(pan.x, pan.y, 0f) + shakeOffset,
                 restRotation);
