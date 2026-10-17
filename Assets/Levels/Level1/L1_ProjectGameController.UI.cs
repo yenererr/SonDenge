@@ -247,12 +247,22 @@ namespace Jam.Levels.Level1
                 var installed = item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id);
                 Panel(row, installed ? new Color32(230, 247, 218, 255) : Deep,
                     installed ? Green : locked ? Muted : Border);
+                var icon = Icon(item.id);
+                if (icon != null)
+                {
+                    var texture = icon.texture;
+                    var rect = icon.textureRect;
+                    GUI.DrawTextureWithTexCoords(new Rect(row.x + 12f, row.y + 40f, 62f, 62f), texture,
+                        new Rect(rect.x / texture.width, rect.y / texture.height,
+                            rect.width / texture.width, rect.height / texture.height));
+                }
                 GUI.Label(new Rect(row.x + 14f, row.y + 8f, 27f, 25f), (i + 1).ToString("00"), uiSmall);
                 GUI.Label(new Rect(row.x + 43f, row.y + 8f, 256f, 25f), item.title, uiText);
                 GUI.Label(new Rect(row.x + 319f, row.y + 9f, 81f, 22f), item.mass + " kg", uiSmall);
                 L1_PaperGui.Rule(row.x + 13f, row.y + 34f, row.width - 26f, new Color(0.46f, 0.28f, 0.15f, 0.5f));
-                GUI.Label(new Rect(row.x + 12f, row.y + 42f, row.width - 24f, 31f), Description(item), uiSmall);
-                GUI.Label(new Rect(row.x + 12f, row.y + 82f, 100f, 22f), item.cost + " altın", uiText);
+                GUI.Label(new Rect(row.x + 83f, row.y + 41f, row.width - 95f, 32f), Description(item), uiSmall);
+                GUI.Label(new Rect(row.x + 83f, row.y + 75f, 170f, 29f), item.cost + " altın" +
+                    (item.category == "Mobilya" ? "  ·  +" + FurnitureIncome(item) : ""), uiSmall);
                 var buttonRect = new Rect(row.xMax - 130f, row.y + 77f, 118f, 29f);
                 if (locked) GUI.Label(buttonRect, item.unlockLevel + ". seviyede açılır", uiTiny);
                 else if (installed) GUI.Label(buttonRect, "KURULDU ✓", uiSmall);
@@ -365,7 +375,7 @@ namespace Jam.Levels.Level1
             Panel(new Rect(rect.x + 28f, rect.y + 136f, 484f, 132f), Deep, Border);
             GUI.Label(new Rect(rect.x + 45f, rect.y + 148f, 452f, 110f), report, uiText);
             if (ActionButton(new Rect(rect.x + 50f, rect.y + 291f, 440f, 48f),
-                level == 5 ? "BÜYÜK ZAFERİ GÖR" : "SONRAKİ SEVİYEYE GEÇ (+450 ALTIN)", Green)) Advance();
+                level == 5 ? "BÜYÜK ZAFERİ GÖR" : "SONRAKİ SEVİYEYE GEÇ", Green)) Advance();
         }
 
         private void DrawGameOver(float width, float height)

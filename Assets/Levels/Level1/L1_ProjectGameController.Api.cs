@@ -46,7 +46,8 @@ namespace Jam.Levels.Level1
         public struct ShopEntry
         {
             public string id, title, description;
-            public int cost, mass, unlockLevel;
+            public int cost, mass, unlockLevel, income;
+            public Sprite icon;
             public bool locked, installed, affordable;
         }
 
@@ -65,6 +66,8 @@ namespace Jam.Levels.Level1
                 {
                     id = item.id, title = item.title, description = Description(item),
                     cost = item.cost, mass = item.mass, unlockLevel = item.unlockLevel,
+                    income = item.category == "Mobilya" ? FurnitureIncome(item) : 0,
+                    icon = Icon(item.id),
                     locked = IsLocked(item),
                     installed = item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id),
                     affordable = budget >= item.cost

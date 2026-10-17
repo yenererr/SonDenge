@@ -197,20 +197,41 @@ namespace Jam.Levels.Level1
         private void ShopRow(L1_ProjectGameController.ShopEntry entry)
         {
             var row = UiKit.Rect(shopList, entry.id, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero,
-                new Vector2(0f, 128f));
+                new Vector2(0f, 148f));
             var rowImage = UiKit.Panel(row, entry.installed ? new Color32(226, 240, 210, 255) : UiKit.Cream);
             UiKit.Border(rowImage, entry.installed ? UiKit.Olive : new Color(0.38f, 0.24f, 0.15f, 0.6f), 2f);
-            var title = UiKit.Label(row, "Ad", entry.title, 26, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
-            title.rectTransform.offsetMin = new Vector2(14f, 8f);
-            title.rectTransform.offsetMax = new Vector2(-14f, -8f);
-            var mass = UiKit.Label(row, "Kütle", entry.mass + " kg", 22, UiKit.Ink, TextAnchor.UpperRight);
-            mass.rectTransform.offsetMin = new Vector2(14f, 8f);
-            mass.rectTransform.offsetMax = new Vector2(-14f, -10f);
+            var thumbnail = UiKit.Rect(row, "Eşya görseli çerçevesi", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(96f, 96f));
+            var thumbnailFrame = UiKit.Panel(thumbnail, UiKit.Paper);
+            UiKit.Border(thumbnailFrame, UiKit.Wood, 1f);
+            if (entry.icon != null)
+            {
+                var picture = UiKit.Rect(thumbnail, "Eşya görseli", Vector2.zero, Vector2.one,
+                    new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(-12f, -12f));
+                var image = picture.gameObject.AddComponent<Image>();
+                image.sprite = entry.icon;
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+            }
+            var title = UiKit.Label(row, "Ad", entry.title, 23, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
+            title.rectTransform.offsetMin = new Vector2(122f, 8f);
+            title.rectTransform.offsetMax = new Vector2(-112f, -8f);
+            var massRect = UiKit.Rect(row, "Kütle alanı", new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(1f, 1f), new Vector2(-14f, -8f), new Vector2(94f, 27f));
+            UiKit.Label(massRect, "Kütle", entry.mass + " kg", 19, UiKit.Ink, TextAnchor.UpperRight);
             var description = UiKit.Label(row, "Açıklama", entry.description, 19, new Color(0.3f, 0.22f, 0.16f), TextAnchor.MiddleLeft);
-            description.rectTransform.offsetMin = new Vector2(14f, 40f);
-            description.rectTransform.offsetMax = new Vector2(-14f, -38f);
-            var price = UiKit.Label(row, "Fiyat", entry.cost + " altın", 24, UiKit.Wood, TextAnchor.LowerLeft, FontStyle.Bold);
-            price.rectTransform.offsetMin = new Vector2(14f, 10f);
+            description.rectTransform.offsetMin = new Vector2(122f, 66f);
+            description.rectTransform.offsetMax = new Vector2(-14f, -37f);
+            if (entry.income > 0)
+            {
+                var income = UiKit.Label(row, "Bölüm getirisi", "Korunursa +" + entry.income + " altın",
+                    19, UiKit.Olive, TextAnchor.MiddleLeft, FontStyle.Bold);
+                income.rectTransform.offsetMin = new Vector2(122f, 38f);
+                income.rectTransform.offsetMax = new Vector2(-14f, -87f);
+            }
+            var price = UiKit.Label(row, "Fiyat", entry.cost + " altın", 23, UiKit.Wood, TextAnchor.LowerLeft, FontStyle.Bold);
+            price.rectTransform.offsetMin = new Vector2(122f, 8f);
+            price.rectTransform.offsetMax = new Vector2(-190f, -113f);
             var buttonRect = UiKit.Rect(row, "Al", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f),
                 new Vector2(-12f, 8f), new Vector2(170f, 44f));
             var caption = entry.locked ? entry.unlockLevel + ". BÖLÜMDE" : entry.installed ? "KURULDU ✓" :

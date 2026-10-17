@@ -32,7 +32,6 @@ namespace Jam.Levels.Level1
         public bool nextLevelReady = false;
         [Tooltip("Bu kütle ve üstü 'ağır eşya' sayılır (kg).")]
         public float heavyMassKg = 50f;
-        public int levelCompleteBonus = 450;
 
         [Header("Deprem çantası ve Çök–Kapan–Tutun")]
         [Tooltip("Açıkken marketten alınan deprem çantası karakterin sırtına takılır.")]
@@ -87,6 +86,7 @@ namespace Jam.Levels.Level1
         }
 
         private readonly List<QuakeRecord> quakeRecords = new List<QuakeRecord>();
+        private readonly HashSet<L1_MovableProp> fallenFurniture = new HashSet<L1_MovableProp>();
         private float quakeStartTime, quakePhase;
         private bool levelRewardGiven, houseSurvived;
         private int safetyScore;
@@ -106,7 +106,7 @@ namespace Jam.Levels.Level1
                     item = item,
                     name = PlayerFacingName(item),
                     mass = item.Mass,
-                    value = CatalogCost(item),
+                    value = FurnitureIncome(item),
                     anchored = item.IsAnchored,
                     startX = houseRoot.InverseTransformPoint(item.transform.position).x
                 });
@@ -123,10 +123,16 @@ namespace Jam.Levels.Level1
             return null;
         }
 
-        private static int CatalogCost(L1_MovableProp item)
+        private static int FurnitureIncome(ShopItem entry)
+        {
+            return Mathf.Max(10, Mathf.RoundToInt(entry.cost * 0.45f + entry.mass * 0.65f));
+        }
+
+        private static int FurnitureIncome(L1_MovableProp item)
         {
             var entry = CatalogEntry(item);
-            return entry != null ? entry.cost : Mathf.Max(10, item.Value);
+            return entry != null ? FurnitureIncome(entry) :
+                Mathf.Max(10, Mathf.RoundToInt(item.Value * 0.45f + item.Mass * 0.85f));
         }
 
         /// <summary>Oyuncuya gösterilen Türkçe ad (katalog başlığı; yoksa sahnedeki ad).</summary>
@@ -149,13 +155,40 @@ namespace Jam.Levels.Level1
 
         private void TrackLostFurniture()
         {
+            foreach (var item in furniture)
+            {
+                if (item == null || !item.gameObject.activeInHierarchy || item.Body == null) continue;
+                var local = houseRoot.InverseTransformPoint(item.Body.position);
+                if (local.y < lowestFloorTop - 1.45f || Mathf.Abs(local.x) > roomHalfWidth + 1.47f)
+                    fallenFurniture.Add(item);
+            }
             foreach (var record in quakeRecords)
             {
                 if (record.lost || record.item == null) continue;
-                var local = houseRoot.InverseTransformPoint(record.item.transform.position);
-                // Zeminden düşen ya da evin dışına kayan eşya bir kez kayıp sayılır.
-                if (local.y < lowestFloorTop - 1.45f || Mathf.Abs(local.x) > roomHalfWidth + 1.47f) record.lost = true;
+                if (fallenFurniture.Contains(record.item)) record.lost = true;
             }
+        }
+
+        /// <summary>Only furniture still inside the house pays out; fallen pieces leave the next round.</summary>
+        private (int income, int lostCount) SettleFurnitureIncome()
+        {
+            TrackLostFurniture();
+            var income = 0;
+            var lostCount = 0;
+            for (var i = furniture.Count - 1; i >= 0; i--)
+            {
+                var item = furniture[i];
+                if (item == null) { furniture.RemoveAt(i); continue; }
+                if (!item.gameObject.activeInHierarchy) continue;
+                if (!fallenFurniture.Contains(item)) { income += FurnitureIncome(item); continue; }
+                lostCount++;
+                item.gameObject.SetActive(false);
+                Destroy(item.gameObject);
+                furniture.RemoveAt(i);
+            }
+            fallenFurniture.Clear();
+            budget += income;
+            return (income, lostCount);
         }
 
         private void UpdateQuakeCamera()
@@ -217,7 +250,8 @@ namespace Jam.Levels.Level1
             {
                 levelRewardGiven = true;
                 score += safetyScore;
-                text.AppendLine("Kazanılan para: +" + levelCompleteBonus + " altın (sonraki bölüme aktarılır)");
+                var (income, lostCount) = SettleFurnitureIncome();
+                text.AppendLine("Korunan eşya getirisi: +" + income + " altın  ·  Evden düşen: " + lostCount);
             }
             text.AppendLine();
             text.Append(anchoredHeavy > 0

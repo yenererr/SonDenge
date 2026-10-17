@@ -18370,7 +18370,6 @@ MonoBehaviour:
   nextLevelScene: Level2
   nextLevelReady: 0
   heavyMassKg: 50
-  levelCompleteBonus: 450
   bagOnBack: 1
   bagMassKg: 10
   coverRatioForBonus: 0.5
@@ -18440,7 +18439,7 @@ MonoBehaviour:
   singleFloorLevel: 1
   roomHalfWidth: 5.3
   kitchenUpperFloor: 1
-  absoluteTorque: 1
+  absoluteTorque: 0
   holdFurnitureWhilePlanning: 1
   collapseAngle: 26
   collapseHoldSeconds: 1

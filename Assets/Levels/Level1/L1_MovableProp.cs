@@ -37,15 +37,20 @@ namespace Jam.Levels.Level1
                 ? CollisionDetectionMode.ContinuousSpeculative : normalDetectionMode;
         }
 
-        public void BeginPlacementGrace(float seconds)
+        public void BeginPlacementGrace(float seconds, bool allowPlanningSlide = true)
         {
             placementGraceActive = true;
             placementReleaseTime = Time.time + Mathf.Max(0f, seconds);
-            AllowPlanningSlide = true;
+            AllowPlanningSlide = allowPlanningSlide;
             Body.linearVelocity = Vector3.zero;
             Body.angularVelocity = Vector3.zero;
             Body.isKinematic = true;
             Body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        }
+
+        public void ResetPlanningSlide()
+        {
+            AllowPlanningSlide = false;
         }
 
         private void FixedUpdate()

@@ -146,35 +146,39 @@ namespace Jam.Levels.Level1
             }
             if (resident != null) resident.spawnPosition += houseRoot.up * floorHeight;
 
-            PopulateNewFloor(newTop);
+            var placed = PopulateNewFloor(newTop);
             RefreshFurniture();
             CacheHangingLamps();
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
-            Warn("Ev büyüdü: yeni kat eşyalarıyla birlikte açıldı.");
+            Warn("Ev büyüdü: yeni katta " + placed + " eşya hazır.");
             growing = false;
             marketOpen = true;
         }
 
-        private void PopulateNewFloor(float top)
+        private int PopulateNewFloor(float top)
         {
             string[] items;
             switch (level)
             {
-                case 2: items = new[] { "dining_table", "wooden_barrel" }; break;
-                case 3: items = new[] { "cozy_bed", "bedside_table" }; break;
-                case 4: items = new[] { "bookshelf", "red_armchair" }; break;
-                default: items = new[] { "green_sofa", "coffee_table" }; break;
+                case 2: items = new[] { "dining_table", "wooden_barrel", "red_armchair", "coffee_table" }; break;
+                case 3: items = new[] { "cozy_bed", "bedside_table", "standing_lamp", "wooden_barrel" }; break;
+                case 4: items = new[] { "bookshelf", "red_armchair", "coffee_table", "standing_lamp" }; break;
+                default: items = new[] { "green_sofa", "coffee_table", "wooden_barrel", "standing_lamp" }; break;
             }
+            var positions = new[] { -2.25f, 0f, 2.25f };
+            var placed = 0;
             foreach (var id in items)
             {
                 foreach (var entry in Catalog)
                 {
                     if (entry.id != id) continue;
-                    SpawnFurniture(entry, top);
+                    if (SpawnFurniture(entry, top, positions[Mathf.Min(placed, positions.Length - 1)])) placed++;
                     break;
                 }
+                if (placed == positions.Length) break;
             }
+            return placed;
         }
 
         // Şablon kat (Kat 1) zemin üstü; kopyalar buna göre aşağı kaydırılır.

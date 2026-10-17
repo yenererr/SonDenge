@@ -55,13 +55,13 @@ namespace Jam.Levels.Level1
             new ShopItem("green_sofa", "Adaçayı koltuk", "Mobilya", 150, 1, 60, "MIX — yıpranmış deri kanepe"),
             new ShopItem("red_armchair", "Tekli koltuk", "Mobilya", 90, 1, 35, "StylArts — orta kat tekli koltuk"),
             new ShopItem("coffee_table", "Ahşap sehpa", "Mobilya", 60, 1, 20, "MIX — sehpa"),
-            new ShopItem("bookshelf", "Kitaplık", "Mobilya", 180, 1, 85, "MIX — dokulu kitaplık"),
+            new ShopItem("bookshelf", "Kitaplık", "Mobilya", 200, 1, 85, "MIX — dokulu kitaplık"),
             new ShopItem("refrigerator", "Retro buzdolabı", "Mobilya", 220, 2, 90, "StylArts — buzdolabı"),
             new ShopItem("stove_counter", "Ocak ve fırın", "Mobilya", 190, 2, 75, "StylArts — ocak ve fırın"),
             new ShopItem("dining_table", "Yemek masası", "Mobilya", 130, 2, 50, "Yemek masası"),
-            new ShopItem("wooden_barrel", "Erzak fıçısı", "Mobilya", 80, 2, 40, "Erzak fıçısı"),
+            new ShopItem("wooden_barrel", "Erzak fıçısı", "Mobilya", 100, 2, 40, "Erzak fıçısı"),
             new ShopItem("cozy_bed", "Çift kişilik yatak", "Mobilya", 175, 3, 70, "Realistic Bed 01 — yatak"),
-            new ShopItem("wardrobe", "Gardırop", "Mobilya", 200, 3, 85),
+            new ShopItem("wardrobe", "Gardırop", "Mobilya", 210, 3, 85),
             new ShopItem("bedside_table", "Komodin ve şamdan", "Mobilya", 50, 3, 20, "Komodin"),
             new ShopItem("standing_lamp", "Pirinç lambader", "Mobilya", 45, 1, 15),
             new ShopItem("deprem_cantasi", "Deprem çantası", "Deprem", 80, 1, 10),
@@ -98,7 +98,7 @@ namespace Jam.Levels.Level1
             !(kitchenUpperFloor && item.unlockLevel == 2 && item.category == "Mobilya");
 
         [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
-        public bool absoluteTorque = true;
+        public bool absoluteTorque = false;
         [Tooltip("Hazırlıkta mevcut eşyalar kaymaz; yeni yerleştirilenler 1,5 saniye sonra eğime tepki verir.")]
         public bool holdFurnitureWhilePlanning = true;
         [Tooltip("Devrilme açısı (derece) ve bu açıda kesintisiz kalma süresi (saniye).")]
@@ -113,6 +113,7 @@ namespace Jam.Levels.Level1
         private readonly HashSet<string> equipment = new HashSet<string>();
         private readonly List<FireSpot> fires = new List<FireSpot>();
         private readonly List<L1_MovableProp> furniture = new List<L1_MovableProp>();
+        private readonly Dictionary<string, L1_MovableProp> furnitureTemplates = new Dictionary<string, L1_MovableProp>();
         private readonly List<HangingLamp> hangingLamps = new List<HangingLamp>();
         private PhysicsMaterial looseFurnitureMaterial, mediumFurnitureMaterial, heavyFurnitureMaterial;
         private GameObject foamVisual;
@@ -158,6 +159,7 @@ namespace Jam.Levels.Level1
             SetUpperFloorVisible(false);
             if (drag != null) drag.floorTopsProvider = FloorTops;
             RefreshFurniture();
+            CacheFurnitureTemplates();
             CacheHangingLamps();
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
@@ -208,6 +210,25 @@ namespace Jam.Levels.Level1
                 }
                 if (item.Body != null) item.Body.linearDamping = 0.85f;
                 if (item.gameObject.activeInHierarchy) item.AllowFallAtEdges(houseRoot);
+            }
+        }
+
+        private void CacheFurnitureTemplates()
+        {
+            var root = new GameObject("Mobilya model şablonları");
+            root.transform.SetParent(transform, false);
+            root.SetActive(false);
+            foreach (var entry in Catalog)
+            {
+                if (entry.category != "Mobilya" || entry.template == null) continue;
+                foreach (var item in furniture)
+                {
+                    if (item == null || item.displayName == null || !item.displayName.Contains(entry.template)) continue;
+                    var copy = Instantiate(item.gameObject, root.transform).GetComponent<L1_MovableProp>();
+                    copy.name = entry.title + " model şablonu";
+                    furnitureTemplates[entry.id] = copy;
+                    break;
+                }
             }
         }
 
@@ -338,14 +359,15 @@ namespace Jam.Levels.Level1
         private void FixedUpdate()
         {
             if (balancePivot == null || houseRoot == null || state == RoundState.StartMenu ||
-                state == RoundState.Report || state == RoundState.GameOver || state == RoundState.Victory || menuOpen || howToOpen) return;
+                state == RoundState.Report || state == RoundState.GameOver || state == RoundState.Victory ||
+                growing || menuOpen || howToOpen) return;
+            TrackLostFurniture();
             var disturbance = 0f;
             var quake = 0f;
             if (state == RoundState.Disaster && level == 1)
             {
                 quake = QuakeAcceleration();
                 disturbance = quake * quakeTiltPerAcceleration;
-                TrackLostFurniture();
             }
             else if (state == RoundState.Disaster && level == 2)
                 disturbance = (equipment.Contains("storm_brace") ? 0.012f : 0.035f) * (1f + Mathf.Sin(Time.time * 1.3f));
@@ -583,6 +605,8 @@ namespace Jam.Levels.Level1
                 (equipment.Contains("drainage_channel") ? "✓" : "–") + " / " +
                 (equipment.Contains("water_pump") ? "✓" : "–");
             report += "\n+" + points + " bonus puan";
+            var (income, lostCount) = SettleFurnitureIncome();
+            report += "\nKorunan eşya getirisi: +" + income + " altın  |  Kaybedilen: " + lostCount;
             SetMusic(planningMusic);
             SetState(RoundState.Report);
             if (sfx != null) sfx.Play("level");
@@ -594,13 +618,14 @@ namespace Jam.Levels.Level1
             if (level == 5) { score += 1500 + budget * 3; SetState(RoundState.Victory); if (sfx != null) sfx.Play("victory"); return; }
             foreach (var item in furniture)
             {
-                if (item == null || !item.IsAnchored) continue;
+                if (item == null) continue;
+                item.ResetPlanningSlide();
+                if (!item.IsAnchored) continue;
                 item.SetAnchored(false);
                 RefreshAnchorVisual(item);
             }
             score += 500 + budget;
             level++;
-            budget += 450;
             timer = 45f;
             maxTilt = 0f;
             houseAngle = angularVelocity = 0f;
@@ -774,14 +799,14 @@ namespace Jam.Levels.Level1
             if (sfx != null) sfx.Play("purchase");
         }
 
-        private bool SpawnFurniture(ShopItem item, float? requiredFloorTop = null)
+        private bool SpawnFurniture(ShopItem item, float? requiredFloorTop = null, float? preferredX = null)
         {
-            if (item.template == null) return SpawnSpriteFurniture(item, requiredFloorTop);
-            L1_MovableProp source = null;
-            foreach (var prop in furniture)
-                if (prop.displayName != null && prop.displayName.Contains(item.template)) { source = prop; break; }
-            if (source == null) return SpawnSpriteFurniture(item, requiredFloorTop);
-            var clone = Instantiate(source.gameObject, source.transform.parent);
+            if (item.template == null) return SpawnSpriteFurniture(item, requiredFloorTop, preferredX);
+            furnitureTemplates.TryGetValue(item.id, out var source);
+            if (source == null) return SpawnSpriteFurniture(item, requiredFloorTop, preferredX);
+            var parent = houseRoot.Find("Bağımsız 3D mobilyalar");
+            if (parent == null) parent = houseRoot;
+            var clone = Instantiate(source.gameObject, parent);
             clone.SetActive(true);
             clone.name = item.title + " (market)";
             var movable = clone.GetComponent<L1_MovableProp>();
@@ -796,19 +821,19 @@ namespace Jam.Levels.Level1
             body.angularVelocity = Vector3.zero;
             var box = clone.GetComponent<BoxCollider>();
             var start = source.transform.localPosition;
-            if (!FindSpawnPosition(box, requiredFloorTop, out var floorTop, out var x))
+            if (!FindSpawnPosition(box, requiredFloorTop, preferredX, out var floorTop, out var x))
             { clone.SetActive(false); Destroy(clone); return false; }
             var floorY = floorTop + box.size.y * 0.5f + 0.03f;
             clone.transform.localPosition = new Vector3(x, floorY, start.z);
             // Kopya, kaynağın Rigidbody konumunu taşır; fizik onu eski yere geri yazmasın.
             body.position = clone.transform.position;
             body.rotation = clone.transform.rotation;
-            movable.BeginPlacementGrace(1.5f);
+            movable.BeginPlacementGrace(requiredFloorTop.HasValue ? 2f : 1.5f, !requiredFloorTop.HasValue);
             Physics.SyncTransforms();
             return true;
         }
 
-        private bool SpawnSpriteFurniture(ShopItem item, float? requiredFloorTop = null)
+        private bool SpawnSpriteFurniture(ShopItem item, float? requiredFloorTop = null, float? preferredX = null)
         {
             var sprite = Icon(item.id);
             if (sprite == null) return false;
@@ -822,7 +847,7 @@ namespace Jam.Levels.Level1
             root.transform.SetParent(parent, false);
             var box = root.AddComponent<BoxCollider>();
             box.size = size;
-            if (!FindSpawnPosition(box, requiredFloorTop, out var floorTop, out var x))
+            if (!FindSpawnPosition(box, requiredFloorTop, preferredX, out var floorTop, out var x))
             { root.SetActive(false); Destroy(root); return false; }
             root.transform.localPosition = new Vector3(x, floorTop + size.y * 0.5f + 0.03f, 0.25f);
             var body = root.AddComponent<Rigidbody>();
@@ -840,12 +865,13 @@ namespace Jam.Levels.Level1
             movable.displayName = item.title;
             movable.itemId = item.id + "-" + Time.frameCount;
             movable.balanceMassKg = item.mass;
-            movable.BeginPlacementGrace(1.5f);
+            movable.BeginPlacementGrace(requiredFloorTop.HasValue ? 2f : 1.5f, !requiredFloorTop.HasValue);
             Physics.SyncTransforms();
             return true;
         }
 
-        private bool FindSpawnPosition(BoxCollider box, float? requiredFloorTop, out float floorTop, out float x)
+        private bool FindSpawnPosition(BoxCollider box, float? requiredFloorTop, float? preferredX,
+            out float floorTop, out float x)
         {
             var tops = FloorTops();
             var first = requiredFloorTop.HasValue ? 0 : UnityEngine.Random.Range(0, tops.Length);
@@ -854,7 +880,7 @@ namespace Jam.Levels.Level1
             {
                 var top = requiredFloorTop ?? tops[(first + i) % tops.Length];
                 var centerY = top + box.size.y * 0.5f + 0.03f;
-                if (!FindFreePosition(box, centerY, out x)) continue;
+                if (!FindFreePosition(box, centerY, preferredX, out x)) continue;
                 floorTop = top;
                 return true;
             }
@@ -863,12 +889,16 @@ namespace Jam.Levels.Level1
             return false;
         }
 
-        private bool FindFreePosition(BoxCollider box, float localY, out float result)
+        private bool FindFreePosition(BoxCollider box, float localY, float? preferredX, out float result)
         {
             // The source game spawns purchases near the center and alternates
             // sides. Edge-first spawning made a newly bought heavy item create
             // a large balance impulse before the player could reposition it.
-            var tries = new[] { 0f, 0.4f, -0.4f, 1f, -1f, 1.6f, -1.6f, 2.2f, -2.2f, 2.8f, -2.8f, 3.4f, -3.4f, 3.9f, -3.9f };
+            var center = preferredX ?? 0f;
+            var tries = preferredX.HasValue
+                ? new[] { center, center + 0.5f, center - 0.5f, center + 1f, center - 1f,
+                    0f, 1.6f, -1.6f, 2.8f, -2.8f, 3.7f, -3.7f }
+                : new[] { 0f, 0.4f, -0.4f, 1f, -1f, 1.6f, -1.6f, 2.2f, -2.2f, 2.8f, -2.8f, 3.4f, -3.4f, 3.9f, -3.9f };
             var rotation = box.transform.rotation;
             var scale = box.transform.lossyScale;
             var half = Vector3.Scale(box.size * 0.5f,
