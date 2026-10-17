@@ -15,6 +15,7 @@ namespace Jam.Levels.Level1
         private const string Tavern = "Assets/Low Poly Tarvern Pack/Prefabs/Probs/";
         private const string Decor = "Assets/3Digitalis/LowPolyInteriorPropsPack/Prefabs/";
         private const string StylArts = "Assets/StylArts/StylizedHouseInterior/Level1/";
+        private const string Farm = "Assets/FarmHouse/Models/SM_FarmHouse_";
         private static Material wood, lightWood, plaster, iron, stone, olive, cream, glow, tile;
         private static Mesh beamMesh;
         private static Mesh salvagedBoards;
@@ -22,6 +23,8 @@ namespace Jam.Levels.Level1
         private static Material mixSofaMaterial, mixBookshelfMaterial;
         private static Material stylArtsTvMaterial, stylArtsFridgeMaterial, stylArtsBathMaterial, stylArtsStoveMaterial;
         private static Material stylArtsKitchenMaterial, stylArtsChairMaterial;
+        private static Material farmMaterial;
+        private static Material realisticBedMaterial;
         private static int meshIndex;
         private static Transform house;
         private static readonly float[] Floors = { -1.15f, 1.1f, 3.35f };
@@ -40,15 +43,18 @@ namespace Jam.Levels.Level1
             Folder(RootPath + "Meshes");
             wood = Mat("L1_3D_WornOak", new Color(.74f,.51f,.31f), true);
             lightWood = Mat("L1_3D_HoneyOak", new Color(.95f,.76f,.48f), true);
-            plaster = Mat("L1_3D_AgedPlaster", new Color(.83f,.74f,.59f));
+            plaster = Mat("L1_3D_AgedPlaster", new Color(.97f,.89f,.77f));
             plaster.SetTexture("_BaseMap", PlasterTexture());
+            plaster.SetColor("_EmissionColor",new Color(.16f,.12f,.085f));
+            plaster.EnableKeyword("_EMISSION");
+            EditorUtility.SetDirty(plaster);
             iron = Mat("L1_3D_BlackIron", new Color(.11f,.10f,.085f));
             stone = Mat("L1_3D_OldStone", new Color(.36f,.34f,.29f));
             olive = Mat("L1_3D_Olive", new Color(.24f,.31f,.15f));
             cream = Mat("L1_3D_Linen", new Color(.83f,.72f,.48f));
             tile = Mat("L1_3D_Clay", new Color(.40f,.16f,.075f), true);
             glow = Mat("L1_3D_LanternGlow", new Color(1,.62f,.18f));
-            glow.EnableKeyword("_EMISSION"); glow.SetColor("_EmissionColor",new Color(3,1.25f,.25f));
+            glow.EnableKeyword("_EMISSION"); glow.SetColor("_EmissionColor",new Color(1.2f,.46f,.05f));
             EditorUtility.SetDirty(glow);
             mixSofaMaterial = MixPbrMaterial("L1_MIX_BigSofa_URP", "Assets/ZNS3D/Mix_Furniture_Pack/Textures/Big_Sofa_1", "big_sofa_big_sofa");
             mixBookshelfMaterial = MixPbrMaterial("L1_MIX_Bookshelf_URP", "Assets/ZNS3D/Mix_Furniture_Pack/Textures/Bookshelf_1", "bookshelf_Mat_Bookshelf_1");
@@ -58,6 +64,8 @@ namespace Jam.Levels.Level1
             stylArtsStoveMaterial = StylArtsMaterial("L1_StylArts_Stove_URP",Color.white,"T_Stove_A_D.TGA","T_Stove_A_N.TGA");
             stylArtsKitchenMaterial = StylArtsMaterial("L1_StylArts_Kitchen_URP",Color.white,"T_Kitchen_Mat_D.TGA","T_Kitchen_Mat_N.TGA");
             stylArtsChairMaterial = StylArtsMaterial("L1_StylArts_Chair_URP",Color.white,"T_LeatherCouch_BC.TGA","T_LeatherCouch_N.TGA");
+            farmMaterial = FarmMaterial();
+            realisticBedMaterial = RealisticBedMaterial();
             beamMesh = CreateBeam(); PrepareSalvagedBoards(); meshIndex = 0;
             foreach (var root in EditorSceneManager.GetActiveScene().GetRootGameObjects())
                 if (root.name == "[L1] World Visuals" || root.name.StartsWith("[L1] Asset Review"))
@@ -78,7 +86,7 @@ namespace Jam.Levels.Level1
             var resident=house.GetComponentInChildren<L1_ResidentController>();
             resident.spawnPosition=resident.transform.position;
             var camera = Root("Main Camera").GetComponent<Camera>();
-            camera.transform.SetPositionAndRotation(new Vector3(0,2,-14),Quaternion.identity);
+            camera.transform.SetPositionAndRotation(new Vector3(0,3,-14),Quaternion.Euler(4,0,0));
             camera.orthographic=false; camera.fieldOfView=40;
             var controls = Node(world,"Eşya taşıma").gameObject.AddComponent<L1_PropDrag>();
             controls.sceneCamera=camera;
@@ -113,6 +121,9 @@ namespace Jam.Levels.Level1
                 float front=level>0 && Mathf.Abs(x-hatchX)<.44f ? -.25f : -1.15f;
                 Beam(floor,"Aşınmış döşeme tahtası",new Vector3(x,y-.07f,front),new Vector3(x+.015f*Mathf.Sin(i),y-.07f,1.2f),.13f,.29f,i%3==0?wood:lightWood);
             }
+            // Real kitbash terrace meshes give the cutaway floors uneven plank edges and atlas wood grain.
+            FarmPart(floor,"FarmHouse — sol ahşap döşeme","Terrace_4M_001",new Vector3(-1.7f,y-.055f,.03f),new Vector3(3.3f,.12f,2.47f));
+            FarmPart(floor,"FarmHouse — sağ ahşap döşeme","Terrace_4M_001",new Vector3(1.7f,y-.055f,.03f),new Vector3(3.3f,.12f,2.47f));
             Beam(floor,"Kalın ön döşeme kirişi",new Vector3(-3.5f,y-.17f,-1.24f),new Vector3(3.5f,y-.13f,-1.24f),.22f,.30f,wood);
             Beam(floor,"Arka döşeme kirişi",new Vector3(-3.4f,y-.15f,1.2f),new Vector3(3.4f,y-.15f,1.2f),.23f,.26f,wood);
             SalvagedPatch(floor,new Vector3(-2.1f,y+.004f,.50f),new Vector3(2.1f,.045f,1.30f));
@@ -142,6 +153,14 @@ namespace Jam.Levels.Level1
             Beam(back,"Pencere dikmesi",new Vector3(windowX,y+.58f,1.03f),new Vector3(windowX,y+1.97f,1.03f),.045f,.065f,lightWood);
             Beam(back,"Pencere çaprazı",new Vector3(windowX-.5f,y+1.18f,1.03f),new Vector3(windowX+.5f,y+1.18f,1.03f),.04f,.065f,lightWood);
             Beam(back,"Pencere pervazı",new Vector3(windowX-.65f,y+.55f,.99f),new Vector3(windowX+.65f,y+.55f,.99f),.12f,.28f,wood);
+            // FarmHouse wall and opening modules sit in front of the structural back wall.
+            FarmPart(back,"FarmHouse — sol yıpranmış duvar","Wall_1m_2m_A_001",new Vector3(-3.04f,y+1.10f,1.01f),new Vector3(.53f,2.15f,.22f));
+            FarmPart(back,"FarmHouse — ana yıpranmış duvar","Wall_4m_2m_A_001",new Vector3(.015f,y+1.10f,1.01f),new Vector3(3.32f,2.15f,.22f));
+            FarmPart(back,"FarmHouse — sağ yıpranmış duvar","Wall_1m_2m_D_001",new Vector3(3.23f,y+1.10f,1.01f),new Vector3(.34f,2.15f,.22f));
+            FarmPlaster(back,"FarmHouse — dökülen geniş sıva","Plaster_Tile_010",new Vector3(.03f,y+1.11f,.875f),new Vector2(3.06f,1.82f));
+            FarmPlaster(back,"FarmHouse — pencere yanı sıva","Plaster_Tile_Main_001",new Vector3(-3.03f,y+1.04f,.875f),new Vector2(.38f,1.75f));
+            FarmPart(back,"FarmHouse — kalın ahşap pencere kemeri","WoodenArch_2m_001",new Vector3(windowX,y+1.31f,.92f),new Vector3(1.12f,1.55f,.25f));
+            FarmPart(back,"FarmHouse — aşınmış taş duvar eteği","StoneBlocks_Front_2m_66_7cm_001",new Vector3(level==1?.45f:-.25f,y+.15f,.815f),new Vector3(1.52f,.28f,.10f));
             // Worn timber dado, masonry and cracks break up the plaster.
             for(int row=0;row<2;row++) for(int i=0;i<20;i++)
             {
@@ -160,8 +179,11 @@ namespace Jam.Levels.Level1
             {
                 float x=s*3.26f;
                 Beam(floor,"Eğri ana ahşap direk",new Vector3(x,y-.25f,-.95f),new Vector3(x+s*.07f,y+2.20f,-.91f),.22f,.25f,wood);
+                FarmTimber(floor,"FarmHouse — eğri ön taşıyıcı","WoodBeam_Dark_4m_A_001",new Vector3(x,y-.25f,-1.03f),new Vector3(x+s*.07f,y+2.20f,-1.00f),.29f);
                 Beam(floor,"Arka ana direk",new Vector3(x,y,1.08f),new Vector3(x+s*.05f,y+2.22f,1.08f),.19f,.23f,wood);
+                FarmTimber(floor,"FarmHouse — arka direk","WoodBeam_Bright_4m_B_001",new Vector3(x,y,1.00f),new Vector3(x+s*.05f,y+2.22f,1.00f),.20f);
                 Beam(floor,"Çapraz ahşap payanda",new Vector3(x,y+.2f,-.92f),new Vector3(x-s*.51f,y+.84f,-.92f),.13f,.15f,lightWood);
+                FarmTimber(floor,"FarmHouse — çapraz payanda","WallBeam_2m_001",new Vector3(x,y+.2f,-1.035f),new Vector3(x-s*.51f,y+.84f,-1.035f),.15f);
                 Beam(floor,"Tavan köşe desteği",new Vector3(x,y+1.62f,-.92f),new Vector3(x-s*.58f,y+2.15f,-.92f),.13f,.15f,wood);
                 Stud(floor,new Vector3(x,y+.22f,-1.08f));
                 var wall=Node(floor,"Yan duvar çarpışması");wall.localPosition=new Vector3(s*3.47f,y+1.1f,.1f);
@@ -171,6 +193,7 @@ namespace Jam.Levels.Level1
             }
             Beam(back,"Yatay duvar ahşabı",new Vector3(-1.55f,y+1.25f,1.03f),new Vector3(3.28f,y+1.29f,1.03f),.085f,.10f,wood);
             Door(back,2.50f,y+.03f);
+            FarmPart(back,"FarmHouse — masif ahşap kapı","Door_A_001",new Vector3(2.50f,y+1.05f,.90f),new Vector3(1.02f,2.0f,.18f));
             for(int l=0;l<2;l++) Lamp(floor,new Vector3(l==0?-.5f:2.1f,y+1.77f,.25f));
             if(level!=1)
             {
@@ -183,13 +206,19 @@ namespace Jam.Levels.Level1
         private static void BuildRoof()
         {
             var roof=Node(house,"Asimetrik kiremit çatı");
-            for(int row=0;row<4;row++) for(int i=0;i<24;i++)
+            for(int row=0;row<8;row++)for(int i=0;i<19;i++)
             {
-                float x=-3.58f+i*.31f;
-                float y=5.42f+(x+3.58f)*.145f;
-                Beam(roof,"Düzensiz kil kiremit",new Vector3(x,y+row*.045f,-1.35f+row*.66f),new Vector3(x+.012f,y+row*.045f,-.58f+row*.66f),.09f,.34f,i%4==0?wood:tile);
+                float x=-3.56f+i*.40f+(row%2)*.13f;
+                float y=5.36f+(x+3.58f)*.145f;
+                FarmPart(roof,"FarmHouse — ayrı kiremit " + row + " / " + i,
+                    (i+row)%3==0?"Roof_Top_Shingle_A_001":(i+row)%3==1?"Roof_Top_Shingle_B_001":"Roof_Top_Shingle_C_001",
+                    new Vector3(x,y+.03f+row*.065f,-1.48f+row*.37f),new Vector3(.42f,.19f,.39f));
             }
             Beam(roof,"Eğimli ön çatı saçağı",new Vector3(-3.8f,5.36f,-1.45f),new Vector3(3.8f,6.46f,-1.45f),.23f,.30f,wood);
+            for(int i=0;i<2;i++)
+                FarmTimber(roof,"FarmHouse — eğri mahya kirişi","TopRoofBeam_4m_A_001",
+                    new Vector3(-3.75f+i*3.75f,5.34f+i*.55f,-1.51f),
+                    new Vector3(0f+i*3.75f,5.89f+i*.55f,-1.51f),.28f);
             Beam(roof,"İç çatı kirişi",new Vector3(-3.7f,5.23f,-1.01f),new Vector3(3.7f,6.30f,-1.01f),.14f,.18f,lightWood);
             for(int i=0;i<10;i++)
             {
@@ -200,8 +229,7 @@ namespace Jam.Levels.Level1
             Polygon(roof,"Üst çatı sıvası",verts,plaster);
             Beam(roof,"Çatıya uzanan sağ direk",new Vector3(3.33f,5.35f,-.91f),new Vector3(3.35f,6.28f,-.91f),.22f,.25f,wood);
             Beam(roof,"Üst çatı duvar çaprazı",new Vector3(-.1f,5.55f,1.04f),new Vector3(2.5f,6.22f,1.04f),.10f,.12f,wood);
-            Prop(Doll+"01_Structure/SM_LPI_Struct_Column_01.prefab",roof,"Baca",new Vector3(-2.6f,6.15f,.7f),new Vector3(.42f,1.1f,.45f),stone);
-            for(int row=0;row<6;row++) Beam(roof,"Baca tuğla sırası",new Vector3(-2.88f,5.7f+row*.18f,.7f),new Vector3(-2.32f,5.7f+row*.18f,.7f),.13f,.56f,stone);
+            FarmPart(roof,"FarmHouse — taş baca","Chimney_001",new Vector3(-2.6f,6.19f,.70f),new Vector3(.52f,1.25f,.52f),false);
         }
 
         private static void BuildBalcony()
@@ -215,11 +243,16 @@ namespace Jam.Levels.Level1
                 Beam(balcony,"Balkon küpeştesi",new Vector3(3.28f,y+.7f,-1.28f),new Vector3(4.12f,y+.74f,-1.28f),.08f,.10f,wood);
                 Prop("Assets/EmaceArt/Fences 2026/Prefabs/Fence/Beam/PRE/EA03_Fence_Beam_01a_PRE.prefab",balcony,"Roadside eski ahşap korkuluk",new Vector3(3.75f,y+.36f,-1.2f),new Vector3(.85f,.70f,.14f));
                 Beam(balcony,"Balkon payandası",new Vector3(3.25f,y-.8f,-.4f),new Vector3(4,y-.12f,-.4f),.14f,.16f,wood);
+                FarmTimber(balcony,"FarmHouse — balkon çaprazı","WoodBeam_Bright_4m_B_001",new Vector3(3.25f,y-.72f,-.55f),new Vector3(4.12f,y-.10f,-.55f),.16f);
             }
+            FarmPart(balcony,"FarmHouse — balkon fıçısı","Barrel_001",new Vector3(3.72f,Floors[1]+.37f,.09f),new Vector3(.46f,.70f,.46f));
+            FarmPart(balcony,"FarmHouse — çatı saksısı","FlowerPot_A_001",new Vector3(3.74f,Floors[2]+.18f,.10f),new Vector3(.32f,.35f,.32f));
             Beam(balcony,"Vinç kolu",new Vector3(3.12f,5.45f,.2f),new Vector3(4.55f,5.7f,.2f),.16f,.2f,wood);
             Beam(balcony,"Vinç çaprazı",new Vector3(3.25f,4.6f,.2f),new Vector3(4.4f,5.65f,.2f),.12f,.15f,wood);
-            Beam(balcony,"Vinç halatı",new Vector3(4.5f,5.7f,.2f),new Vector3(4.5f,4.45f,.2f),.024f,.024f,iron);
-            Prop(Tavern+"Wooden Chest.prefab",balcony,"Vinçte asılı sandık",new Vector3(4.5f,4.22f,.2f),new Vector3(.6f,.48f,.48f));
+            FarmTimber(balcony,"FarmHouse — eğri vinç kolu","WoodBeam_Dark_4m_D_001",new Vector3(3.12f,5.45f,.08f),new Vector3(4.78f,5.77f,.08f),.23f);
+            FarmTimber(balcony,"FarmHouse — vinç desteği","WoodBeam_Bright_4m_A_001",new Vector3(3.25f,4.62f,.08f),new Vector3(4.63f,5.72f,.08f),.16f);
+            Beam(balcony,"Vinç halatı",new Vector3(4.72f,5.77f,.08f),new Vector3(4.72f,4.50f,.08f),.024f,.024f,iron);
+            FarmPart(balcony,"FarmHouse — asılı kargo sandığı","Crate_001",new Vector3(4.72f,4.26f,.08f),new Vector3(.74f,.55f,.68f));
         }
 
         private static void DressRooms()
@@ -245,8 +278,7 @@ namespace Jam.Levels.Level1
             Movable(StylArts+"Meshes/SM_LeatherCouch.fbx",p,"StylArts — orta kat tekli koltuk",2.62f,1,new Vector3(.92f,.82f,.72f),2,stylArtsChairMaterial);
             Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/tea_table.fbx",p,"MIX — sehpa",.12f,1,new Vector3(.60f,.46f,.54f),2,lightWood);
             Movable(StylArts+"Meshes/SM_TVSet.fbx",p,"StylArts — eski televizyon",.86f,1,new Vector3(1.03f,.80f,.53f),3,stylArtsTvMaterial);
-            var bed=Movable(Doll+"07_Bedroom/SM_LPI_Bed_Double_01.prefab",p,"Ahşap yatak",-2.1f,2,new Vector3(1.65f,.72f,.9f),4);
-            Prop(Doll+"16_Textiles/SM_LPI_Text_Throw_01.prefab",bed,"Yatak örtüsü",new Vector3(.1f,.10f,-.02f),new Vector3(1.05f,.09f,.72f),olive);
+            Movable("Assets/Realistic_Bed/Prefab/Bed_Prefab.prefab",p,"Realistic Bed 01 — yatak",-2.1f,2,new Vector3(1.75f,.78f,1.02f),4,realisticBedMaterial,Quaternion.Euler(0,90,0));
             Movable(Doll+"07_Bedroom/SM_LPI_Bed_Nightstand_01.prefab",p,"Komodin",-.65f,2,new Vector3(.5f,.57f,.45f),1);
             var bookcase=Movable("Assets/ZNS3D/Mix_Furniture_Pack/Meshes/bookshelf.fbx",p,"MIX — dokulu kitaplık",1.3f,2,new Vector3(.95f,1.48f,.48f),4,mixBookshelfMaterial);
             bookcase.localRotation=Quaternion.Euler(0,180,0);
@@ -259,10 +291,10 @@ namespace Jam.Levels.Level1
             }
         }
 
-        private static Transform Movable(string path,Transform parent,string name,float x,int floor,Vector3 size,float mass,Material material=null)
+        private static Transform Movable(string path,Transform parent,string name,float x,int floor,Vector3 size,float mass,Material material=null,Quaternion? modelRotation=null)
         {
             var root=Node(parent,name);root.localPosition=new Vector3(x,Floors[floor]+size.y*.5f+.03f,.25f);
-            Prop(path,root,"Model",Vector3.zero,size,material);
+            Prop(path,root,"Model",Vector3.zero,size,material,modelRotation);
             var box=root.gameObject.AddComponent<BoxCollider>();box.size=size;
             var body=root.gameObject.AddComponent<Rigidbody>();body.mass=mass;body.interpolation=RigidbodyInterpolation.Interpolate;
             body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;body.linearDamping=.7f;body.angularDamping=2f;
@@ -275,7 +307,7 @@ namespace Jam.Levels.Level1
         {
             float low=Floors[level],high=Floors[level+1];
             var root=Node(house,name);
-            Prop(Doll+"20_Utility/SM_LPI_Util_Ladder_01.prefab",root,"Gerçek ahşap merdiven modeli",new Vector3(x,(low+high)*.5f,-.66f),new Vector3(.55f,2.4f,.18f),wood);
+            FarmPart(root,"FarmHouse — gerçek ahşap merdiven","Ladder_2m_001",new Vector3(x,(low+high)*.5f,-.66f),new Vector3(.62f,2.4f,.17f));
             var route=root.gameObject.AddComponent<L1_ClimbRoute>();
             route.bottom=Node(root,"Alt giriş");route.bottom.position=new Vector3(x,low+.43f,-.96f);
             route.top=Node(root,"Üst giriş");route.top.position=new Vector3(x,high+.43f,-.96f);
@@ -321,7 +353,7 @@ namespace Jam.Levels.Level1
             Beam(lamp,"Fener askısı",new Vector3(0,.19f,-.05f),new Vector3(0,.42f,-.05f),.018f,.018f,iron);
             Ellipsoid(lamp,"Amber ışık çekirdeği",new Vector3(0,-.04f,-.05f),new Vector3(.09f,.17f,.09f),glow);
             var light=Node(lamp,"Sıcak fener ışığı").gameObject.AddComponent<Light>();
-            light.transform.localPosition=new Vector3(0,-.06f,-.28f);light.type=LightType.Point;light.color=new Color(1,.65f,.34f);light.intensity=1.25f;light.range=3.1f;light.shadows=LightShadows.None;
+            light.transform.localPosition=new Vector3(0,-.06f,-.28f);light.type=LightType.Point;light.color=new Color(1,.55f,.24f);light.intensity=1.10f;light.range=3.1f;light.shadows=LightShadows.None;
         }
 
         private static void Door(Transform parent,float x,float y)
@@ -395,10 +427,10 @@ namespace Jam.Levels.Level1
         }
         private static void Stud(Transform parent,Vector3 pos)=>Ellipsoid(parent,"Dövme demir çivi",pos,new Vector3(.065f,.065f,.035f),iron);
 
-        private static GameObject Prop(string path,Transform parent,string name,Vector3 center,Vector3 size,Material material=null)
+        private static GameObject Prop(string path,Transform parent,string name,Vector3 center,Vector3 size,Material material=null,Quaternion? modelRotation=null)
         {
             var source=AssetDatabase.LoadAssetAtPath<GameObject>(path);if(source==null)throw new InvalidOperationException(path);
-            var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,parent);instance.name=name;instance.transform.localPosition=Vector3.zero;instance.transform.localRotation=Quaternion.identity;instance.transform.localScale=Vector3.one;
+            var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,parent);instance.name=name;instance.transform.localPosition=Vector3.zero;instance.transform.localRotation=modelRotation??Quaternion.identity;instance.transform.localScale=Vector3.one;
             foreach(var c in instance.GetComponentsInChildren<Collider>()) c.enabled=false;
             var renderers=instance.GetComponentsInChildren<Renderer>();
             bool isStylArts=path.StartsWith(StylArts,StringComparison.Ordinal);
@@ -412,7 +444,9 @@ namespace Jam.Levels.Level1
             if(sizeRenderer==null)throw new InvalidOperationException("Görünür model bulunamadı: "+path);
             var bounds=sizeRenderer.bounds;
             if(!isStylArts)foreach(var r in renderers)bounds.Encapsulate(r.bounds);
-            instance.transform.localScale=new Vector3(size.x/Mathf.Max(.001f,bounds.size.x),size.y/Mathf.Max(.001f,bounds.size.y),size.z/Mathf.Max(.001f,bounds.size.z));
+            instance.transform.localScale=modelRotation.HasValue
+                ?new Vector3(size.z/Mathf.Max(.001f,bounds.size.z),size.y/Mathf.Max(.001f,bounds.size.y),size.x/Mathf.Max(.001f,bounds.size.x))
+                :new Vector3(size.x/Mathf.Max(.001f,bounds.size.x),size.y/Mathf.Max(.001f,bounds.size.y),size.z/Mathf.Max(.001f,bounds.size.z));
             bounds=sizeRenderer.bounds;
             if(!isStylArts)foreach(var r in renderers)bounds.Encapsulate(r.bounds);
             instance.transform.position+=parent.TransformPoint(center)-bounds.center;
@@ -424,6 +458,115 @@ namespace Jam.Levels.Level1
                 group.SetLODs(lods);group.RecalculateBounds();
             }
             return instance;
+        }
+
+        private static Material FarmMaterial()
+        {
+            var material=Mat("L1_FarmHouse_Atlas_URP",new Color(.84f,.77f,.69f));
+            var baseMap=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/FarmHouse/T_BC.PNG");
+            var normalPath="Assets/FarmHouse/T_NM.PNG";
+            var normalImporter=AssetImporter.GetAtPath(normalPath) as TextureImporter;
+            if(normalImporter!=null && normalImporter.textureType!=TextureImporterType.NormalMap)
+            { normalImporter.textureType=TextureImporterType.NormalMap;normalImporter.SaveAndReimport(); }
+            var normal=AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
+            if(baseMap==null || normal==null)throw new InvalidOperationException("FarmHouse atlas dokuları bulunamadı.");
+            material.SetTexture("_BaseMap",baseMap);
+            material.SetTexture("_BumpMap",normal);
+            material.SetFloat("_BumpScale",.75f);
+            material.SetFloat("_Metallic",0);
+            material.SetFloat("_Smoothness",.12f);
+            material.EnableKeyword("_NORMALMAP");
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+
+        private static Material RealisticBedMaterial()
+        {
+            const string textures="Assets/Realistic_Bed/Bed/Textures/";
+            var baseMap=AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"bed1_bed_mat_AlbedoTransparency.png");
+            var normal=AssetDatabase.LoadAssetAtPath<Texture2D>(textures+"bed1_bed_mat_Normal.png");
+            if(baseMap==null || normal==null)throw new InvalidOperationException("Realistic Bed 01 dokuları bulunamadı.");
+            var material=Mat("L1_RealisticBed01_URP",Color.white);
+            material.SetTexture("_BaseMap",baseMap);
+            material.SetTexture("_BumpMap",normal);
+            material.SetFloat("_BumpScale",.70f);
+            material.SetFloat("_Metallic",0);
+            material.SetFloat("_Smoothness",.18f);
+            material.EnableKeyword("_NORMALMAP");
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+
+        private static GameObject FarmPart(Transform parent,string name,string model,Vector3 center,Vector3 size,bool turnToFaceCamera=true)
+        {
+            var path=Farm+model+".FBX";
+            var source=AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if(source==null)throw new InvalidOperationException("FarmHouse modeli bulunamadı: "+path);
+            var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,parent);
+            instance.name=name;
+            instance.transform.localPosition=Vector3.zero;
+            instance.transform.localScale=Vector3.one;
+            instance.transform.localRotation=(turnToFaceCamera?Quaternion.Euler(0,90,0):Quaternion.identity)*source.transform.localRotation;
+            foreach(var collider in instance.GetComponentsInChildren<Collider>())collider.enabled=false;
+            var renderers=instance.GetComponentsInChildren<Renderer>();
+            if(renderers.Length==0)throw new InvalidOperationException("FarmHouse mesh görünmüyor: "+path);
+            var bounds=renderers[0].bounds;
+            foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+            instance.transform.localScale=turnToFaceCamera
+                ?new Vector3(size.z/Mathf.Max(.001f,bounds.size.z),size.x/Mathf.Max(.001f,bounds.size.x),size.y/Mathf.Max(.001f,bounds.size.y))
+                :new Vector3(size.x/Mathf.Max(.001f,bounds.size.x),size.z/Mathf.Max(.001f,bounds.size.z),size.y/Mathf.Max(.001f,bounds.size.y));
+            bounds=renderers[0].bounds;
+            foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+            instance.transform.position+=parent.TransformPoint(center)-bounds.center;
+            foreach(var renderer in renderers)
+            {
+                var mats=renderer.sharedMaterials;
+                for(int i=0;i<mats.Length;i++)mats[i]=farmMaterial;
+                renderer.sharedMaterials=mats;
+            }
+            return instance;
+        }
+
+        private static void FarmTimber(Transform parent,string name,string model,Vector3 start,Vector3 end,float thickness)
+        {
+            var path=Farm+model+".FBX";
+            var source=AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if(source==null)throw new InvalidOperationException("FarmHouse kirişi bulunamadı: "+path);
+            var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,parent);
+            instance.name=name;
+            instance.transform.localRotation=Quaternion.FromToRotation(Vector3.forward,(end-start).normalized)*source.transform.localRotation;
+            var mesh=source.GetComponentInChildren<MeshFilter>();
+            if(mesh==null)throw new InvalidOperationException("FarmHouse kiriş mesh'i bulunamadı: "+path);
+            var size=mesh.sharedMesh.bounds.size;
+            instance.transform.localScale=new Vector3(thickness/Mathf.Max(.001f,size.x),Vector3.Distance(start,end)/Mathf.Max(.001f,size.y),thickness/Mathf.Max(.001f,size.z));
+            var renderer=instance.GetComponentInChildren<Renderer>();
+            instance.transform.localPosition=(start+end)*.5f-parent.InverseTransformPoint(renderer.bounds.center)+instance.transform.localPosition;
+            foreach(var r in instance.GetComponentsInChildren<Renderer>())
+            {
+                var mats=r.sharedMaterials;
+                for(int i=0;i<mats.Length;i++)mats[i]=farmMaterial;
+                r.sharedMaterials=mats;
+            }
+            foreach(var c in instance.GetComponentsInChildren<Collider>())c.enabled=false;
+        }
+
+        private static void FarmPlaster(Transform parent,string name,string model,Vector3 center,Vector2 size)
+        {
+            var path=Farm+model+".FBX";
+            var source=AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if(source==null)throw new InvalidOperationException("FarmHouse sıva modeli bulunamadı: "+path);
+            var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,parent);
+            instance.name=name;
+            instance.transform.localPosition=Vector3.zero;
+            instance.transform.localRotation=Quaternion.Euler(0,-90,0)*source.transform.localRotation;
+            var mesh=source.GetComponentInChildren<MeshFilter>();
+            if(mesh==null)throw new InvalidOperationException("FarmHouse sıva mesh'i bulunamadı: "+path);
+            var original=mesh.sharedMesh.bounds.size;
+            instance.transform.localScale=new Vector3(1,size.x/Mathf.Max(.001f,original.y),size.y/Mathf.Max(.001f,original.z));
+            var renderer=instance.GetComponentInChildren<Renderer>();
+            instance.transform.position+=parent.TransformPoint(center)-renderer.bounds.center;
+            renderer.sharedMaterial=plaster;
+            foreach(var c in instance.GetComponentsInChildren<Collider>())c.enabled=false;
         }
         private static void PrepareSalvagedBoards()
         {
