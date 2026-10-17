@@ -257,7 +257,9 @@ namespace Jam.Levels.Level1
             {
                 if (lamp.mount == null) continue;
                 var idle = Mathf.Sin(Time.unscaledTime * 1.65f + lamp.phase) * (state == RoundState.Disaster ? 8f : 5.5f);
-                var target = Mathf.Clamp(houseMotion + idle, -16f, 16f);
+                // Ev eğilse de lamba yer çekimiyle dik sarkar: evin açısını geri çevir.
+                var plumb = -houseAngle * Mathf.Rad2Deg;
+                var target = plumb + Mathf.Clamp(houseMotion + idle, -16f, 16f);
                 lamp.sway = Mathf.SmoothDamp(lamp.sway, target, ref lamp.swayVelocity,
                     0.22f, Mathf.Infinity, Time.unscaledDeltaTime);
                 lamp.mount.localRotation = lamp.restingRotation * Quaternion.Euler(0f, 0f, lamp.sway);

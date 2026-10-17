@@ -899,6 +899,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5867328661928728152, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5886960430779320904, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
       propertyPath: m_Name
       value: "Modular Sewer \u2014 Sarkan Lamba"
@@ -3956,6 +3960,7 @@ MonoBehaviour:
   leftFoot: {fileID: 288051196}
   rightFoot: {fileID: 309266735}
   spawnPosition: {x: -1.45, y: -1.17, z: -0.96}
+  hideSquash: 0.62
 --- !u!54 &88710192
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -9231,7 +9236,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 231422001}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -17083,6 +17088,10 @@ MonoBehaviour:
   nextLevelReady: 0
   heavyMassKg: 50
   levelCompleteBonus: 450
+  bagOnBack: 1
+  bagMassKg: 10
+  coverRatioForBonus: 0.5
+  coverBonus: 10
   houseRoot: {fileID: 2023073730}
   balancePivot: {fileID: 863096740}
   resident: {fileID: 88710191}
@@ -23398,7 +23407,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 617869473}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -24690,7 +24699,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 650438123}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -27860,7 +27869,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 753605572}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -35483,6 +35492,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1049946344784148548, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5867328661928728152, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5886960430779320904, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
@@ -44015,6 +44028,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5867328661928728152, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5886960430779320904, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
       propertyPath: m_Name
       value: "Modular Sewer \u2014 Sarkan Lamba"
@@ -49442,6 +49459,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1049946344784148548, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5867328661928728152, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5886960430779320904, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
@@ -55572,7 +55593,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1370452584}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -58157,6 +58178,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5867328661928728152, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5886960430779320904, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
       propertyPath: m_Name
       value: "Modular Sewer \u2014 Sarkan Lamba"
@@ -59242,7 +59267,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1456593355}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -61768,6 +61793,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1049946344784148548, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5867328661928728152, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5886960430779320904, guid: b9197d7aaf0bad6489ee674c020b2c2b, type: 3}
@@ -83314,11 +83343,15 @@ MonoBehaviour:
   selectedTint: {r: 1.12, g: 1.22, b: 1.15, a: 1}
   mouseRequiresReach: 0
   allowCarry: 0
+  freeDrag: 1
   roomHalfWidth: 5.3
   contactGap: 0.025
   interactionReach: 1.35
   canDrag: 1
   showLegacyHint: 0
+  testPointer: 0
+  testPointerPosition: {x: 0, y: 0}
+  testPointerDown: 0
 --- !u!1 &2108933232
 GameObject:
   m_ObjectHideFlags: 0
