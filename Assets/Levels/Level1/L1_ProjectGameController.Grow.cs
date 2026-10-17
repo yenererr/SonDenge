@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Jam.Levels.Level1
 {
     /// <summary>
-    /// Bölüm ilerledikçe evin aşağı doğru büyümesi: en alttaki katın altına boş bir kat eklenir,
+    /// Bölüm ilerledikçe evin aşağı doğru büyümesi: en alttaki katın altına eşyalı bir kat eklenir,
     /// ev kayanın üstünde bir kat yüksekliği kadar kalkar. Mevcut katlar, eşyalar ve fizik korunur.
     /// </summary>
     public sealed partial class L1_ProjectGameController
@@ -13,7 +13,7 @@ namespace Jam.Levels.Level1
         [Header("Aşağı doğru büyüme")]
         [Tooltip("Açıksa 'Sonraki bölüm' aynı sahnede bir sonraki afete geçer ve en alta yeni kat eklenir.")]
         public bool growDownward = true;
-        [Tooltip("Eklenecek boş kat görseli (L1_EmptyFloor_Medieval).")]
+        [Tooltip("Eklenecek kat görseli (L1_EmptyFloor_Medieval). Eşyalar çalışma anında eklenir.")]
         public GameObject newFloorPrefab;
         [Tooltip("Kopyalanacak mevcut en alt kat (zemin ve yan duvar collider'ları, lambalar için şablon).")]
         public Transform floorTemplate;
@@ -33,7 +33,8 @@ namespace Jam.Levels.Level1
         private bool growing;
 
         public bool IsGrowing => growing;
-        public int FloorCount => 2 + addedFloors;
+        public int FloorCount => growDownward ? 2 + addedFloors :
+            upperFloor != null && upperFloor.gameObject.activeSelf ? 3 : 2;
 
         /// <summary>Tüm katların zemin üstleri (houseRoot yerel Y), aşağıdan yukarı.</summary>
         public float[] FloorTops()
@@ -145,11 +146,35 @@ namespace Jam.Levels.Level1
             }
             if (resident != null) resident.spawnPosition += houseRoot.up * floorHeight;
 
+            PopulateNewFloor(newTop);
             RefreshFurniture();
             CacheHangingLamps();
-            Warn("Ev büyüdü: en alta yeni boş bir kat eklendi.");
+            baselineTorque = ComputeTorque();
+            smoothedTorque = baselineTorque;
+            Warn("Ev büyüdü: yeni kat eşyalarıyla birlikte açıldı.");
             growing = false;
             marketOpen = true;
+        }
+
+        private void PopulateNewFloor(float top)
+        {
+            string[] items;
+            switch (level)
+            {
+                case 2: items = new[] { "dining_table", "wooden_barrel" }; break;
+                case 3: items = new[] { "cozy_bed", "bedside_table" }; break;
+                case 4: items = new[] { "bookshelf", "red_armchair" }; break;
+                default: items = new[] { "green_sofa", "coffee_table" }; break;
+            }
+            foreach (var id in items)
+            {
+                foreach (var entry in Catalog)
+                {
+                    if (entry.id != id) continue;
+                    SpawnFurniture(entry, top);
+                    break;
+                }
+            }
         }
 
         // Şablon kat (Kat 1) zemin üstü; kopyalar buna göre aşağı kaydırılır.

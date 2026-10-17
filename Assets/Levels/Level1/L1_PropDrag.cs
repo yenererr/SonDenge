@@ -115,7 +115,8 @@ namespace Jam.Levels.Level1
             if (pressedThisFrame && hover != null)
             {
                 Selected = hover;
-                if (hover.IsAnchored || (mouseRequiresReach && !CanReach(hover))) return;
+                if (hover.IsAnchored || hover.IsPlacementGraceActive ||
+                    (mouseRequiresReach && !CanReach(hover))) return;
                 usingTouch = pointerIsTouch;
                 held = hover;
                 heldCollider = held.GetComponent<BoxCollider>();
@@ -380,7 +381,7 @@ namespace Jam.Levels.Level1
             var player = houseRoot.InverseTransformPoint(resident.transform.position);
             foreach (var item in houseRoot.GetComponentsInChildren<L1_MovableProp>())
             {
-                if (item.IsAnchored || !CanReach(item)) continue;
+                if (item.IsAnchored || item.IsPlacementGraceActive || !CanReach(item)) continue;
                 var distance = Mathf.Abs(houseRoot.InverseTransformPoint(item.transform.position).x - player.x);
                 if (distance >= best) continue;
                 best = distance;

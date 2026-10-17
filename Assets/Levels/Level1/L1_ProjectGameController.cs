@@ -58,8 +58,8 @@ namespace Jam.Levels.Level1
             new ShopItem("bookshelf", "Kitaplık", "Mobilya", 180, 1, 85, "MIX — dokulu kitaplık"),
             new ShopItem("refrigerator", "Retro buzdolabı", "Mobilya", 220, 2, 90, "StylArts — buzdolabı"),
             new ShopItem("stove_counter", "Ocak ve fırın", "Mobilya", 190, 2, 75, "StylArts — ocak ve fırın"),
-            new ShopItem("dining_table", "Yemek masası", "Mobilya", 130, 2, 50),
-            new ShopItem("wooden_barrel", "Erzak fıçısı", "Mobilya", 80, 2, 40),
+            new ShopItem("dining_table", "Yemek masası", "Mobilya", 130, 2, 50, "Yemek masası"),
+            new ShopItem("wooden_barrel", "Erzak fıçısı", "Mobilya", 80, 2, 40, "Erzak fıçısı"),
             new ShopItem("cozy_bed", "Çift kişilik yatak", "Mobilya", 175, 3, 70, "Realistic Bed 01 — yatak"),
             new ShopItem("wardrobe", "Gardırop", "Mobilya", 200, 3, 85),
             new ShopItem("bedside_table", "Komodin ve şamdan", "Mobilya", 50, 3, 20, "Komodin"),
@@ -87,25 +87,19 @@ namespace Jam.Levels.Level1
         public L1_ProjectSpriteEntry[] spriteEntries;
         public AudioClip planningMusic;
         public AudioClip disasterMusic;
-        [Tooltip("Level 1 tek katlı oturma odasıyla oynanır; market eşyaları alt kata gelir.")]
+        [Tooltip("Eski tek katlı deprem raporu kurallarını kullanır; eşya yerleşimi açık katlar arasından seçilir.")]
         public bool singleFloorLevel = true;
         [Tooltip("Odanın iç yarı genişliği (m). Zemin collider'ı ile aynı olmalı; L1_PropDrag'deki değerle eşleşmeli.")]
         public float roomHalfWidth = 4.3f;
-        [Tooltip("Level 1 iki katlı: üst kat mutfak. Mutfak eşyaları markette açık ve üst kata gelir.")]
+        [Tooltip("Level 1 iki katlı: ikinci seviye mobilyaları markette erken açılır.")]
         public bool kitchenUpperFloor = true;
 
         private bool IsLocked(ShopItem item) => level < item.unlockLevel &&
             !(kitchenUpperFloor && item.unlockLevel == 2 && item.category == "Mobilya");
 
-        private int SpawnFloorFor(ShopItem item)
-        {
-            if (kitchenUpperFloor) return item.unlockLevel == 2 ? 1 : 0;
-            if (singleFloorLevel) return 0;
-            return item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
-        }
         [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
         public bool absoluteTorque = true;
-        [Tooltip("Hazırlıkta serbest eşyalar eğimde kendiliğinden kaymaz; kayma yalnız afette olur.")]
+        [Tooltip("Hazırlıkta mevcut eşyalar kaymaz; yeni yerleştirilenler 1,5 saniye sonra eğime tepki verir.")]
         public bool holdFurnitureWhilePlanning = true;
         [Tooltip("Devrilme açısı (derece) ve bu açıda kesintisiz kalma süresi (saniye).")]
         public float collapseAngle = 26f;
@@ -359,7 +353,7 @@ namespace Jam.Levels.Level1
             foreach (var item in furniture)
             {
                 if (item == null || !item.gameObject.activeInHierarchy || item.IsAnchored || item.Body == null || item.Body.isKinematic) continue;
-                if (holdFurnitureWhilePlanning && state == RoundState.Planning)
+                if (holdFurnitureWhilePlanning && state == RoundState.Planning && !item.AllowPlanningSlide)
                 {
                     // Hazırlıkta eğim, eşyayı kendiliğinden kaydırıp zincirleme devrilme yaratmasın.
                     var right = houseRoot.right;
@@ -598,6 +592,12 @@ namespace Jam.Levels.Level1
         {
             if (state != RoundState.Report) return;
             if (level == 5) { score += 1500 + budget * 3; SetState(RoundState.Victory); if (sfx != null) sfx.Play("victory"); return; }
+            foreach (var item in furniture)
+            {
+                if (item == null || !item.IsAnchored) continue;
+                item.SetAnchored(false);
+                RefreshAnchorVisual(item);
+            }
             score += 500 + budget;
             level++;
             budget += 450;
@@ -760,7 +760,7 @@ namespace Jam.Levels.Level1
             if (state != RoundState.Planning || IsLocked(item)) return;
             if (budget < item.cost) { Warn("Yeterli altın yok."); return; }
             if (item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id)) { Warn("Bu ekipman zaten kurulu."); return; }
-            if (item.category == "Mobilya" && !SpawnFurniture(item)) { Warn("Bu katta yeni eşya için yer yok. Bir eşyayı satabilirsin."); return; }
+            if (item.category == "Mobilya" && !SpawnFurniture(item)) { Warn("Açık katlarda yeni eşya için yer yok. Bir eşyayı satabilirsin."); return; }
             budget -= item.cost;
             if (item.category == "Mobilya") RefreshFurniture();
             if (item.id == "sabitleme_aparati") anchors++;
@@ -774,13 +774,13 @@ namespace Jam.Levels.Level1
             if (sfx != null) sfx.Play("purchase");
         }
 
-        private bool SpawnFurniture(ShopItem item)
+        private bool SpawnFurniture(ShopItem item, float? requiredFloorTop = null)
         {
-            if (item.template == null) return SpawnSpriteFurniture(item);
+            if (item.template == null) return SpawnSpriteFurniture(item, requiredFloorTop);
             L1_MovableProp source = null;
             foreach (var prop in furniture)
                 if (prop.displayName != null && prop.displayName.Contains(item.template)) { source = prop; break; }
-            if (source == null) return SpawnSpriteFurniture(item);
+            if (source == null) return SpawnSpriteFurniture(item, requiredFloorTop);
             var clone = Instantiate(source.gameObject, source.transform.parent);
             clone.SetActive(true);
             clone.name = item.title + " (market)";
@@ -794,24 +794,24 @@ namespace Jam.Levels.Level1
             movable.balanceMassKg = item.mass;
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
-            var floor = SpawnFloorFor(item);
             var box = clone.GetComponent<BoxCollider>();
-            var floorY = FloorY[floor] + box.size.y * 0.5f + 0.03f;
             var start = source.transform.localPosition;
-            if (!FindFreePosition(box, floorY, out var x))
-            { Destroy(clone); return false; }
+            if (!FindSpawnPosition(box, requiredFloorTop, out var floorTop, out var x))
+            { clone.SetActive(false); Destroy(clone); return false; }
+            var floorY = floorTop + box.size.y * 0.5f + 0.03f;
             clone.transform.localPosition = new Vector3(x, floorY, start.z);
             // Kopya, kaynağın Rigidbody konumunu taşır; fizik onu eski yere geri yazmasın.
             body.position = clone.transform.position;
             body.rotation = clone.transform.rotation;
+            movable.BeginPlacementGrace(1.5f);
+            Physics.SyncTransforms();
             return true;
         }
 
-        private bool SpawnSpriteFurniture(ShopItem item)
+        private bool SpawnSpriteFurniture(ShopItem item, float? requiredFloorTop = null)
         {
             var sprite = Icon(item.id);
             if (sprite == null) return false;
-            var floor = SpawnFloorFor(item);
             var size = item.id == "wardrobe" ? new Vector3(0.75f, 1.45f, 0.4f) :
                 item.id == "dining_table" ? new Vector3(1.2f, 0.7f, 0.5f) :
                 item.id == "bedside_table" ? new Vector3(0.48f, 0.72f, 0.4f) :
@@ -822,9 +822,9 @@ namespace Jam.Levels.Level1
             root.transform.SetParent(parent, false);
             var box = root.AddComponent<BoxCollider>();
             box.size = size;
-            if (!FindFreePosition(box, FloorY[floor] + size.y * 0.5f + 0.03f, out var x))
-            { Destroy(root); return false; }
-            root.transform.localPosition = new Vector3(x, FloorY[floor] + size.y * 0.5f + 0.03f, 0.25f);
+            if (!FindSpawnPosition(box, requiredFloorTop, out var floorTop, out var x))
+            { root.SetActive(false); Destroy(root); return false; }
+            root.transform.localPosition = new Vector3(x, floorTop + size.y * 0.5f + 0.03f, 0.25f);
             var body = root.AddComponent<Rigidbody>();
             body.mass = Mathf.Clamp(item.mass / 18f, 1f, 6f);
             body.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
@@ -840,7 +840,27 @@ namespace Jam.Levels.Level1
             movable.displayName = item.title;
             movable.itemId = item.id + "-" + Time.frameCount;
             movable.balanceMassKg = item.mass;
+            movable.BeginPlacementGrace(1.5f);
+            Physics.SyncTransforms();
             return true;
+        }
+
+        private bool FindSpawnPosition(BoxCollider box, float? requiredFloorTop, out float floorTop, out float x)
+        {
+            var tops = FloorTops();
+            var first = requiredFloorTop.HasValue ? 0 : UnityEngine.Random.Range(0, tops.Length);
+            var count = requiredFloorTop.HasValue ? 1 : tops.Length;
+            for (var i = 0; i < count; i++)
+            {
+                var top = requiredFloorTop ?? tops[(first + i) % tops.Length];
+                var centerY = top + box.size.y * 0.5f + 0.03f;
+                if (!FindFreePosition(box, centerY, out x)) continue;
+                floorTop = top;
+                return true;
+            }
+            floorTop = 0f;
+            x = 0f;
+            return false;
         }
 
         private bool FindFreePosition(BoxCollider box, float localY, out float result)
