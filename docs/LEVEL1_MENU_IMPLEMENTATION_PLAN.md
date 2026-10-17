@@ -32,7 +32,9 @@ odakta değilken `EditorApplication.Step()` ile ilerletildi. Windows build **al�
 
 ## Açık konular / sonraki iş
 
-- Mağaza, rapor, duraklatma ve "nasıl oynanır" panelleri Level1'de hâlâ **IMGUI** (çalışıyor, uGUI HUD ile çakışmıyor). uGUI'ye taşımak P1.
+- Mağaza, rapor, duraklatma ve "nasıl oynanır" panelleri uGUI'ye taşındı (`L1_Hud.Panels.cs`); eski IMGUI
+  sürümleri yalnız `useLegacyHud` açıkken görünür. Editor'de düğmeler tek tek denendi (sekme, satın alma,
+  duraklat → nasıl oynanır → devam, deprem → rapor → ana menü).
 - Gerçek fare sürüklemesi kod yoluyla test edildi; **elle fareyle sürükleme oynanarak denenmedi**.
 - Yan kapı ve dış ahşap platform eklenmedi (eski balkon gizlendi).
 - Yeni CC0 paketleri (Kenney/Quaternius) indirilmedi; ses efektleri eski `L1_ProjectSfx` ile.

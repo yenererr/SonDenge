@@ -88,14 +88,19 @@ namespace Jam.Levels.Level1
                 if (state == RoundState.Planning && !marketOpen && !menuOpen && !howToOpen) DrawSelectedBar(width, height);
             }
 
-            if (marketOpen && state == RoundState.Planning && !menuOpen && !howToOpen) DrawMarket(width, height);
+            // Yeni uGUI HUD (L1_Hud) mağaza, rapor, duraklatma ve nasıl oynanır panellerini çizer.
+            // Eski IMGUI panelleri yalnız useLegacyHud açıkken (geliştirme modu) görünür.
+            if (useLegacyHud)
+            {
+                if (marketOpen && state == RoundState.Planning && !menuOpen && !howToOpen) DrawMarket(width, height);
+                var earthquakeOnly = singleFloorLevel && level == 1;
+                if (state == RoundState.Report) { if (earthquakeOnly) DrawEarthquakeReport(width, height, true); else DrawReport(width, height); }
+                if (state == RoundState.GameOver) { if (earthquakeOnly) DrawEarthquakeReport(width, height, false); else DrawGameOver(width, height); }
+                if (state == RoundState.Victory) DrawVictory(width, height);
+                if (menuOpen && !howToOpen) DrawPauseMenu(width, height);
+                if (howToOpen) DrawHowTo(width, height);
+            }
             if (state == RoundState.StartMenu && !howToOpen && !autoStart) DrawStartMenu(width, height);
-            var earthquakeOnly = singleFloorLevel && level == 1;
-            if (state == RoundState.Report) { if (earthquakeOnly) DrawEarthquakeReport(width, height, true); else DrawReport(width, height); }
-            if (state == RoundState.GameOver) { if (earthquakeOnly) DrawEarthquakeReport(width, height, false); else DrawGameOver(width, height); }
-            if (state == RoundState.Victory) DrawVictory(width, height);
-            if (menuOpen && !howToOpen) DrawPauseMenu(width, height);
-            if (howToOpen) DrawHowTo(width, height);
 
             GUI.matrix = previousMatrix;
             if (state == RoundState.Planning || state == RoundState.Disaster) L1_TouchControls.Draw();

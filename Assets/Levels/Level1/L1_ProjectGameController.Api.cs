@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Jam.Levels.Level1
@@ -40,5 +41,62 @@ namespace Jam.Levels.Level1
         public void UiToggleAnchor() { if (state == RoundState.Planning) ToggleAnchor(); }
         public void UiSellSelected() { if (state == RoundState.Planning) SellSelected(); }
         public void UiTogglePause() => ToggleMenu();
+
+        // ---------------------------------------------------------------- mağaza
+        public struct ShopEntry
+        {
+            public string id, title, description;
+            public int cost, mass, unlockLevel;
+            public bool locked, installed, affordable;
+        }
+
+        public string[] UiCategories => singleFloorLevel ? new[] { Categories[0], Categories[1] } : Categories;
+        public int AnchorStock => anchors;
+
+        public List<ShopEntry> UiShopEntries(int categoryIndex)
+        {
+            var result = new List<ShopEntry>();
+            var categories = UiCategories;
+            if (categoryIndex < 0 || categoryIndex >= categories.Length) return result;
+            foreach (var item in Catalog)
+            {
+                if (item.category != categories[categoryIndex]) continue;
+                result.Add(new ShopEntry
+                {
+                    id = item.id, title = item.title, description = Description(item),
+                    cost = item.cost, mass = item.mass, unlockLevel = item.unlockLevel,
+                    locked = level < item.unlockLevel,
+                    installed = item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id),
+                    affordable = budget >= item.cost
+                });
+            }
+            return result;
+        }
+
+        public void UiPurchase(string id)
+        {
+            foreach (var item in Catalog)
+                if (item.id == id) { Purchase(item); return; }
+        }
+
+        public void UiCloseMarket() => marketOpen = false;
+
+        // ---------------------------------------------------------------- duraklatma
+        public bool IsMenuOpen => menuOpen;
+        public bool IsHowToOpen => howToOpen;
+        public bool MusicMuted => musicMuted;
+        public void UiToggleMusic() { musicMuted = !musicMuted; SyncPause(); }
+        public void UiOpenHowTo() { howToOpen = true; SyncPause(); }
+        public void UiCloseHowTo() { howToOpen = false; SyncPause(); }
+
+        // ---------------------------------------------------------------- rapor
+        public bool IsReport => state == RoundState.Report;
+        public bool IsGameOver => state == RoundState.GameOver;
+        public string ReportText => report;
+        public int SafetyScore => safetyScore;
+        public bool NextLevelAvailable => nextLevelReady && state == RoundState.Report;
+        public void UiRestart() => Restart();
+        public void UiMainMenu() => ReturnToMainMenu();
+        public void UiNextLevel() { if (state == RoundState.Report) GoToNextLevel(); }
     }
 }

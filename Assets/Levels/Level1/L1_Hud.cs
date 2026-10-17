@@ -9,7 +9,7 @@ namespace Jam.Levels.Level1
     /// kamera düğmeleri, 3-2-1 geri sayımı ve deprem uyarısı. Oyun durumunu yalnız
     /// L1_ProjectGameController'dan okur; kendi durum makinesi yoktur.
     /// </summary>
-    public sealed class L1_Hud : MonoBehaviour
+    public sealed partial class L1_Hud : MonoBehaviour
     {
         [SerializeField] private L1_ProjectGameController game;
         [SerializeField] private L1_CameraController cameraController;
@@ -41,6 +41,7 @@ namespace Jam.Levels.Level1
             if (game == null) game = GetComponentInParent<L1_ProjectGameController>();
             UiKit.EnsureEventSystem(transform);
             Build();
+            BuildPanels();
         }
 
         private void OnEnable()
@@ -83,6 +84,7 @@ namespace Jam.Levels.Level1
             group.alpha = modal ? 0.35f : 1f;
             if (cameraController != null) cameraController.inputEnabled = !modal;
 
+            UpdatePanels();
             UpdateGauge();
             budgetText.text = game.Budget + " altın";
             if (game.IsDisaster) timerText.text = "DEPREM!  " + Mathf.CeilToInt(game.TimeLeft) + " sn";

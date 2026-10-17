@@ -286,7 +286,8 @@ namespace Jam.Levels.Level1
         private void Update()
         {
             var keyboard = Keyboard.current;
-            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && state != RoundState.StartMenu && !howToOpen)
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && state != RoundState.StartMenu && !howToOpen &&
+                !(marketOpen && !useLegacyHud))
                 ToggleMenu();
             if (state == RoundState.StartMenu || menuOpen || howToOpen || Time.timeScale <= 0f) return;
             if (warningUntil > 0f) warningUntil -= Time.deltaTime;
