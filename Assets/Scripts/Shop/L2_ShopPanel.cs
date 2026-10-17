@@ -39,6 +39,7 @@ namespace Jam.Shop
         private readonly List<Button> _itemButtons = new List<Button>();
         private readonly List<FurnitureData> _catalogItems = new List<FurnitureData>();
         private int _budget;
+        private bool _purchasesEnabled = true;
 
         /// <summary>Mağazadaki mevcut para. Lead ekonomi sistemiyle senkronlanabilir.</summary>
         public int Budget => _budget;
@@ -109,6 +110,26 @@ namespace Jam.Shop
         public void SetBudget(int budget)
         {
             _budget = Mathf.Max(0, budget);
+            RefreshView();
+        }
+
+        /// <summary>Yerleştirme sistemi gibi yardımcı sistemlerin mağaza mesajını güncellemesi için kullanılır.</summary>
+        public void ShowFeedback(string message)
+        {
+            SetFeedback(message);
+        }
+
+        /// <summary>Hazırlıkta iptal edilen yerleştirme için satın alma bedelini iade eder.</summary>
+        public void RefundPurchase(int amount)
+        {
+            _budget += Mathf.Max(0, amount);
+            RefreshView();
+        }
+
+        /// <summary>Bir mobilya yerleştirilirken ikinci satın almayı engeller.</summary>
+        public void SetPurchasingEnabled(bool enabled)
+        {
+            _purchasesEnabled = enabled;
             RefreshView();
         }
 
@@ -326,7 +347,7 @@ namespace Jam.Shop
             for (int i = 0; i < _itemButtons.Count && i < _catalogItems.Count; i++)
             {
                 FurnitureData furniture = _catalogItems[i];
-                _itemButtons[i].interactable = canBuy && furniture.PurchasePrice <= _budget;
+                _itemButtons[i].interactable = _purchasesEnabled && canBuy && furniture.PurchasePrice <= _budget;
             }
         }
 
