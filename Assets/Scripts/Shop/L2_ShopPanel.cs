@@ -268,7 +268,7 @@ namespace Jam.Shop
             rect.anchoredPosition = position;
             rect.sizeDelta = size;
             Text label = labelObject.GetComponent<Text>();
-            label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             label.text = content;
             label.fontSize = fontSize;
             label.alignment = alignment;
