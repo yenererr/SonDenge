@@ -55,8 +55,6 @@ namespace Jam.Levels.Level1
             group.SetParent(world, false);
             var mountains = new GameObject("Dağ zirveleri").transform;
             mountains.SetParent(group, false);
-            var rocks = new GameObject("Kaya çıkıntıları").transform;
-            rocks.SetParent(group, false);
             var cloudBank = new GameObject("Bulut katmanları").transform;
             cloudBank.SetParent(group, false);
 
@@ -66,7 +64,6 @@ namespace Jam.Levels.Level1
             var farCloud = LitMaterial("Cloud_CloudPeach", new Color(0.98f, 0.89f, 0.91f), new Color(0.42f, 0.33f, 0.37f));
             var nearMountain = LitMaterial("Cloud_MountainNear", new Color(0.25f, 0.30f, 0.45f), new Color(0.018f, 0.019f, 0.03f));
             var farMountain = LitMaterial("Cloud_MountainFar", new Color(0.38f, 0.38f, 0.57f), new Color(0.03f, 0.025f, 0.045f));
-            var supportRock = LitMaterial("Cloud_SupportRock", new Color(0.36f, 0.34f, 0.40f), new Color(0.025f, 0.02f, 0.02f));
 
             AddSky(group);
             // Their bases sit well below the cloud surface. The house and its balancing rock stay in front.
@@ -76,14 +73,12 @@ namespace Jam.Levels.Level1
             AddMountain(mountains, mountainPrefab, "Orta uzak zirve", 2f, 7.2f, 45.0f, 21f, farMountain, -12f);
             AddMountain(mountains, mountainPrefab, "Sağ uzak zirve", 34f, 8.4f, 38.0f, 23f, farMountain, 31f);
 
-            // Mountains near the foot of the house echo its existing rock silhouette.
-            AddMountain(rocks, mountainPrefab, "Sol kaya çıkıntısı", -3.7f, -3.8f, 3.8f, 2.9f, supportRock, 28f);
-            AddMountain(rocks, mountainPrefab, "Sağ kaya çıkıntısı", 3.8f, -4.0f, 4.1f, 3.0f, supportRock, -24f);
-
             var random = new System.Random(4817);
-            AddCloudLayer(cloudBank, cloudPrefabs, farCloud, random, 18f, 0.1f, -43f, 43f, 4.5f, 10.2f, 1);
-            AddCloudLayer(cloudBank, cloudPrefabs, middleCloud, random, 10f, -1.2f, -31f, 31f, 3.8f, 8.0f, 3);
-            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, 5.5f, -3.0f, -22f, 22f, 3.0f, 7.0f, 5);
+            AddCloudLayer(cloudBank, cloudPrefabs, farCloud, random, 18f, 0.1f, -43f, 43f, 6.5f, 9.6f, 1, 0.9f);
+            AddCloudLayer(cloudBank, cloudPrefabs, middleCloud, random, 10f, -1.2f, -31f, 31f, 5.3f, 7.8f, 3, 1.2f);
+            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, 5.5f, -3.0f, -22f, 22f, 4.5f, 6.8f, 5, 1.5f);
+            // These low clouds pass in front of the central balancing rock, below the playable floor.
+            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, -0.8f, -4.2f, -6f, 6f, 6f, 4.2f, 2, 2.2f, true);
 
             var camera = Camera.main;
             if (camera != null)
@@ -94,11 +89,13 @@ namespace Jam.Levels.Level1
         }
 
         private static void AddCloudLayer(Transform parent, GameObject[] prefabs, Material material,
-            System.Random random, float z, float y, float left, float right, float step, float width, int variantStart)
+            System.Random random, float z, float y, float left, float right, float step, float width,
+            int variantStart, float driftRange, bool flatOnly = false)
         {
             for (var x = left; x <= right; x += step)
             {
-                var index = BankClouds[(variantStart + random.Next(BankClouds.Length)) % BankClouds.Length];
+                var index = flatOnly ? (random.Next(2) == 0 ? 13 : 14) :
+                    BankClouds[(variantStart + random.Next(BankClouds.Length)) % BankClouds.Length];
                 var cloud = (GameObject)PrefabUtility.InstantiatePrefab(prefabs[index], parent);
                 cloud.name = "Bulut " + Mathf.RoundToInt(z) + "m / " + index.ToString("D2");
                 cloud.transform.localRotation = Quaternion.Euler(0f, (float)(random.NextDouble() * 28.0 - 14.0),
@@ -109,6 +106,10 @@ namespace Jam.Levels.Level1
                         y + (float)(random.NextDouble() * 0.85 - 0.35),
                         z + (float)(random.NextDouble() * 2.0 - 1.0)));
                 Decorate(cloud, material);
+                cloud.AddComponent<L1_CloudDrift>().Configure(
+                    driftRange * (float)(0.75 + random.NextDouble() * 0.5),
+                    (float)(32.0 + random.NextDouble() * 18.0),
+                    (float)(random.NextDouble() * Mathf.PI * 2.0));
             }
         }
 
