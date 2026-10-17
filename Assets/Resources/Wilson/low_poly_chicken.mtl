@@ -1,0 +1,5 @@
+newmtl low_poly_chicken
+Kd 1 1 1
+Ks 0 0 0
+Ns 0
+map_Kd low_poly_chicken.png

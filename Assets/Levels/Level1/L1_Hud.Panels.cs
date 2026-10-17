@@ -274,7 +274,10 @@ namespace Jam.Levels.Level1
             var body = UiKit.Rect(frame, "İçerik", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), new Vector2(0f, 10f),
                 new Vector2(-110f, -250f));
             body.gameObject.AddComponent<RectMask2D>();
-            var text = UiKit.Label(body, "Yazı", howToText, 29, UiKit.Ink, TextAnchor.UpperLeft);
+            var instructions = howToText + "\n\nWILSON: Tavuk katlarda dolaşıp yemlenir ve yumurta bırakır. " +
+                "Normal yumurta 5 kg yük getirir; üstünden geçerek topla. " +
+                "Nadir altın yumurta anında 100 altın kazandırır.";
+            var text = UiKit.Label(body, "Yazı", instructions, 29, UiKit.Ink, TextAnchor.UpperLeft);
             text.lineSpacing = 1.15f;
             text.rectTransform.anchorMin = new Vector2(0f, 1f);
             text.rectTransform.pivot = new Vector2(0.5f, 1f);

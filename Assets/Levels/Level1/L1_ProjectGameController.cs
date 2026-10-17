@@ -161,6 +161,7 @@ namespace Jam.Levels.Level1
             RefreshFurniture();
             CacheFurnitureTemplates();
             CacheHangingLamps();
+            SpawnWilson();
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
             if (startImmediatelyOnReload || autoStart)
@@ -452,6 +453,7 @@ namespace Jam.Levels.Level1
             }
             if (resident != null)
                 torque += (8f + (bagAttached ? bagMassKg : 0f)) * houseRoot.InverseTransformPoint(resident.transform.position).x;
+            if (wilson != null) torque += wilson.EggTorque();
             return torque;
         }
 
