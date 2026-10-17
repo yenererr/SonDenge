@@ -125,7 +125,8 @@ namespace Jam.Levels.Level1
             if (floors.Length > 1 && Random.value < 0.36f && TryChooseLadder(currentIndex, floors))
                 return;
             activity = Activity.Walking;
-            destinationX = Random.Range(-game.roomHalfWidth + 0.8f, game.roomHalfWidth - 0.8f);
+            var floorCenter = game.FloorCenterX(currentIndex);
+            destinationX = Random.Range(floorCenter - 2.35f, floorCenter + 2.35f);
         }
 
         private bool TryChooseLadder(int floorIndex, float[] floors)

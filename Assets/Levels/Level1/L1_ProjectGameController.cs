@@ -293,7 +293,8 @@ namespace Jam.Levels.Level1
             if (upperFloor != null) upperFloor.gameObject.SetActive(visible);
             if (upperLadder != null) upperLadder.gameObject.SetActive(visible);
             if (upperExtras != null) upperExtras.gameObject.SetActive(visible);
-            if (roof != null) roof.localPosition = new Vector3(0f, visible ? 0f : -2.25f, 0f);
+            if (roof != null) roof.localPosition = new Vector3(visible ? -0.70f : 0.55f,
+                visible ? 0f : -2.25f, 0f);
             foreach (var prop in houseRoot.GetComponentsInChildren<L1_MovableProp>(true))
             {
                 var local = houseRoot.InverseTransformPoint(prop.transform.position);

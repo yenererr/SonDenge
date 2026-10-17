@@ -153,6 +153,7 @@ namespace Jam.Levels.Level1
             RenderSettings.ambientGroundColor = new Color(0.05f, 0.04f, 0.03f);
 
             L1_ProjectFilesInstaller.Apply(false);
+            L1_AsymmetricHouseLayout.ApplyToHouse(house);
             L1_CloudSeaBuilder.BuildInto(world);
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());

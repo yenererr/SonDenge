@@ -26,6 +26,7 @@ namespace Jam.Levels.Level1
         [SerializeField] private float riskWarningAngle = 18f;
 
         private CanvasGroup group;
+        private RectTransform hudRoot;
         private Text levelLabel, radioLabel;
         private Image levelIcon, selectedIcon;
         private int shownLevel;
@@ -121,9 +122,10 @@ namespace Jam.Levels.Level1
                 selectedIcon.enabled = selectedIcon.sprite != null;
             }
             else selectedStatus.text = "Eşya seçilmedi";
+            anchorButton.gameObject.SetActive(planning && item != null && item.gameObject.activeInHierarchy);
             anchorButton.interactable = planning && item != null;
             sellButton.interactable = planning && item != null;
-            anchorLabel.text = item != null && item.IsAnchored ? "SABİTLEMEYİ SÖK" : "SABİTLE (" + game.AnchorCost + ")";
+            anchorLabel.text = item != null && item.IsAnchored ? "SABİTİ SÖK" : "SABİTLE (" + game.AnchorCost + ")";
             shopButton.interactable = planning;
             readyButton.interactable = planning;
 
@@ -141,6 +143,28 @@ namespace Jam.Levels.Level1
                 var showBanner = Time.unscaledTime < disasterBannerUntil;
                 centerPanel.SetActive(showBanner);
                 if (showBanner) centerText.text = "DEPREM!";
+            }
+        }
+
+        private void LateUpdate()
+        {
+            if (anchorButton == null || !anchorButton.gameObject.activeSelf || hudRoot == null || game == null) return;
+            var item = game.SelectedItem;
+            if (item == null) { anchorButton.gameObject.SetActive(false); return; }
+            var camera = cameraController != null ? cameraController.GetComponent<Camera>() : null;
+            if (camera == null) camera = Camera.main;
+            if (camera == null) return;
+            var collider = item.GetComponent<Collider>();
+            var point = collider != null ? collider.bounds.center + Vector3.up * (collider.bounds.extents.y + 0.13f) :
+                item.transform.position + Vector3.up;
+            var screen = camera.WorldToScreenPoint(point);
+            if (screen.z <= 0f) { anchorButton.gameObject.SetActive(false); return; }
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(hudRoot, screen, null, out var local))
+            {
+                var rect = hudRoot.rect;
+                var button = (RectTransform)anchorButton.transform;
+                button.anchoredPosition = new Vector2(Mathf.Clamp(local.x, rect.xMin + 95f, rect.xMax - 95f),
+                    Mathf.Clamp(local.y, rect.yMin + 116f, rect.yMax - 65f));
             }
         }
 
@@ -184,6 +208,7 @@ namespace Jam.Levels.Level1
             var canvas = UiKit.CreateCanvas(transform, "Level1Canvas", 100);
             group = canvas.gameObject.AddComponent<CanvasGroup>();
             var root = canvas.transform;
+            hudRoot = (RectTransform)root;
 
             // Sol üst: seviye ve radyo.
             var top = UiKit.Rect(root, "TopHud", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
@@ -298,11 +323,18 @@ namespace Jam.Levels.Level1
             layout.spacing = 13f;
             layout.childControlWidth = true;
             layout.childForceExpandWidth = true;
-            anchorButton = BarButton(actions, "SabitleButonu", "SABİTLE (30)", UiKit.Paper, () => game.UiToggleAnchor());
-            anchorLabel = anchorButton.GetComponentInChildren<Text>();
             sellButton = BarButton(actions, "SatButonu", "SAT", UiKit.Paper, () => game.UiSellSelected());
             shopButton = BarButton(actions, "MağazaButonu", "MAĞAZA", UiKit.Paper, () => game.UiToggleMarket());
             readyButton = BarButton(actions, "AfeteHazırımButonu", "AFETE HAZIRIM", UiKit.Orange, RequestDisaster);
+
+            // Seçili eşyanın tepesinde, eşya hareket ettikçe ekran konumunu izleyen eylem.
+            var anchorRect = UiKit.Rect(root, "Eşyanın Üstünde Sabitle", new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(190f, 50f));
+            anchorButton = UiKit.Button(anchorRect, "SABİTLE (30)", 22, UiKit.Paper, UiKit.Ink,
+                () => game.UiToggleAnchor());
+            L1_HudSkin.Button(anchorButton, L1_HudSkin.Surface.PaperButton);
+            anchorLabel = anchorButton.GetComponentInChildren<Text>();
+            anchorButton.gameObject.SetActive(false);
 
             // Alt sağ: kamera.
             var zoom = UiKit.Rect(root, "ZoomControls", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f),

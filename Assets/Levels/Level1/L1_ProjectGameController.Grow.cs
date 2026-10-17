@@ -44,6 +44,14 @@ namespace Jam.Levels.Level1
             return tops;
         }
 
+        public float FloorCenterX(int floorIndex)
+        {
+            if (!growDownward) return floorIndex == 0 ? -0.50f : floorIndex == 1 ? 0.55f : -0.70f;
+            var addedNumber = addedFloors - floorIndex;
+            if (addedNumber > 0) return addedNumber % 2 == 1 ? 0.80f : -0.80f;
+            return floorIndex == addedFloors ? -0.50f : 0.55f;
+        }
+
         private void GrowFloorBelow()
         {
             if (growing || houseRoot == null || newFloorPrefab == null || floorTemplate == null) return;
@@ -56,8 +64,15 @@ namespace Jam.Levels.Level1
             if (drag != null) drag.canDrag = false;
             addedFloors++;
             var newTop = lowestFloorTop - floorHeight;
+            // Yeni katlar sağa/sola dönüşümlü taşar; geçiş merdiveni de her seferinde karşı taraftadır.
+            var newCenterX = addedFloors % 2 == 1 ? 0.80f : -0.80f;
+            var ladderX = addedFloors % 2 == 1 ? -1.15f : 1.65f;
+            var previousFloor = lowestFloorCollider != null ? lowestFloorCollider : FindFloorCollider(floorTemplate);
+            var previousCenterX = previousFloor != null
+                ? houseRoot.InverseTransformPoint(previousFloor.bounds.center).x : floorTemplate.localPosition.x;
             var group = new GameObject("Alt kat " + addedFloors + " (yeni)").transform;
             group.SetParent(houseRoot, false);
+            group.localPosition = Vector3.right * newCenterX;
 
             // Görsel kat.
             var visual = Instantiate(newFloorPrefab, group);
@@ -89,7 +104,8 @@ namespace Jam.Levels.Level1
                 foreach (var r in remove) Destroy(r);
                 foreach (var col in slab.GetComponentsInChildren<Collider>(true)) Destroy(col);
                 // Şablon çatı döşemesi: en üst katın tavanı. Yeni katın tavanı = eski en alt katın zemini.
-                slab.transform.localPosition = slabTemplate.localPosition + Vector3.up * (lowestFloorTop - SlabTop());
+                slab.transform.localPosition = new Vector3(previousCenterX - newCenterX,
+                    slabTemplate.localPosition.y + lowestFloorTop - SlabTop(), slabTemplate.localPosition.z);
             }
 
             // Merdiven: yeni kattan bir üst kata.
@@ -98,6 +114,15 @@ namespace Jam.Levels.Level1
                 var ladder = Instantiate(ladderTemplate.gameObject, group).GetComponent<L1_ClimbRoute>();
                 ladder.gameObject.SetActive(true);
                 ladder.transform.localPosition = ladderTemplate.transform.localPosition + Vector3.up * (newTop - templateFloorTop);
+                if (ladder.bottom != null)
+                {
+                    var position = ladder.transform.localPosition;
+                    position.x += ladderX - houseRoot.InverseTransformPoint(ladder.bottom.position).x;
+                    ladder.transform.localPosition = position;
+                    if (ladder.top != null && ladder.landing != null)
+                        ladder.landing.position = ladder.top.position + houseRoot.right *
+                            (ladderX < 0f ? 0.15f : -0.20f);
+                }
                 ladder.upperFloor = lowestFloorCollider != null ? lowestFloorCollider : FindFloorCollider(floorTemplate);
                 if (resident != null)
                 {
@@ -107,7 +132,9 @@ namespace Jam.Levels.Level1
             }
             lowestFloorCollider = newFloorCollider;
             lowestFloorTop = newTop;
-            if (baseBeams != null) baseBeams.localPosition += Vector3.down * floorHeight;
+            if (baseBeams != null)
+                baseBeams.localPosition = new Vector3(newCenterX,
+                    baseBeams.localPosition.y - floorHeight, baseBeams.localPosition.z);
 
             // Evi kayanın üstünde bir kat yüksekliği kadar kaldır (eşyalar bu sırada kilitli).
             var bodies = new List<Rigidbody>();
@@ -146,7 +173,7 @@ namespace Jam.Levels.Level1
             }
             if (resident != null) resident.spawnPosition += houseRoot.up * floorHeight;
 
-            var placed = PopulateNewFloor(newTop);
+            var placed = PopulateNewFloor(newTop, newCenterX, ladderX);
             RefreshFurniture();
             CacheHangingLamps();
             baselineTorque = ComputeTorque();
@@ -157,7 +184,7 @@ namespace Jam.Levels.Level1
             marketOpen = true;
         }
 
-        private int PopulateNewFloor(float top)
+        private int PopulateNewFloor(float top, float centerX, float ladderX)
         {
             string[] items;
             switch (level)
@@ -167,7 +194,9 @@ namespace Jam.Levels.Level1
                 case 4: items = new[] { "bookshelf", "red_armchair", "coffee_table", "standing_lamp" }; break;
                 default: items = new[] { "green_sofa", "coffee_table", "wooden_barrel", "standing_lamp" }; break;
             }
-            var positions = new[] { -2.25f, 0f, 2.25f };
+            var positions = ladderX < 0f
+                ? new[] { centerX, centerX + 1.2f, centerX + 2.3f }
+                : new[] { centerX - 2.3f, centerX - 1.2f, centerX };
             var placed = 0;
             foreach (var id in items)
             {

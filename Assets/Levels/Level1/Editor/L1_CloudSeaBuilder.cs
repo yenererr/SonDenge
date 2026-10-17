@@ -67,11 +67,11 @@ namespace Jam.Levels.Level1
 
             AddSky(group);
             // Their bases sit well below the cloud surface. The house and its balancing rock stay in front.
-            AddMountain(mountains, mountainPrefab, "Sol yakın zirve", -18f, 6.6f, 20.0f, 18f, nearMountain, 20f);
-            AddMountain(mountains, mountainPrefab, "Sağ yakın zirve", 18f, 6.4f, 22.0f, 18f, nearMountain, -32f);
-            AddMountain(mountains, mountainPrefab, "Sol uzak zirve", -34f, 8.6f, 36.0f, 23f, farMountain, 44f);
-            AddMountain(mountains, mountainPrefab, "Orta uzak zirve", 2f, 7.2f, 45.0f, 21f, farMountain, -12f);
-            AddMountain(mountains, mountainPrefab, "Sağ uzak zirve", 34f, 8.4f, 38.0f, 23f, farMountain, 31f);
+            AddMountain(mountains, mountainPrefab, "Sol yakın zirve", -18f, -4.2f, 20.0f, 18f, nearMountain, 20f);
+            AddMountain(mountains, mountainPrefab, "Sağ yakın zirve", 18f, -4.2f, 22.0f, 18f, nearMountain, -32f);
+            AddMountain(mountains, mountainPrefab, "Sol uzak zirve", -34f, -5.7f, 36.0f, 23f, farMountain, 44f);
+            AddMountain(mountains, mountainPrefab, "Orta uzak zirve", 2f, -5.7f, 45.0f, 21f, farMountain, -12f);
+            AddMountain(mountains, mountainPrefab, "Sağ uzak zirve", 34f, -5.7f, 38.0f, 23f, farMountain, 31f);
 
             var random = new System.Random(4817);
             // Keep open sky between the banks, including their slow horizontal drift.
