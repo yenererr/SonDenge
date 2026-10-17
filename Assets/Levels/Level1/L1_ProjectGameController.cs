@@ -101,6 +101,8 @@ namespace Jam.Levels.Level1
         private float timer = 45f, houseAngle, angularVelocity, baselineTorque, smoothedTorque;
         private float maxTilt;
         private float buildingHealth = 100f, water, indoorFlood, lightningClock, lightningFlash;
+        private float evacuatedWater, waterSensorCooldown;
+        private int extinguishedFires, fireSpreads, lightningHits, lightningBlocked;
         private float warningUntil;
         private string warning, report;
         private string fireCause;
@@ -156,6 +158,20 @@ namespace Jam.Levels.Level1
             foreach (var item in furniture)
             {
                 if (item == null) continue;
+                if (item.balanceMassKg <= 0f)
+                {
+                    var catalogMass = 0;
+                    foreach (var entry in Catalog)
+                    {
+                        if ((item.itemId != null && item.itemId.StartsWith(entry.id)) ||
+                            (entry.template != null && item.displayName != null &&
+                             item.displayName.Contains(entry.template)))
+                        { catalogMass = entry.mass; break; }
+                    }
+                    // Additional 3D room props have no counterpart in the 2D catalog.
+                    item.balanceMassKg = catalogMass > 0 ? catalogMass :
+                        item.Body != null ? Mathf.Max(10f, item.Body.mass * 10f) : 10f;
+                }
                 var collider = item.GetComponent<BoxCollider>();
                 if (collider != null)
                 {
@@ -245,6 +261,8 @@ namespace Jam.Levels.Level1
             score = anchors = 0;
             timer = 45f;
             maxTilt = 0f;
+            evacuatedWater = waterSensorCooldown = 0f;
+            extinguishedFires = fireSpreads = lightningHits = lightningBlocked = 0;
             marketOpen = menuOpen = howToOpen = false;
             SetMusic(planningMusic);
             SetState(RoundState.Planning);
@@ -322,6 +340,10 @@ namespace Jam.Levels.Level1
             // Use the same limit before and during a disaster; switching states
             // must not release a previously clamped target in one step.
             var target = Mathf.Clamp(-torqueDelta * 0.0016f + disturbance, -0.52f, 0.52f);
+            // The source game keeps the house nearly level from the fire stage
+            // onward so those rounds are decided by their own hazards. Retain a
+            // small visible response for the physical 3D house.
+            if (level >= 3) target = Mathf.Clamp(target * 0.16f, -0.065f, 0.065f);
             houseAngle = Mathf.SmoothDamp(houseAngle, target, ref angularVelocity,
                 1.55f, 0.15f, Time.fixedDeltaTime);
             balancePivot.localRotation = Quaternion.Euler(0f, 0f, houseAngle * Mathf.Rad2Deg);
@@ -343,13 +365,13 @@ namespace Jam.Levels.Level1
                 // from the sum at one coordinate made the whole house snap back.
                 var edgeWeight = 1f - Mathf.SmoothStep(3.25f, 4.65f, Mathf.Abs(local.x));
                 var heightWeight = Mathf.SmoothStep(-2.8f, -1.8f, local.y);
-                torque += item.Body.mass * local.x * edgeWeight * heightWeight;
+                torque += item.Mass * local.x * edgeWeight * heightWeight;
             }
             if (drag != null && drag.Carried != null && drag.Carried.Body != null)
             {
                 // A carried item no longer presses on the floor, but its load
                 // still acts at the resident's hand position as they walk.
-                var carriedMass = Mathf.Max(12f, drag.Carried.Body.mass * 3f);
+                var carriedMass = Mathf.Max(10f, drag.Carried.Mass * 0.75f);
                 torque += carriedMass * drag.CarriedLocalX;
             }
             if (resident != null)
@@ -363,6 +385,7 @@ namespace Jam.Levels.Level1
             {
                 var spraying = equipment.Contains("yangin_tupu") &&
                     ((keyboard != null && (keyboard.eKey.isPressed || keyboard.enterKey.isPressed)) || L1_TouchControls.ActionHeld);
+                spraying &= resident != null && !resident.IsClimbing;
                 ShowFoam(spraying);
                 for (var i = fires.Count - 1; i >= 0; i--)
                 {
@@ -371,19 +394,26 @@ namespace Jam.Levels.Level1
                     if (spraying && resident != null)
                     {
                         var player = houseRoot.InverseTransformPoint(resident.transform.position);
-                        var flame = fire.visual.transform.localPosition;
-                        if (Mathf.Abs(player.x - flame.x) < 0.9f && Mathf.Abs(player.y - flame.y) < 1.15f)
-                            fire.health -= dt * 72f;
+                        var playerFloor = Mathf.Clamp(Mathf.RoundToInt(
+                            (player.y - resident.footOffset - FloorY[0]) / 2.25f), 0, 2);
+                        var delta = fire.x - player.x;
+                        if (fire.floor == playerFloor && Mathf.Abs(delta) < 1.75f &&
+                            delta * resident.Facing >= -0.35f)
+                            fire.health -= dt * 75f;
                     }
                     if (fire.health <= 0f)
                     {
                         Destroy(fire.visual);
                         fires.RemoveAt(i);
+                        extinguishedFires++;
+                        score += 300;
+                        if (sfx != null) sfx.Play("level");
                     }
-                    else if (fire.spreadClock > 16f && fires.Count < 4)
+                    else if (fire.spreadClock > 16f && fires.Count < 4 && fire.health > 60f)
                     {
                         fire.spreadClock = 0f;
-                        SpawnFire(Mathf.Clamp(fire.floor + (UnityEngine.Random.value > 0.5f ? 1 : -1), 0, 2), -fire.x * 0.7f);
+                        SpawnFire(UnityEngine.Random.Range(0, 3), UnityEngine.Random.Range(-1.2f, 1.2f), 75f);
+                        fireSpreads++;
                     }
                 }
                 if (fires.Count == 0) CompleteLevel();
@@ -393,25 +423,38 @@ namespace Jam.Levels.Level1
                 lightningClock -= dt;
                 if (lightningClock <= 0f)
                 {
-                    lightningClock = UnityEngine.Random.Range(3.5f, 4.5f);
+                    lightningClock = UnityEngine.Random.Range(3.5f, 5f);
                     lightningFlash = 0.8f;
                     if (!equipment.Contains("lightning_rod_system"))
                     {
+                        lightningHits++;
                         buildingHealth -= equipment.Contains("surge_protector") ? 25f : 37f;
                         if (sfx != null) sfx.Play("strike");
                     }
-                    else if (sfx != null) sfx.Play("shield");
+                    else
+                    {
+                        lightningBlocked++;
+                        if (sfx != null) sfx.Play("shield");
+                    }
                     if (buildingHealth <= 0f) Lose("Yıldırım darbeleri evi yıktı.");
                 }
             }
             else if (level == 5)
             {
-                var inflow = 16f;
-                if (equipment.Contains("gutter_system")) inflow -= 5.5f;
-                if (equipment.Contains("drainage_channel")) inflow -= 6f;
-                if (equipment.Contains("water_pump")) inflow -= 7f;
-                water = Mathf.Clamp(water + inflow * dt * 2.2f, 0f, 200f);
+                var evacuation = (equipment.Contains("gutter_system") ? 5.5f : 0f) +
+                    (equipment.Contains("drainage_channel") ? 6f : 0f) +
+                    (equipment.Contains("water_pump") ? 7f : 0f);
+                var availableWater = water + 16f * dt * 2.2f;
+                var actualEvacuation = Mathf.Min(evacuation * dt * 2.2f, availableWater);
+                evacuatedWater += actualEvacuation;
+                water = Mathf.Clamp(availableWater - actualEvacuation, 0f, 200f);
                 var barrier = equipment.Contains("sandbags") ? 65f : 25f;
+                waterSensorCooldown = Mathf.Max(0f, waterSensorCooldown - dt);
+                if (equipment.Contains("water_sensor") && water >= barrier * 0.75f && waterSensorCooldown <= 0f)
+                {
+                    Warn("Su sensörü: giriş eşiğinde su yükseliyor!");
+                    waterSensorCooldown = 8f;
+                }
                 if (water > barrier)
                     indoorFlood = Mathf.Clamp(indoorFlood + (water - barrier) * dt * 0.15f *
                         (equipment.Contains("waterproof_sealing") ? 0.25f : 1f), 0f, 100f);
@@ -430,17 +473,19 @@ namespace Jam.Levels.Level1
             timer = level == 1 ? 10f : level == 2 ? 12f : level == 3 ? 30f : 25f;
             if (level == 3)
             {
+                extinguishedFires = fireSpreads = 0;
                 var source = UnityEngine.Random.Range(0, 4);
                 var floor = source == 1 ? 1 : source == 2 ? 2 : 0;
                 var x = source == 0 ? -0.2f : source == 1 ? 1.1f : source == 2 ? -0.7f : 0.8f;
                 fireCause = source == 0 ? "Mutfakta aşırı ısınan ocak" : source == 1 ?
                     "Oturma odasında aşırı yüklü priz" : source == 2 ?
                     "Yatak odasında arızalı ısıtıcı" : "Ocakta unutulan kızgın tava";
-                SpawnFire(floor, x);
-                SpawnFire(floor == 1 ? 0 : 1, x > 0f ? -0.8f : 0.8f);
+                SpawnFire(floor, x, 100f);
+                SpawnFire(floor == 1 ? 0 : 1, x > 0f ? -0.8f : 0.8f, 85f);
+                if (equipment.Contains("duman_dedektoru")) Warn("Duman dedektörü: yangın erken algılandı!");
             }
-            if (level == 4) { buildingHealth = 100f; lightningClock = 2.5f; }
-            if (level == 5) { water = 0f; indoorFlood = 0f; }
+            if (level == 4) { buildingHealth = 100f; lightningClock = 2.5f; lightningHits = lightningBlocked = 0; }
+            if (level == 5) { water = indoorFlood = evacuatedWater = waterSensorCooldown = 0f; }
             SetMusic(disasterMusic);
             SetState(RoundState.Disaster);
             if (sfx != null) sfx.Play(level == 3 ? "strike" : "confirm");
@@ -458,13 +503,20 @@ namespace Jam.Levels.Level1
                 "\nÇivilenmiş eşya: " + anchored + "\nEn yüksek eğim: " + maxTilt.ToString("F1") + "°" :
                 level == 2 ? "Çatı güçlendirmesi: " + (equipment.Contains("storm_brace") ? "kurulu" : "yok") +
                 "\nEn yüksek eğim: " + maxTilt.ToString("F1") + "°\nEvin dengesi korundu." :
-                level == 3 ? "Yangın kaynağı: " + fireCause + "\nDuman dedektörü: " +
-                (equipment.Contains("duman_dedektoru") ? "erken uyarı verdi" : "yok") + "\nAlevler söndürüldü." :
-                level == 4 ? "Bina sağlığı: %" + Mathf.RoundToInt(buildingHealth) + "\nParatoner: " +
-                (equipment.Contains("lightning_rod_system") ? "kurulu" : "yok") + "\nGerilim koruması: " +
-                (equipment.Contains("surge_protector") ? "kurulu" : "yok") :
-                "Yüzey suyu: " + Mathf.RoundToInt(water) + " L\nİçeri sızan su: %" + Mathf.RoundToInt(indoorFlood) +
-                "\nTahliye pompası: " + (equipment.Contains("water_pump") ? "aktif" : "yok");
+                level == 3 ? "Yangın kaynağı: " + fireCause + "\nSöndürülen alev: " + extinguishedFires +
+                "  |  Yayılma: " + fireSpreads + "\nDuman dedektörü: " +
+                (equipment.Contains("duman_dedektoru") ? "erken uyarı verdi" : "yok") :
+                level == 4 ? "Bina sağlığı: %" + Mathf.RoundToInt(buildingHealth) +
+                "  |  Darbe: " + lightningHits + "\nParatonerin engellediği: " + lightningBlocked +
+                "\nGerilim koruması: " + (equipment.Contains("surge_protector") ? "kurulu" : "yok") :
+                "Tahliye edilen su: " + Mathf.RoundToInt(evacuatedWater) + " L" +
+                "  |  Biriken: " + Mathf.RoundToInt(water) + " L\nİçeri sızma: %" +
+                Mathf.RoundToInt(indoorFlood) + "  |  Eşik: " +
+                (equipment.Contains("sandbags") ? "kum torbalı" : "korumasız") +
+                "\nOluk / drenaj / pompa: " +
+                (equipment.Contains("gutter_system") ? "✓" : "–") + " / " +
+                (equipment.Contains("drainage_channel") ? "✓" : "–") + " / " +
+                (equipment.Contains("water_pump") ? "✓" : "–");
             report += "\n+" + points + " bonus puan";
             SetMusic(planningMusic);
             SetState(RoundState.Report);
@@ -586,7 +638,7 @@ namespace Jam.Levels.Level1
             return null;
         }
 
-        private void SpawnFire(int floor, float x)
+        private void SpawnFire(int floor, float x, float health)
         {
             var sprite = Icon("fire_flame");
             var visual = new GameObject("Yangın alevi — " + (floor + 1) + ". kat");
@@ -596,7 +648,7 @@ namespace Jam.Levels.Level1
             renderer.sprite = sprite;
             renderer.sharedMaterial = projectSpriteMaterial;
             if (sprite != null) visual.transform.localScale = new Vector3(0.65f / sprite.bounds.size.x, 0.9f / sprite.bounds.size.y, 1f);
-            fires.Add(new FireSpot { visual = visual, health = 100f, floor = floor, x = x });
+            fires.Add(new FireSpot { visual = visual, health = health, floor = floor, x = x });
         }
 
         private void ShowFoam(bool spraying)
@@ -618,15 +670,8 @@ namespace Jam.Levels.Level1
                 renderer.sharedMaterial = projectSpriteMaterial;
             }
             var player = houseRoot.InverseTransformPoint(resident.transform.position);
-            var direction = 1f;
-            var nearest = float.MaxValue;
-            foreach (var fire in fires)
-            {
-                var delta = fire.x - player.x;
-                if (Mathf.Abs(delta) < nearest && Mathf.Abs(fire.visual.transform.localPosition.y - player.y) < 1.2f)
-                { nearest = Mathf.Abs(delta); direction = Mathf.Sign(delta); }
-            }
-            foamVisual.transform.localPosition = new Vector3(player.x + direction * 0.48f, player.y + 0.22f, -0.78f);
+            foamVisual.transform.localPosition = new Vector3(player.x + resident.Facing * 0.48f,
+                player.y + 0.22f, -1.5f);
             foamVisual.transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(Time.time * 19f) * 12f);
             foamVisual.SetActive(true);
         }
@@ -666,7 +711,8 @@ namespace Jam.Levels.Level1
             movable.SetAnchored(false);
             RefreshAnchorVisual(movable);
             var body = clone.GetComponent<Rigidbody>();
-            body.mass = item.mass;
+            body.mass = Mathf.Clamp(item.mass / 18f, 1f, 6f);
+            movable.balanceMassKg = item.mass;
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
             var floor = item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
@@ -698,7 +744,7 @@ namespace Jam.Levels.Level1
             { Destroy(root); return false; }
             root.transform.localPosition = new Vector3(x, FloorY[floor] + size.y * 0.5f + 0.03f, 0.25f);
             var body = root.AddComponent<Rigidbody>();
-            body.mass = item.mass;
+            body.mass = Mathf.Clamp(item.mass / 18f, 1f, 6f);
             body.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             var visual = new GameObject("Görsel");
@@ -711,12 +757,16 @@ namespace Jam.Levels.Level1
             var movable = root.AddComponent<L1_MovableProp>();
             movable.displayName = item.title;
             movable.itemId = item.id + "-" + Time.frameCount;
+            movable.balanceMassKg = item.mass;
             return true;
         }
 
         private bool FindFreePosition(BoxCollider box, float localY, out float result)
         {
-            var tries = new[] { 2.8f, -2.8f, 2.2f, -2.2f, 1.6f, -1.6f, 1f, -1f, 0.4f, -0.4f, 0f };
+            // The source game spawns purchases near the center and alternates
+            // sides. Edge-first spawning made a newly bought heavy item create
+            // a large balance impulse before the player could reposition it.
+            var tries = new[] { 0f, 0.4f, -0.4f, 1f, -1f, 1.6f, -1.6f, 2.2f, -2.2f, 2.8f, -2.8f };
             var rotation = box.transform.rotation;
             var scale = box.transform.lossyScale;
             var half = Vector3.Scale(box.size * 0.5f,
@@ -751,7 +801,7 @@ namespace Jam.Levels.Level1
             var box = root.AddComponent<BoxCollider>();
             box.size = new Vector3(0.48f, 0.52f, 0.34f);
             var body = root.AddComponent<Rigidbody>();
-            body.mass = 10f;
+            body.mass = 1.5f;
             body.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
             var visual = new GameObject("Çanta görseli");
             visual.transform.SetParent(root.transform, false);
@@ -763,6 +813,7 @@ namespace Jam.Levels.Level1
             var movable = root.AddComponent<L1_MovableProp>();
             movable.displayName = "Deprem çantası";
             movable.itemId = "deprem_cantasi";
+            movable.balanceMassKg = 10f;
             RefreshFurniture();
         }
 
