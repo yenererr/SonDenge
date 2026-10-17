@@ -19,4 +19,4 @@ MonoBehaviour:
   anchoringCost: 15
   purchasePrice: 30
   durability: 100
-  modelPrefab: {fileID: 100100000, guid: 8bd967ee39d994d27bbaf85eb4974fe9, type: 3}
+  modelPrefab: {fileID: 6254852114844529006, guid: 8bd967ee39d994d27bbaf85eb4974fe9, type: 3}
