@@ -81,6 +81,8 @@ Aktif Level1 evi gerçek 3D geometri ve aşağıdaki paketlerin modellerinden ol
 
 - **Arşivdeki Level1 referans ev:** Kullanıcının sağladığı şeffaf ev görseli (`L1_ReferenceHouse_Empty.png`); mobilyalı varyant kullanıcının iki referansı kullanılarak ImageGen ile düzenlendi (`L1_ReferenceHouse_Furnished.png`). Kaynak ve üretim istemi: [L1_ReferenceHouse_SOURCE.md](Assets/Levels/Level1/Art/L1_ReferenceHouse_SOURCE.md).
 
+- **KayKit : Adventurers Character Pack 2.0** — Kay Lousberg (www.kaylousberg.com) — CC0. Level 1 sakin karakteri (Barbarian modeli, dokusu ve Rig_Medium animasyonları). Lisans: `Assets/Levels/Level1/Art/Characters/KayKit_Barbarian/KayKit_License.txt`.
+
 - **Medieval Room Kit** — 1Luka2 — [Unity Asset Store](https://assetstore.unity.com/packages/3d/environments/medieval-room-kit-399232) — Standard Unity Asset Store EULA. Son Denge'nin Level 1 modüler oda/kat görsellerinde kullanıldı (zemin, arka duvar, kolon, süpürgelik, tavan pervazı). Repoya yalnız kullanılan modeller/dokular eklendi.
 
 - **DOLLHOUSE - FREE - Modular Low Poly Interiors: Furniture & Room Kit** (ForgeWorks): Level1 yatak, kanepe, küvet, kitaplık, tekstiller, fener ve ahşap merdiven modelleri. [Unity Asset Store](https://assetstore.unity.com/packages/3d/props/interior/dollhouse-free-modular-low-poly-interiors-furniture-room-kit-411314). Lisans: Standard Unity Asset Store EULA.

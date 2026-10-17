@@ -5,6 +5,7 @@ Yeni indirilen paket **yok**; yalnız repoda zaten bulunan paketler kullanıldı
 
 | Paket | Yol | Level1/Menü'de kullanımı | Lisans |
 |---|---|---|---|
+| KayKit Adventurers 2.0 (Kay Lousberg) | `Assets/Levels/Level1/Art/Characters/KayKit_Barbarian/` | Sakin karakteri: Barbarian.fbx, barbarian_texture.png, Rig_Medium_General/MovementBasic animasyonları | CC0 (lisans dosyası klasörde) |
 | Medieval Room Kit (1Luka2) — [Asset Store](https://assetstore.unity.com/packages/3d/environments/medieval-room-kit-399232) | `Assets/Medieval Room Kit/` (yalnız kullanılan parçalar git'te) | Boş kat prefab'ı `L1_EmptyFloor_Medieval`: Floor_4x4, Wall_4m, Wall_2m_Window, Column_1, SkirtingBoard_2m/4m, CeilingMoldings_2m/4m | Unity Asset Store Standart EULA |
 | MIX Furniture Pack (ZNS3D) | `Assets/ZNS3D/` | Kanepe (`MIX — yıpranmış deri kanepe`), kitaplık, sehpa | Unity Asset Store Standart EULA |
 | StylArts | `Assets/StylArts/` | Tekli koltuk; (gizli) küvet, lavabo, ocak, buzdolabı, TV | Unity Asset Store Standart EULA |
