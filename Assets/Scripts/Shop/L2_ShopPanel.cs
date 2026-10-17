@@ -286,7 +286,7 @@ namespace Jam.Shop
             itemButtonPrefab = CreateFurnitureCard("EsyaKartSablon", panel.transform);
             itemButtonPrefab.gameObject.SetActive(false);
 
-            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(125f, 42f), new Vector2(365f, 342f), new Color(0.45f, 0.2f, 0.2f, 1f));
+            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(125f, 42f), new Vector2(365f, -24f), new Color(0.45f, 0.2f, 0.2f, 1f));
 
             CreateLabel("AltBilgi", panel.transform, "İpucu: Ağır eşyalar dengeyi daha çok etkiler.", 14, TextAnchor.MiddleCenter, new Vector2(0f, -368f), new Vector2(760f, 28f), new Color(0.55f, 0.68f, 0.76f, 1f));
 
