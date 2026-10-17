@@ -90,8 +90,9 @@ namespace Jam.Levels.Level1
 
             if (marketOpen && state == RoundState.Planning && !menuOpen && !howToOpen) DrawMarket(width, height);
             if (state == RoundState.StartMenu && !howToOpen && !autoStart) DrawStartMenu(width, height);
-            if (state == RoundState.Report) DrawReport(width, height);
-            if (state == RoundState.GameOver) DrawGameOver(width, height);
+            var earthquakeOnly = singleFloorLevel && level == 1;
+            if (state == RoundState.Report) { if (earthquakeOnly) DrawEarthquakeReport(width, height, true); else DrawReport(width, height); }
+            if (state == RoundState.GameOver) { if (earthquakeOnly) DrawEarthquakeReport(width, height, false); else DrawGameOver(width, height); }
             if (state == RoundState.Victory) DrawVictory(width, height);
             if (menuOpen && !howToOpen) DrawPauseMenu(width, height);
             if (howToOpen) DrawHowTo(width, height);

@@ -97,7 +97,7 @@ namespace Jam.Levels.Level1
             var planning = game.IsPlanning && countdownLeft < 0f;
             selectedPanel.SetActive(item != null && item.gameObject.activeInHierarchy);
             if (selectedPanel.activeSelf)
-                selectedText.text = item.displayName + "  ·  " + Mathf.RoundToInt(item.Mass) + " kg  ·  " +
+                selectedText.text = L1_ProjectGameController.PlayerFacingName(item) + "  ·  " + Mathf.RoundToInt(item.Mass) + " kg  ·  " +
                     (item.IsAnchored ? "Sabitli" : "Sabit değil");
             anchorButton.interactable = planning && item != null;
             sellButton.interactable = planning && item != null;

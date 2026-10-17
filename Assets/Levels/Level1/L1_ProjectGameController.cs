@@ -312,6 +312,7 @@ namespace Jam.Levels.Level1
             {
                 timer -= Time.deltaTime;
                 TickDisaster(Time.deltaTime, keyboard);
+                UpdateQuakeCamera();
                 if (state == RoundState.Disaster && timer <= 0f)
                 {
                     if (level == 3 && fires.Count > 0) Lose("Yangın zamanında söndürülemedi.");
@@ -325,8 +326,13 @@ namespace Jam.Levels.Level1
             if (balancePivot == null || houseRoot == null || state == RoundState.StartMenu ||
                 state == RoundState.Report || state == RoundState.GameOver || state == RoundState.Victory || menuOpen || howToOpen) return;
             var disturbance = 0f;
+            var quake = 0f;
             if (state == RoundState.Disaster && level == 1)
-                disturbance = Mathf.Sin(Time.time * 5.2f) * 0.015f + Mathf.Sin(Time.time * 8.3f) * 0.008f;
+            {
+                quake = QuakeAcceleration();
+                disturbance = quake * quakeTiltPerAcceleration;
+                TrackLostFurniture();
+            }
             else if (state == RoundState.Disaster && level == 2)
                 disturbance = (equipment.Contains("storm_brace") ? 0.012f : 0.035f) * (1f + Mathf.Sin(Time.time * 1.3f));
 
@@ -345,7 +351,7 @@ namespace Jam.Levels.Level1
                 // Gravity already pulls props down the rotated floor. A small,
                 // continuous assist overcomes contact friction without a sudden threshold.
                 var slope = -Mathf.Sin(houseAngle) * 2.5f;
-                var shake = state == RoundState.Disaster && level == 1 ? Mathf.Sin(Time.time * 8f) * 1.4f : 0f;
+                var shake = quake;
                 var wind = state == RoundState.Disaster && level == 2 ? (equipment.Contains("storm_brace") ? 0.8f : 2.5f) : 0f;
                 item.Body.AddForce(houseRoot.right * (slope + shake + wind), ForceMode.Acceleration);
                 var along = Vector3.Dot(item.Body.linearVelocity, houseRoot.right);
@@ -504,7 +510,8 @@ namespace Jam.Levels.Level1
         {
             if (!CanStartDisaster(forced)) return;
             marketOpen = false;
-            timer = level == 1 ? 10f : level == 2 ? 12f : level == 3 ? 30f : 25f;
+            timer = level == 1 ? quakeDuration : level == 2 ? 12f : level == 3 ? 30f : 25f;
+            if (level == 1) BeginQuakeRecord();
             if (level == 3)
             {
                 extinguishedFires = fireSpreads = 0;
@@ -537,6 +544,7 @@ namespace Jam.Levels.Level1
         private void CompleteLevel()
         {
             if (state != RoundState.Disaster) return;
+            if (level == 1 && singleFloorLevel) { CompleteEarthquakeLevel(true, null); return; }
             var anchored = 0;
             foreach (var item in furniture) if (item != null && item.IsAnchored) anchored++;
             var points = level == 1 ? 400 : level == 2 ? 500 : level == 3 ? 600 : level == 4 ?
@@ -593,6 +601,7 @@ namespace Jam.Levels.Level1
         private void Lose(string reason)
         {
             if (state == RoundState.GameOver || state == RoundState.Victory) return;
+            if (level == 1 && singleFloorLevel && state == RoundState.Disaster) { CompleteEarthquakeLevel(false, reason); return; }
             report = reason;
             marketOpen = false;
             SetMusic(planningMusic);
@@ -888,7 +897,7 @@ namespace Jam.Levels.Level1
             if (drag == null || drag.Selected == null) { Warn("Önce sabitlemek istediğin eşyayı seç."); return; }
             var item = drag.Selected;
             if (drag.Carried == item) { Warn("Sabitlemeden önce eşyayı yere bırak."); return; }
-            if (item.IsAnchored) { item.SetAnchored(false); RefreshAnchorVisual(item); anchors++; Warn(item.displayName + " serbest bırakıldı."); if (sfx != null) sfx.Play("confirm"); return; }
+            if (item.IsAnchored) { item.SetAnchored(false); RefreshAnchorVisual(item); anchors++; Warn(PlayerFacingName(item) + " serbest bırakıldı."); if (sfx != null) sfx.Play("confirm"); return; }
             if (anchors <= 0)
             {
                 if (budget < 30) { Warn("Sabitleme aparatı için 30 altın gerekli."); return; }
@@ -897,7 +906,7 @@ namespace Jam.Levels.Level1
             else anchors--;
             item.SetAnchored(true);
             RefreshAnchorVisual(item);
-            Warn(item.displayName + " sabitlendi.");
+            Warn(PlayerFacingName(item) + " sabitlendi.");
             if (sfx != null) sfx.Play("confirm");
         }
 
