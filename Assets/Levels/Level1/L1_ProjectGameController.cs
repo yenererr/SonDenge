@@ -89,6 +89,8 @@ namespace Jam.Levels.Level1
         public AudioClip disasterMusic;
         [Tooltip("Level 1 tek katlı oturma odasıyla oynanır; market eşyaları alt kata gelir.")]
         public bool singleFloorLevel = true;
+        [Tooltip("Odanın iç yarı genişliği (m). Zemin collider'ı ile aynı olmalı; L1_PropDrag'deki değerle eşleşmeli.")]
+        public float roomHalfWidth = 4.3f;
         [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
         public bool absoluteTorque = true;
         [Tooltip("Hazırlıkta serbest eşyalar eğimde kendiliğinden kaymaz; kayma yalnız afette olur.")]
@@ -404,7 +406,7 @@ namespace Jam.Levels.Level1
                 // from the sum at one coordinate made the whole house snap back.
                 // Mathf.SmoothStep(a, b, t) a→b arası enterpolasyondur; eşik geçişi için
                 // önce t'yi 0–1 aralığına çevirmek gerekir.
-                var edgeWeight = 1f - Smooth01(3.25f, 4.65f, Mathf.Abs(local.x));
+                var edgeWeight = 1f - Smooth01(roomHalfWidth - 0.08f, roomHalfWidth + 1.32f, Mathf.Abs(local.x));
                 var heightWeight = Smooth01(-2.8f, -1.8f, local.y);
                 torque += item.Mass * local.x * edgeWeight * heightWeight;
             }
@@ -779,6 +781,9 @@ namespace Jam.Levels.Level1
             if (!FindFreePosition(box, floorY, out var x))
             { Destroy(clone); return false; }
             clone.transform.localPosition = new Vector3(x, floorY, start.z);
+            // Kopya, kaynağın Rigidbody konumunu taşır; fizik onu eski yere geri yazmasın.
+            body.position = clone.transform.position;
+            body.rotation = clone.transform.rotation;
             return true;
         }
 
@@ -823,7 +828,7 @@ namespace Jam.Levels.Level1
             // The source game spawns purchases near the center and alternates
             // sides. Edge-first spawning made a newly bought heavy item create
             // a large balance impulse before the player could reposition it.
-            var tries = new[] { 0f, 0.4f, -0.4f, 1f, -1f, 1.6f, -1.6f, 2.2f, -2.2f, 2.8f, -2.8f };
+            var tries = new[] { 0f, 0.4f, -0.4f, 1f, -1f, 1.6f, -1.6f, 2.2f, -2.2f, 2.8f, -2.8f, 3.4f, -3.4f, 3.9f, -3.9f };
             var rotation = box.transform.rotation;
             var scale = box.transform.lossyScale;
             var half = Vector3.Scale(box.size * 0.5f,
@@ -836,7 +841,7 @@ namespace Jam.Levels.Level1
             {
                 var candidate = houseRoot.TransformPoint(new Vector3(x, localY, 0.25f)) +
                     rotation * Vector3.Scale(box.center, scale);
-                if (Mathf.Abs(x) + width > 3.22f) continue;
+                if (Mathf.Abs(x) + width > roomHalfWidth - 0.11f) continue;
                 var blocked = false;
                 foreach (var hit in Physics.OverlapBox(candidate, half * 0.98f, rotation, ~0, QueryTriggerInteraction.Ignore))
                     if (!hit.transform.IsChildOf(box.transform) && hit.GetComponentInParent<L1_MovableProp>() != null) { blocked = true; break; }

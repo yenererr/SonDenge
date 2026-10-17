@@ -13,6 +13,8 @@ namespace Jam.Levels.Level1
         public float maxSpeed = 2.8f;
         [Tooltip("Fareyle sürüklemek için karakterin eşyaya yakın olması gereksin mi? Level 1'de kapalı.")]
         public bool mouseRequiresReach = false;
+        [Tooltip("Odanın iç yarı genişliği (m); L1_ProjectGameController.roomHalfWidth ile aynı olmalı.")]
+        public float roomHalfWidth = 4.3f;
         public float contactGap = 0.025f;
         public float interactionReach = 1.35f;
         public bool canDrag = true;
@@ -124,7 +126,7 @@ namespace Jam.Levels.Level1
                 var local = houseRoot.InverseTransformPoint(resident.transform.position);
                 var halfWidth = carriedCollider != null ? carriedCollider.size.x * 0.5f : 0.3f;
                 var halfHeight = carriedCollider != null ? carriedCollider.size.y * 0.5f : 0.3f;
-                local.x = Mathf.Clamp(local.x + resident.Facing * (0.3f + halfWidth), -3.15f, 3.15f);
+                local.x = Mathf.Clamp(local.x + resident.Facing * (0.3f + halfWidth), -(roomHalfWidth - 0.18f), roomHalfWidth - 0.18f);
                 local.y += 0.25f + halfHeight * 0.35f;
                 // The camera looks from negative Z. Keep the carried model in
                 // front of the resident and the floor's front framing timbers.
@@ -150,7 +152,7 @@ namespace Jam.Levels.Level1
                 + Mathf.Abs(Vector3.Dot(right, heldCollider.transform.forward)) * half.z;
             var local = houseRoot.InverseTransformPoint(target);
             // Allow a held item to cross the floor edge and fall when released.
-            local.x = Mathf.Clamp(local.x, -4.20f + width, 4.20f - width);
+            local.x = Mathf.Clamp(local.x, -(roomHalfWidth + 0.87f) + width, roomHalfWidth + 0.87f - width);
             target = houseRoot.TransformPoint(local);
             target.z = held.Body.position.z;
         }
@@ -258,7 +260,7 @@ namespace Jam.Levels.Level1
             foreach (var offset in offsets)
             {
                 var x = preferred + offset;
-                if (Mathf.Abs(x) + half.x > 3.25f) continue;
+                if (Mathf.Abs(x) + half.x > roomHalfWidth - 0.08f) continue;
                 var candidate = houseRoot.TransformPoint(new Vector3(x, floorY + half.y + 0.04f, 0.25f));
                 var blocked = false;
                 foreach (var hit in UnityEngine.Physics.OverlapBox(candidate, half * 0.95f,
@@ -274,7 +276,7 @@ namespace Jam.Levels.Level1
             }
             if (!found && !force) { dropBlockedUntil = Time.unscaledTime + 1.5f; return false; }
             if (!found)
-                destination = houseRoot.TransformPoint(new Vector3(Mathf.Clamp(preferred, -3.0f, 3.0f),
+                destination = houseRoot.TransformPoint(new Vector3(Mathf.Clamp(preferred, -(roomHalfWidth - 0.33f), roomHalfWidth - 0.33f),
                     floorY + half.y + 0.04f, 0.25f));
             carried.Body.position = destination;
             if (box != null) box.enabled = true;

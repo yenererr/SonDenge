@@ -112,7 +112,7 @@ namespace Jam.Levels.Level1
                 if (record.lost || record.item == null) continue;
                 var local = houseRoot.InverseTransformPoint(record.item.transform.position);
                 // Zeminden düşen ya da evin dışına kayan eşya bir kez kayıp sayılır.
-                if (local.y < -2.6f || Mathf.Abs(local.x) > 4.8f) record.lost = true;
+                if (local.y < -2.6f || Mathf.Abs(local.x) > roomHalfWidth + 1.47f) record.lost = true;
             }
         }
 
