@@ -9,8 +9,15 @@ namespace Jam.Levels.Level1
     {
         public Camera sceneCamera;
         public Transform houseRoot;
-        public float followGain = 7f;
-        public float maxSpeed = 2.8f;
+        public float followGain = 18f;
+        public float maxSpeed = 8f;
+        [Tooltip("Fare imleci altındaki / seçili eşyanın parlaklık tonu.")]
+        public Color hoverTint = new Color(1.25f, 1.12f, 0.85f, 1f);
+        public Color selectedTint = new Color(1.12f, 1.22f, 1.15f, 1f);
+        private Renderer[] tintedRenderers;
+        private L1_MovableProp tintedItem;
+        private Color tintedColor;
+        private MaterialPropertyBlock tintBlock;
         [Tooltip("Fareyle sürüklemek için karakterin eşyaya yakın olması gereksin mi? Level 1'de kapalı.")]
         public bool mouseRequiresReach = false;
         [Tooltip("Odanın iç yarı genişliği (m); L1_ProjectGameController.roomHalfWidth ile aynı olmalı.")]
@@ -82,6 +89,8 @@ namespace Jam.Levels.Level1
                 hover = hit.collider.GetComponentInParent<L1_MovableProp>();
                 if (hover != null) break;
             }
+            // Boş yere tıklamak seçimi kaldırır.
+            if (pressedThisFrame && hover == null && held == null) Selected = null;
             if (pressedThisFrame && hover != null)
             {
                 Selected = hover;
@@ -117,6 +126,32 @@ namespace Jam.Levels.Level1
                     ClampToFloor();
                 }
                 if (!isPressed) ReleasePointer();
+            }
+        }
+        private void LateUpdate()
+        {
+            // İmlecin altındaki veya tutulan eşya sıcak, seçili eşya hafif yeşil parlar.
+            var target = held != null ? held : hover != null ? hover : Selected;
+            if (!canDrag && held == null) target = null;
+            var color = target != null && (target == held || target == hover) ? hoverTint : selectedTint;
+            if (target == tintedItem && color == tintedColor) return;
+            ApplyTint(tintedRenderers, null);
+            tintedItem = target;
+            tintedColor = color;
+            tintedRenderers = target != null ? target.GetComponentsInChildren<Renderer>() : null;
+            ApplyTint(tintedRenderers, color);
+        }
+        private void ApplyTint(Renderer[] renderers, Color? color)
+        {
+            if (renderers == null) return;
+            if (tintBlock == null) tintBlock = new MaterialPropertyBlock();
+            foreach (var r in renderers)
+            {
+                if (r == null) continue;
+                if (color == null) { r.SetPropertyBlock(null); continue; }
+                r.GetPropertyBlock(tintBlock);
+                tintBlock.SetColor("_BaseColor", color.Value);
+                r.SetPropertyBlock(tintBlock);
             }
         }
         private void FixedUpdate()

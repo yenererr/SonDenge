@@ -138,7 +138,7 @@ namespace Jam.Levels.Level1
         {
             var angle = game.TiltDegrees;
             var abs = Mathf.Abs(angle);
-            var half = gaugeTrack.rect.width * 0.5f - 10f;
+            var half = gaugeTrack.rect.width * 0.5f - 24f;
             gaugeMarker.anchoredPosition = new Vector2(Mathf.Clamp(angle / gaugeRangeDegrees, -1f, 1f) * half, 0f);
             Color color;
             string status;
@@ -173,23 +173,35 @@ namespace Jam.Levels.Level1
             Pad(radioLabel, 18f, 10f);
 
             // Üst orta: kompakt denge göstergesi (~260 px).
+            // Su terazisi: ekranın üst ortasında, evi kapatmayacak ama net okunacak boyutta.
+            const float trackWidth = 440f;
             var gauge = UiKit.Rect(top, "BalanceGauge", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -18f), new Vector2(300f, 84f));
+                new Vector2(0f, -14f), new Vector2(500f, 118f));
             PaperPanel(gauge);
+            var gaugeTitle = UiKit.Label(gauge, "Başlık", "SU TERAZİSİ", 20, UiKit.Wood, TextAnchor.UpperCenter, FontStyle.Bold);
+            Pad(gaugeTitle, 8f, 6f);
             gaugeTrack = UiKit.Rect(gauge, "Çubuk", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -14f), new Vector2(260f, 18f));
-            UiKit.Panel(gaugeTrack, new Color32(92, 74, 58, 255));
+                new Vector2(0f, -36f), new Vector2(trackWidth, 30f));
+            var trackImage = UiKit.Panel(gaugeTrack, new Color32(206, 222, 196, 255));
+            UiKit.Border(trackImage, UiKit.Wood, 3f);
             var safeZone = UiKit.Rect(gaugeTrack, "GüvenliBölge", new Vector2(0.5f, 0f), new Vector2(0.5f, 1f),
-                new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(260f * safeAngle / gaugeRangeDegrees, 0f));
-            UiKit.Panel(safeZone, new Color(UiKit.Teal.r, UiKit.Teal.g, UiKit.Teal.b, 0.55f));
+                new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(trackWidth * safeAngle / gaugeRangeDegrees, 0f));
+            UiKit.Panel(safeZone, new Color(UiKit.Teal.r, UiKit.Teal.g, UiKit.Teal.b, 0.45f));
+            foreach (var side in new[] { -1f, 1f })
+            {
+                var warnLine = UiKit.Rect(gaugeTrack, "UyarıÇizgisi", new Vector2(0.5f, 0f), new Vector2(0.5f, 1f),
+                    new Vector2(0.5f, 0.5f), new Vector2(side * trackWidth * 0.5f * warningAngle / gaugeRangeDegrees, 0f),
+                    new Vector2(3f, 0f));
+                UiKit.Panel(warnLine, UiKit.Coral);
+            }
             var center = UiKit.Rect(gaugeTrack, "Merkez", new Vector2(0.5f, 0f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(2f, 8f));
-            UiKit.Panel(center, UiKit.Cream);
+                Vector2.zero, new Vector2(3f, 10f));
+            UiKit.Panel(center, UiKit.Wood);
             gaugeMarker = UiKit.Rect(gaugeTrack, "Kabarcık", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(18f, 28f));
+                new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(46f, 22f));
             gaugeMarkerImage = UiKit.Panel(gaugeMarker, UiKit.Teal);
             UiKit.Border(gaugeMarkerImage, UiKit.Wood, 2f);
-            gaugeText = UiKit.Label(gauge, "Durum", "GÜVENLİ  +0.0°", 22, UiKit.Ink, TextAnchor.LowerCenter, FontStyle.Bold);
+            gaugeText = UiKit.Label(gauge, "Durum", "GÜVENLİ  +0.0°", 24, UiKit.Ink, TextAnchor.LowerCenter, FontStyle.Bold);
             Pad(gaugeText, 8f, 8f);
 
             // Sağ üst: bütçe ve süre.
@@ -203,7 +215,7 @@ namespace Jam.Levels.Level1
 
             // Uyarı satırı.
             var warn = UiKit.Rect(root, "Uyarı", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -122f), new Vector2(760f, 50f));
+                new Vector2(0f, -144f), new Vector2(760f, 50f));
             var warnImage = UiKit.Panel(warn, new Color32(255, 232, 214, 240));
             UiKit.Border(warnImage, UiKit.Coral, 2f);
             warningText = UiKit.Label(warn, "Yazı", "", 23, UiKit.Ink, TextAnchor.MiddleCenter);
