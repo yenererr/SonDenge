@@ -158,11 +158,11 @@ namespace Jam.Shop
             }
 
             _budget -= furniture.PurchasePrice;
+            SetFeedback(furniture.DisplayName + " satın alındı.");
             OnFurniturePurchased?.Invoke(furniture);
             if (onFurniturePurchased != null)
                 onFurniturePurchased.Invoke(furniture);
 
-            SetFeedback(furniture.DisplayName + " satın alındı.");
             RefreshView();
             return true;
         }
