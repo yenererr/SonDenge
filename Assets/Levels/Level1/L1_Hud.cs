@@ -27,10 +27,12 @@ namespace Jam.Levels.Level1
 
         private CanvasGroup group;
         private Text levelLabel, radioLabel;
+        private Image levelIcon, selectedIcon;
         private int shownLevel;
         private RectTransform gaugeMarker, gaugeTrack;
         private Image gaugeMarkerImage;
-        private Text gaugeText, budgetText, timerText, warningText, selectedText, centerText, safetyText;
+        private Text gaugeText, budgetText, timerText, warningText, selectedText, selectedDetail,
+            selectedDescription, selectedStatus, centerText, safetyText;
         private Button anchorButton, shopButton, readyButton, sellButton;
         private Text anchorLabel;
         private GameObject selectedPanel, centerPanel, safetyPanel, warningPanel, confirmPanel;
@@ -91,6 +93,8 @@ namespace Jam.Levels.Level1
                 shownLevel = game.LevelNumber;
                 levelLabel.text = "SEVİYE " + shownLevel.ToString("00") + " · " + game.LevelTitle;
                 radioLabel.text = game.RadioLine;
+                levelIcon.sprite = game.UiLevelIcon;
+                levelIcon.enabled = levelIcon.sprite != null;
             }
             UpdatePanels();
             UpdateGauge();
@@ -107,8 +111,16 @@ namespace Jam.Levels.Level1
             var planning = game.IsPlanning && countdownLeft < 0f;
             selectedPanel.SetActive(item != null && item.gameObject.activeInHierarchy);
             if (selectedPanel.activeSelf)
-                selectedText.text = L1_ProjectGameController.PlayerFacingName(item) + "  ·  " + Mathf.RoundToInt(item.Mass) + " kg  ·  " +
+            {
+                selectedText.text = "Seçili: " + L1_ProjectGameController.PlayerFacingName(item);
+                selectedDetail.text = "Ağırlık: " + Mathf.RoundToInt(item.Mass) + " kg";
+                selectedDescription.text = game.UiSelectedDescription;
+                selectedStatus.text = Mathf.RoundToInt(item.Mass) + " kg     |     " +
                     (item.IsAnchored ? "Sabitli" : "Sabit değil");
+                selectedIcon.sprite = game.UiSelectedIcon;
+                selectedIcon.enabled = selectedIcon.sprite != null;
+            }
+            else selectedStatus.text = "Eşya seçilmedi";
             anchorButton.interactable = planning && item != null;
             sellButton.interactable = planning && item != null;
             anchorLabel.text = item != null && item.IsAnchored ? "SABİTLEMEYİ SÖK" : "SABİTLE (" + game.AnchorCost + ")";
@@ -177,23 +189,33 @@ namespace Jam.Levels.Level1
             var top = UiKit.Rect(root, "TopHud", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
                 Vector2.zero, new Vector2(0f, 120f));
             var radio = UiKit.Rect(top, "RadioAlert", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
-                new Vector2(24f, -18f), new Vector2(620f, 92f));
+                new Vector2(24f, -16f), new Vector2(550f, 110f));
             PaperPanel(radio);
-            levelLabel = UiKit.Label(radio, "Seviye", levelTitle, 30, UiKit.Wood, TextAnchor.UpperLeft, FontStyle.Bold);
-            Pad(levelLabel, 18f, 10f);
-            radioLabel = UiKit.Label(radio, "Radyo", radioLine, 21, UiKit.Ink, TextAnchor.LowerLeft, FontStyle.Italic);
-            Pad(radioLabel, 18f, 10f);
+            var iconFrame = UiKit.Rect(radio, "Afet simgesi", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f), new Vector2(18f, 0f), new Vector2(90f, 80f));
+            levelIcon = iconFrame.gameObject.AddComponent<Image>();
+            levelIcon.preserveAspect = true;
+            levelIcon.raycastTarget = false;
+            levelIcon.color = UiKit.Coral;
+            var titleArea = UiKit.Rect(radio, "Seviye alanı", Vector2.zero, Vector2.one,
+                new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            levelLabel = UiKit.Label(titleArea, "Seviye", levelTitle, 31, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
+            levelLabel.rectTransform.offsetMin = new Vector2(116f, 52f);
+            levelLabel.rectTransform.offsetMax = new Vector2(-17f, -13f);
+            radioLabel = UiKit.Label(titleArea, "Radyo", radioLine, 19, UiKit.Ink, TextAnchor.LowerLeft, FontStyle.Italic);
+            radioLabel.rectTransform.offsetMin = new Vector2(116f, 13f);
+            radioLabel.rectTransform.offsetMax = new Vector2(-17f, -56f);
 
             // Üst orta: kompakt denge göstergesi (~260 px).
             // Su terazisi: ekranın üst ortasında, evi kapatmayacak ama net okunacak boyutta.
-            const float trackWidth = 440f;
+            const float trackWidth = 410f;
             var gauge = UiKit.Rect(top, "BalanceGauge", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -14f), new Vector2(500f, 118f));
+                new Vector2(0f, -16f), new Vector2(510f, 126f));
             PaperPanel(gauge);
-            var gaugeTitle = UiKit.Label(gauge, "Başlık", "SU TERAZİSİ", 20, UiKit.Wood, TextAnchor.UpperCenter, FontStyle.Bold);
-            Pad(gaugeTitle, 8f, 6f);
+            var gaugeTitle = UiKit.Label(gauge, "Başlık", "EV DENGESİ", 28, UiKit.Ink, TextAnchor.UpperCenter, FontStyle.Bold);
+            Pad(gaugeTitle, 8f, 9f);
             gaugeTrack = UiKit.Rect(gauge, "Çubuk", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -36f), new Vector2(trackWidth, 30f));
+                new Vector2(0f, -45f), new Vector2(trackWidth, 27f));
             var trackImage = UiKit.Panel(gaugeTrack, new Color32(206, 222, 196, 255));
             UiKit.Border(trackImage, UiKit.Wood, 3f);
             var safeZone = UiKit.Rect(gaugeTrack, "GüvenliBölge", new Vector2(0.5f, 0f), new Vector2(0.5f, 1f),
@@ -213,50 +235,78 @@ namespace Jam.Levels.Level1
                 new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(46f, 22f));
             gaugeMarkerImage = UiKit.Panel(gaugeMarker, UiKit.Teal);
             UiKit.Border(gaugeMarkerImage, UiKit.Wood, 2f);
-            gaugeText = UiKit.Label(gauge, "Durum", "GÜVENLİ  +0.0°", 24, UiKit.Ink, TextAnchor.LowerCenter, FontStyle.Bold);
-            Pad(gaugeText, 8f, 8f);
+            gaugeText = UiKit.Label(gauge, "Durum", "GÜVENLİ  +0.0°", 25, UiKit.Ink, TextAnchor.LowerCenter, FontStyle.Bold);
+            Pad(gaugeText, 8f, 12f);
 
             // Sağ üst: bütçe ve süre.
             var economy = UiKit.Rect(top, "EconomyAndTimer", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Vector2(-24f, -18f), new Vector2(330f, 92f));
             PaperPanel(economy);
-            budgetText = UiKit.Label(economy, "Bütçe", "750 altın", 30, UiKit.Wood, TextAnchor.UpperRight, FontStyle.Bold);
-            Pad(budgetText, 18f, 10f);
+            var economyCoin = UiKit.Rect(economy, "Altın simgesi", new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(0f, 1f), new Vector2(18f, -13f), new Vector2(34f, 34f));
+            var economyCoinImage = economyCoin.gameObject.AddComponent<Image>();
+            economyCoinImage.sprite = L1_HudSkin.Coin;
+            economyCoinImage.raycastTarget = false;
+            budgetText = UiKit.Label(economy, "Bütçe", "750 altın", 28, UiKit.Ink, TextAnchor.UpperRight, FontStyle.Bold);
+            Pad(budgetText, 55f, 10f);
             timerText = UiKit.Label(economy, "Süre", "Hazırlık 45 sn", 24, UiKit.Ink, TextAnchor.LowerRight);
             Pad(timerText, 18f, 10f);
 
             // Uyarı satırı.
             var warn = UiKit.Rect(root, "Uyarı", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
                 new Vector2(0f, -144f), new Vector2(760f, 50f));
-            var warnImage = UiKit.Panel(warn, new Color32(255, 232, 214, 240));
-            UiKit.Border(warnImage, UiKit.Coral, 2f);
+            var warnImage = UiKit.Panel(warn, UiKit.Paper);
+            L1_HudSkin.Apply(warnImage, L1_HudSkin.Surface.FramedPaper);
             warningText = UiKit.Label(warn, "Yazı", "", 23, UiKit.Ink, TextAnchor.MiddleCenter);
             warningPanel = warn.gameObject;
 
             // Alt sol: seçili eşya.
             var selected = UiKit.Rect(root, "FurnitureTooltip", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
-                new Vector2(24f, 24f), new Vector2(520f, 64f));
+                new Vector2(24f, 116f), new Vector2(440f, 158f));
             PaperPanel(selected);
-            selectedText = UiKit.Label(selected, "Yazı", "", 24, UiKit.Ink);
-            Pad(selectedText, 18f, 6f);
+            var selectedPicture = UiKit.Rect(selected, "Eşya görseli", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f), new Vector2(18f, 0f), new Vector2(110f, 110f));
+            L1_HudSkin.Apply(UiKit.Panel(selectedPicture, UiKit.Paper), L1_HudSkin.Surface.Paper);
+            var selectedPictureInner = UiKit.Rect(selectedPicture, "Görsel", Vector2.zero, Vector2.one,
+                new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(-13f, -13f));
+            selectedIcon = selectedPictureInner.gameObject.AddComponent<Image>();
+            selectedIcon.preserveAspect = true;
+            selectedIcon.raycastTarget = false;
+            selectedText = UiKit.Label(selected, "Ad", "", 23, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
+            selectedText.rectTransform.offsetMin = new Vector2(142f, 94f);
+            selectedText.rectTransform.offsetMax = new Vector2(-18f, -16f);
+            selectedDetail = UiKit.Label(selected, "Ağırlık", "", 21, UiKit.Ink, TextAnchor.MiddleLeft);
+            selectedDetail.rectTransform.offsetMin = new Vector2(142f, 58f);
+            selectedDetail.rectTransform.offsetMax = new Vector2(-18f, -54f);
+            selectedDescription = UiKit.Label(selected, "Açıklama", "", 18, UiKit.Ink, TextAnchor.LowerLeft);
+            selectedDescription.rectTransform.offsetMin = new Vector2(142f, 17f);
+            selectedDescription.rectTransform.offsetMax = new Vector2(-18f, -88f);
             selectedPanel = selected.gameObject;
 
             // Alt orta: eylemler.
             var bar = UiKit.Rect(root, "BottomBar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-                new Vector2(70f, 24f), new Vector2(860f, 72f));
-            var layout = bar.gameObject.AddComponent<HorizontalLayoutGroup>();
-            layout.spacing = 14f;
+                new Vector2(0f, 0f), new Vector2(1920f, 108f));
+            L1_HudSkin.Apply(UiKit.Panel(bar, UiKit.Wood), L1_HudSkin.Surface.Wood);
+            var selectedStatusArea = UiKit.Rect(bar, "Eşya durumu", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f), new Vector2(24f, 0f), new Vector2(455f, 76f));
+            L1_HudSkin.Apply(UiKit.Panel(selectedStatusArea, UiKit.Wood), L1_HudSkin.Surface.DarkButton);
+            selectedStatus = UiKit.Label(selectedStatusArea, "Yazı", "Eşya seçilmedi", 23, UiKit.Cream,
+                TextAnchor.MiddleCenter, FontStyle.Bold);
+            var actions = UiKit.Rect(bar, "Eylemler", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(-90f, 0f), new Vector2(900f, 76f));
+            var layout = actions.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 13f;
             layout.childControlWidth = true;
             layout.childForceExpandWidth = true;
-            anchorButton = BarButton(bar, "SabitleButonu", "SABİTLE (30)", UiKit.Paper, () => game.UiToggleAnchor());
+            anchorButton = BarButton(actions, "SabitleButonu", "SABİTLE (30)", UiKit.Paper, () => game.UiToggleAnchor());
             anchorLabel = anchorButton.GetComponentInChildren<Text>();
-            sellButton = BarButton(bar, "SatButonu", "SAT", UiKit.Paper, () => game.UiSellSelected());
-            shopButton = BarButton(bar, "MağazaButonu", "MAĞAZA", UiKit.Paper, () => game.UiOpenMarket());
-            readyButton = BarButton(bar, "AfeteHazırımButonu", "AFETE HAZIRIM", UiKit.Orange, RequestDisaster);
+            sellButton = BarButton(actions, "SatButonu", "SAT", UiKit.Paper, () => game.UiSellSelected());
+            shopButton = BarButton(actions, "MağazaButonu", "MAĞAZA", UiKit.Paper, () => game.UiToggleMarket());
+            readyButton = BarButton(actions, "AfeteHazırımButonu", "AFETE HAZIRIM", UiKit.Orange, RequestDisaster);
 
             // Alt sağ: kamera.
             var zoom = UiKit.Rect(root, "ZoomControls", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f),
-                new Vector2(-24f, 24f), new Vector2(300f, 64f));
+                new Vector2(-24f, 19f), new Vector2(275f, 70f));
             var zoomLayout = zoom.gameObject.AddComponent<HorizontalLayoutGroup>();
             zoomLayout.spacing = 10f;
             zoomLayout.childControlWidth = true;
@@ -268,12 +318,13 @@ namespace Jam.Levels.Level1
             var fitLayout = fit.gameObject.AddComponent<LayoutElement>();
             fitLayout.flexibleWidth = 2f;
             var hint = UiKit.Rect(root, "KontrolIpucu", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-                new Vector2(70f, 100f), new Vector2(860f, 30f));
+                new Vector2(-90f, 115f), new Vector2(900f, 30f));
             UiKit.Label(hint, "Yazı", "Sol fare: eşyayı sağa–sola sürükle  ·  Sağ fare: iptal  ·  F: sabitle  ·  A/D: yürü  ·  W/S: merdiven  ·  Tekerlek: yakınlaş",
                 19, UiKit.Cream, TextAnchor.MiddleCenter).gameObject.AddComponent<Shadow>();
             var pause = UiKit.Rect(root, "Duraklat", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Vector2(-24f, -122f), new Vector2(64f, 56f));
-            UiKit.Button(pause, "II", 28, UiKit.Paper, UiKit.Ink, () => game.UiTogglePause());
+            L1_HudSkin.Button(UiKit.Button(pause, "II", 28, UiKit.Paper, UiKit.Ink,
+                () => game.UiTogglePause()), L1_HudSkin.Surface.PaperButton);
 
             // Orta: geri sayım / DEPREM!
             var centerRect = UiKit.Rect(root, "CountdownOverlay", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -286,8 +337,8 @@ namespace Jam.Levels.Level1
             // Afet sırasında gerçek hayat satırı.
             var safety = UiKit.Rect(root, "DisasterNotice", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
                 new Vector2(0f, 110f), new Vector2(820f, 52f));
-            var safetyImage = UiKit.Panel(safety, new Color32(255, 240, 220, 235));
-            UiKit.Border(safetyImage, UiKit.Coral, 2f);
+            var safetyImage = UiKit.Panel(safety, UiKit.Paper);
+            L1_HudSkin.Apply(safetyImage, L1_HudSkin.Surface.FramedPaper);
             safetyText = UiKit.Label(safety, "Yazı", safetyLine, 24, UiKit.Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
             safetyPanel = safety.gameObject;
             safetyPanel.SetActive(false);
@@ -296,17 +347,19 @@ namespace Jam.Levels.Level1
             var confirm = UiKit.Rect(root, "RiskOnayı", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, new Vector2(760f, 260f));
             var confirmImage = UiKit.Panel(confirm, UiKit.Paper, true);
-            UiKit.Border(confirmImage, UiKit.Coral, 4f);
+            L1_HudSkin.Apply(confirmImage, L1_HudSkin.Surface.FramedPaper);
             var confirmText = UiKit.Label(confirm, "Yazı",
                 "Ev şu an belirgin şekilde eğik. Deprem bu eğimi büyütebilir.\nYine de başlatılsın mı?", 28, UiKit.Ink,
                 TextAnchor.UpperCenter);
             Pad(confirmText, 30f, 30f);
             var yes = UiKit.Rect(confirm, "Evet", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(1f, 0f),
                 new Vector2(-12f, 28f), new Vector2(300f, 64f));
-            UiKit.Button(yes, "BAŞLAT", 28, UiKit.Orange, UiKit.Ink, BeginCountdown);
+            L1_HudSkin.Button(UiKit.Button(yes, "BAŞLAT", 28, UiKit.Orange, UiKit.Ink,
+                BeginCountdown), L1_HudSkin.Surface.CopperButton);
             var no = UiKit.Rect(confirm, "Hayır", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0f),
                 new Vector2(12f, 28f), new Vector2(300f, 64f));
-            UiKit.Button(no, "DENGELE", 28, UiKit.Paper, UiKit.Ink, () => confirmPanel.SetActive(false));
+            L1_HudSkin.Button(UiKit.Button(no, "DENGELE", 28, UiKit.Paper, UiKit.Ink,
+                () => confirmPanel.SetActive(false)), L1_HudSkin.Surface.PaperButton);
             confirmPanel = confirm.gameObject;
             confirmPanel.SetActive(false);
         }
@@ -314,7 +367,7 @@ namespace Jam.Levels.Level1
         private static void PaperPanel(RectTransform rt)
         {
             var image = UiKit.Panel(rt, UiKit.Paper);
-            UiKit.Border(image, UiKit.Wood, 3f);
+            L1_HudSkin.Apply(image, L1_HudSkin.Surface.FramedPaper);
         }
 
         private static void Pad(Text label, float x, float y)
@@ -327,7 +380,9 @@ namespace Jam.Levels.Level1
             UnityEngine.Events.UnityAction action)
         {
             var rt = UiKit.Rect(parent, name, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            return UiKit.Button(rt, caption, 26, fill, UiKit.Ink, action);
+            var button = UiKit.Button(rt, caption, 25, fill, UiKit.Ink, action);
+            L1_HudSkin.Button(button, fill == UiKit.Orange ? L1_HudSkin.Surface.CopperButton : L1_HudSkin.Surface.PaperButton);
+            return button;
         }
     }
 }

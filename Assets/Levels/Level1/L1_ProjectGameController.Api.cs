@@ -13,7 +13,7 @@ namespace Jam.Levels.Level1
         public bool IsDisaster => state == RoundState.Disaster;
         public bool IsPausedMenu => menuOpen || howToOpen;
         public bool IsMarketOpen => marketOpen;
-        public bool HasModal => marketOpen || menuOpen || howToOpen || state == RoundState.Report ||
+        public bool HasModal => (marketOpen && useLegacyHud) || menuOpen || howToOpen || state == RoundState.Report ||
             state == RoundState.GameOver || state == RoundState.Victory || state == RoundState.StartMenu;
         public int Budget => budget;
         public float TimeLeft => Mathf.Max(0f, timer);
@@ -24,8 +24,37 @@ namespace Jam.Levels.Level1
         public string WarningText => warningUntil > 0f ? warning : null;
         public int AnchorCost => 30;
         public L1_MovableProp SelectedItem => drag != null ? drag.Selected : null;
+        public Sprite UiLevelIcon => Icon(level == 1 ? "deprem_cantasi" : level == 2 ? "storm_brace" :
+            level == 3 ? "fire_flame" : level == 4 ? "lightning_rod_system" : "water_sensor");
+        public Sprite UiSelectedIcon
+        {
+            get
+            {
+                var selected = SelectedItem;
+                if (selected == null) return null;
+                foreach (var entry in Catalog)
+                    if ((selected.itemId != null && selected.itemId.StartsWith(entry.id)) ||
+                        (entry.template != null && selected.displayName != null && selected.displayName.Contains(entry.template)))
+                        return Icon(entry.id);
+                return null;
+            }
+        }
+        public string UiSelectedDescription
+        {
+            get
+            {
+                var selected = SelectedItem;
+                if (selected == null) return string.Empty;
+                foreach (var entry in Catalog)
+                    if ((selected.itemId != null && selected.itemId.StartsWith(entry.id)) ||
+                        (entry.template != null && selected.displayName != null && selected.displayName.Contains(entry.template)))
+                        return Description(entry);
+                return "Evdeki taşınabilir eşya.";
+            }
+        }
 
         public void UiOpenMarket() { if (state == RoundState.Planning) marketOpen = true; }
+        public void UiToggleMarket() { if (state == RoundState.Planning) marketOpen = !marketOpen; }
         public void UiStartDisaster() => StartDisaster();
         /// <summary>Geri sayımdan önce kontrol; başlatılamıyorsa uyarıyı gösterir ve false döner.</summary>
         public bool UiCanStartDisaster() => CanStartDisaster(false);

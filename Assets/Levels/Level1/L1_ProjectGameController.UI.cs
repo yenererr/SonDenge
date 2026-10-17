@@ -104,7 +104,8 @@ namespace Jam.Levels.Level1
 
             GUI.matrix = previousMatrix;
             if (state == RoundState.Planning || state == RoundState.Disaster) L1_TouchControls.Draw();
-            if (drag != null) drag.canDrag = state == RoundState.Planning && !marketOpen && !menuOpen && !howToOpen && !countdownActive;
+            if (drag != null) drag.canDrag = state == RoundState.Planning && (!marketOpen || !useLegacyHud) &&
+                !menuOpen && !howToOpen && !countdownActive && !growing;
         }
 
         private void DrawTopBar(float width)

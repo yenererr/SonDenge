@@ -74,7 +74,8 @@ namespace Jam.Levels.Level1
             {
                 categoryButtons[i].gameObject.SetActive(i < categories.Length);
                 if (i < categories.Length)
-                    categoryButtons[i].targetGraphic.color = i == shopCategory ? UiKit.Mustard : UiKit.Paper;
+                    L1_HudSkin.Button(categoryButtons[i], i == shopCategory
+                        ? L1_HudSkin.Surface.CopperButton : L1_HudSkin.Surface.PaperButton);
             }
             for (var i = shopList.childCount - 1; i >= 0; i--) Destroy(shopList.GetChild(i).gameObject);
             foreach (var entry in game.UiShopEntries(shopCategory)) ShopRow(entry);
@@ -120,7 +121,8 @@ namespace Jam.Levels.Level1
             var frame = UiKit.Rect(parent, "Çerçeve", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f), Vector2.zero, size);
             var image = UiKit.Panel(frame, UiKit.Paper, true);
-            UiKit.Border(image, border, 4f);
+            L1_HudSkin.Apply(image, L1_HudSkin.Surface.FramedPaper);
+            UiKit.Border(image, border, 2f);
             return frame;
         }
 
@@ -128,31 +130,44 @@ namespace Jam.Levels.Level1
             Vector2 anchor, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction action)
         {
             var rt = UiKit.Rect(parent, name, anchor, anchor, new Vector2(0.5f, 0.5f), position, size);
-            return UiKit.Button(rt, caption, 26, fill, UiKit.Ink, action);
+            var button = UiKit.Button(rt, caption, 26, fill, UiKit.Ink, action);
+            L1_HudSkin.Button(button, fill == UiKit.Orange || fill == UiKit.Coral
+                ? L1_HudSkin.Surface.CopperButton : L1_HudSkin.Surface.PaperButton);
+            return button;
         }
 
         private void BuildShop(Transform root)
         {
-            var overlay = Overlay(root, "ShopDrawer", 0.45f);
+            // Mağaza oyunun yanında açık kalır; boş Canvas alanı dünyaya tıklamayı engellemez.
+            var overlay = UiKit.Stretch(root, "ShopDrawer");
             shopPanel = overlay.gameObject;
             var drawer = UiKit.Rect(overlay, "Çekmece", new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f),
-                Vector2.zero, new Vector2(440f, 0f));
-            var drawerImage = UiKit.Panel(drawer, UiKit.Paper, true);
-            UiKit.Border(drawerImage, UiKit.Wood, 4f);
+                Vector2.zero, new Vector2(520f, 0f));
+            L1_HudSkin.Apply(UiKit.Panel(drawer, UiKit.Wood, true), L1_HudSkin.Surface.Wood);
 
             var head = UiKit.Rect(drawer, "Başlık", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -16f), new Vector2(-32f, 60f));
-            UiKit.Label(head, "Yazı", "EV MARKETİ", 38, UiKit.Wood, TextAnchor.MiddleLeft, FontStyle.Bold);
-            shopBudget = UiKit.Label(head, "Bütçe", "", 26, UiKit.Ink, TextAnchor.MiddleRight, FontStyle.Bold);
-            shopBudget.rectTransform.offsetMax = new Vector2(-70f, 0f);
+                new Vector2(0f, -20f), new Vector2(-34f, 72f));
+            L1_HudSkin.Apply(UiKit.Panel(head, UiKit.Paper), L1_HudSkin.Surface.FramedPaper);
+            var title = UiKit.Label(head, "Yazı", "EV MARKETİ", 35, UiKit.Ink, TextAnchor.MiddleLeft, FontStyle.Bold);
+            title.rectTransform.offsetMin = new Vector2(20f, 0f);
+            title.rectTransform.offsetMax = new Vector2(-185f, 0f);
+            var coin = UiKit.Rect(head, "Altın", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
+                new Vector2(1f, 0.5f), new Vector2(-151f, 0f), new Vector2(29f, 29f));
+            var coinImage = coin.gameObject.AddComponent<Image>();
+            coinImage.sprite = L1_HudSkin.Coin;
+            coinImage.raycastTarget = false;
+            shopBudget = UiKit.Label(head, "Bütçe", "", 22, UiKit.Ink, TextAnchor.MiddleRight, FontStyle.Bold);
+            shopBudget.rectTransform.offsetMin = new Vector2(330f, 0f);
+            shopBudget.rectTransform.offsetMax = new Vector2(-18f, 0f);
             var close = UiKit.Rect(head, "Kapat", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
-                Vector2.zero, new Vector2(56f, 52f));
-            UiKit.Button(close, "X", 28, UiKit.Coral, UiKit.Cream, () => game.UiCloseMarket());
+                new Vector2(-2f, 60f), new Vector2(44f, 34f));
+            L1_HudSkin.Button(UiKit.Button(close, "×", 22, UiKit.Orange, UiKit.Cream,
+                () => game.UiCloseMarket()), L1_HudSkin.Surface.CopperButton);
 
             var tabs = UiKit.Rect(drawer, "Sekmeler", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -88f), new Vector2(-32f, 52f));
+                new Vector2(0f, -103f), new Vector2(-34f, 57f));
             var tabLayout = tabs.gameObject.AddComponent<HorizontalLayoutGroup>();
-            tabLayout.spacing = 10f;
+            tabLayout.spacing = 4f;
             tabLayout.childControlWidth = true;
             tabLayout.childForceExpandWidth = true;
             categoryButtons = new Button[6];
@@ -161,19 +176,20 @@ namespace Jam.Levels.Level1
                 var index = i;
                 var rt = UiKit.Rect(tabs, "Sekme" + i, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
                 var name = i < game.UiCategories.Length ? game.UiCategories[i] : "";
-                categoryButtons[i] = UiKit.Button(rt, name, 24, UiKit.Paper, UiKit.Ink, () => { shopCategory = index; RefreshShop(); });
+                categoryButtons[i] = UiKit.Button(rt, name, 19, UiKit.Paper, UiKit.Ink,
+                    () => { shopCategory = index; RefreshShop(); });
+                L1_HudSkin.Button(categoryButtons[i], L1_HudSkin.Surface.PaperButton);
             }
 
             var view = UiKit.Rect(drawer, "Liste", new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 6f), new Vector2(-32f, -260f));
+                new Vector2(0f, -38f), new Vector2(-32f, -208f));
             view.gameObject.AddComponent<RectMask2D>();
-            // Saydam arka plan, satır aralarında da kaydırmayı yakalar.
-            UiKit.Panel(view, new Color(0f, 0f, 0f, 0.04f), true);
+            L1_HudSkin.Apply(UiKit.Panel(view, UiKit.Paper, true), L1_HudSkin.Surface.Paper);
             shopList = UiKit.Rect(view, "İçerik", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
                 Vector2.zero, Vector2.zero);
             var listLayout = shopList.gameObject.AddComponent<VerticalLayoutGroup>();
-            listLayout.spacing = 10f;
-            listLayout.padding = new RectOffset(4, 4, 4, 4);
+            listLayout.spacing = 8f;
+            listLayout.padding = new RectOffset(8, 8, 8, 8);
             listLayout.childControlHeight = false;
             listLayout.childForceExpandHeight = false;
             listLayout.childControlWidth = true;
@@ -186,24 +202,19 @@ namespace Jam.Levels.Level1
             scroll.scrollSensitivity = 30f;
 
             var footer = UiKit.Rect(drawer, "Alt", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
-                new Vector2(0f, 16f), new Vector2(-32f, 64f));
-            shopFooter = UiKit.Label(footer, "Yazı", "", 21, UiKit.Ink);
-            shopFooter.rectTransform.offsetMax = new Vector2(-150f, 0f);
-            var done = UiKit.Rect(footer, "Tamam", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
-                Vector2.zero, new Vector2(140f, 56f));
-            UiKit.Button(done, "TAMAM", 26, UiKit.Orange, UiKit.Ink, () => game.UiCloseMarket());
+                new Vector2(0f, 8f), new Vector2(-32f, 48f));
+            L1_HudSkin.Apply(UiKit.Panel(footer, UiKit.Paper), L1_HudSkin.Surface.FramedPaper);
+            shopFooter = UiKit.Label(footer, "Yazı", "", 18, UiKit.Ink, TextAnchor.MiddleCenter);
         }
 
         private void ShopRow(L1_ProjectGameController.ShopEntry entry)
         {
             var row = UiKit.Rect(shopList, entry.id, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero,
-                new Vector2(0f, 148f));
-            var rowImage = UiKit.Panel(row, entry.installed ? new Color32(226, 240, 210, 255) : UiKit.Cream);
-            UiKit.Border(rowImage, entry.installed ? UiKit.Olive : new Color(0.38f, 0.24f, 0.15f, 0.6f), 2f);
+                new Vector2(0f, 154f));
+            L1_HudSkin.Apply(UiKit.Panel(row, UiKit.Cream), L1_HudSkin.Surface.Paper);
             var thumbnail = UiKit.Rect(row, "Eşya görseli çerçevesi", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
-                new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(96f, 96f));
-            var thumbnailFrame = UiKit.Panel(thumbnail, UiKit.Paper);
-            UiKit.Border(thumbnailFrame, UiKit.Wood, 1f);
+                new Vector2(0f, 0.5f), new Vector2(12f, 0f), new Vector2(112f, 112f));
+            L1_HudSkin.Apply(UiKit.Panel(thumbnail, UiKit.Paper), L1_HudSkin.Surface.Paper);
             if (entry.icon != null)
             {
                 var picture = UiKit.Rect(thumbnail, "Eşya görseli", Vector2.zero, Vector2.one,
@@ -213,36 +224,40 @@ namespace Jam.Levels.Level1
                 image.preserveAspect = true;
                 image.raycastTarget = false;
             }
-            var title = UiKit.Label(row, "Ad", entry.title, 23, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
-            title.rectTransform.offsetMin = new Vector2(122f, 8f);
-            title.rectTransform.offsetMax = new Vector2(-112f, -8f);
+            var title = UiKit.Label(row, "Ad", entry.title, 22, UiKit.Ink, TextAnchor.MiddleLeft, FontStyle.Bold);
+            title.rectTransform.offsetMin = new Vector2(135f, 103f);
+            title.rectTransform.offsetMax = new Vector2(-90f, -11f);
             var massRect = UiKit.Rect(row, "Kütle alanı", new Vector2(1f, 1f), new Vector2(1f, 1f),
-                new Vector2(1f, 1f), new Vector2(-14f, -8f), new Vector2(94f, 27f));
-            UiKit.Label(massRect, "Kütle", entry.mass + " kg", 19, UiKit.Ink, TextAnchor.UpperRight);
-            var description = UiKit.Label(row, "Açıklama", entry.description, 19, new Color(0.3f, 0.22f, 0.16f), TextAnchor.MiddleLeft);
-            description.rectTransform.offsetMin = new Vector2(122f, 66f);
-            description.rectTransform.offsetMax = new Vector2(-14f, -37f);
+                new Vector2(1f, 1f), new Vector2(-12f, -10f), new Vector2(78f, 28f));
+            UiKit.Label(massRect, "Kütle", entry.mass + " kg", 17, UiKit.Ink, TextAnchor.MiddleRight);
+            var description = UiKit.Label(row, "Açıklama", entry.description, 17,
+                new Color(0.3f, 0.22f, 0.16f), TextAnchor.MiddleLeft);
+            description.rectTransform.offsetMin = new Vector2(135f, 62f);
+            description.rectTransform.offsetMax = new Vector2(-14f, -49f);
             if (entry.income > 0)
             {
                 var income = UiKit.Label(row, "Bölüm getirisi", "Korunursa +" + entry.income + " altın",
-                    19, UiKit.Olive, TextAnchor.MiddleLeft, FontStyle.Bold);
-                income.rectTransform.offsetMin = new Vector2(122f, 38f);
-                income.rectTransform.offsetMax = new Vector2(-14f, -87f);
+                    16, UiKit.Olive, TextAnchor.MiddleLeft, FontStyle.Bold);
+                income.rectTransform.offsetMin = new Vector2(135f, 39f);
+                income.rectTransform.offsetMax = new Vector2(-14f, -92f);
             }
-            var price = UiKit.Label(row, "Fiyat", entry.cost + " altın", 23, UiKit.Wood, TextAnchor.LowerLeft, FontStyle.Bold);
-            price.rectTransform.offsetMin = new Vector2(122f, 8f);
-            price.rectTransform.offsetMax = new Vector2(-190f, -113f);
+            var price = UiKit.Label(row, "Fiyat", "● " + entry.cost + " altın", 20, UiKit.Wood,
+                TextAnchor.MiddleLeft, FontStyle.Bold);
+            price.rectTransform.offsetMin = new Vector2(135f, 10f);
+            price.rectTransform.offsetMax = new Vector2(-170f, -118f);
             var buttonRect = UiKit.Rect(row, "Al", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f),
-                new Vector2(-12f, 8f), new Vector2(170f, 44f));
+                new Vector2(-11f, 11f), new Vector2(153f, 43f));
             var caption = entry.locked ? entry.unlockLevel + ". BÖLÜMDE" : entry.installed ? "KURULDU ✓" :
                 !entry.affordable ? "YETERSİZ ALTIN" : "SATIN AL";
             var id = entry.id;
-            var button = UiKit.Button(buttonRect, caption, 20, entry.affordable && !entry.locked && !entry.installed
+            var button = UiKit.Button(buttonRect, caption, 18, entry.affordable && !entry.locked && !entry.installed
                 ? UiKit.Orange : UiKit.Paper, UiKit.Ink, () =>
                 {
                     game.UiPurchase(id);
                     shopBudgetSeen = -1; // satın alma sonrası listeyi tazele
                 });
+            L1_HudSkin.Button(button, entry.affordable && !entry.locked && !entry.installed
+                ? L1_HudSkin.Surface.CopperButton : L1_HudSkin.Surface.PaperButton);
             button.interactable = entry.affordable && !entry.locked && !entry.installed;
         }
 
