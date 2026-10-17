@@ -20,6 +20,8 @@ namespace Jam.Levels.Level1
         private MaterialPropertyBlock tintBlock;
         [Tooltip("Fareyle sürüklemek için karakterin eşyaya yakın olması gereksin mi? Level 1'de kapalı.")]
         public bool mouseRequiresReach = false;
+        [Tooltip("Karakterin E ile eşyayı eline alıp taşıması. Kapalıyken eşyalar yalnız fareyle sürüklenir.")]
+        public bool allowCarry = false;
         [Tooltip("Odanın iç yarı genişliği (m); L1_ProjectGameController.roomHalfWidth ile aynı olmalı.")]
         public float roomHalfWidth = 4.3f;
         public float contactGap = 0.025f;
@@ -61,7 +63,7 @@ namespace Jam.Levels.Level1
             actionWasHeld = actionHeld;
             if (Time.timeScale <= 0 || !canDrag) { ReleasePointer(); return; }
             var keyboard = Keyboard.current;
-            if ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || actionPressed)
+            if (allowCarry && ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || actionPressed))
             {
                 if (carried != null) DropCarried();
                 else PickUpNearest();

@@ -257,7 +257,7 @@ namespace Jam.Levels.Level1
             fitLayout.flexibleWidth = 2f;
             var hint = UiKit.Rect(root, "KontrolIpucu", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
                 new Vector2(70f, 100f), new Vector2(860f, 30f));
-            UiKit.Label(hint, "Yazı", "Sol fare: tut ve sağa–sola sürükle  ·  Sağ fare: iptal  ·  F: sabitle  ·  Tekerlek: yakınlaş  ·  Orta fare: kaydır",
+            UiKit.Label(hint, "Yazı", "Sol fare: eşyayı sağa–sola sürükle  ·  Sağ fare: iptal  ·  F: sabitle  ·  A/D: yürü  ·  W/S: merdiven  ·  Tekerlek: yakınlaş",
                 19, UiKit.Cream, TextAnchor.MiddleCenter).gameObject.AddComponent<Shadow>();
             var pause = UiKit.Rect(root, "Duraklat", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
                 new Vector2(-24f, -122f), new Vector2(64f, 56f));

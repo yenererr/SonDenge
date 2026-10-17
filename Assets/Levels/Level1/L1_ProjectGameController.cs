@@ -91,6 +91,18 @@ namespace Jam.Levels.Level1
         public bool singleFloorLevel = true;
         [Tooltip("Odanın iç yarı genişliği (m). Zemin collider'ı ile aynı olmalı; L1_PropDrag'deki değerle eşleşmeli.")]
         public float roomHalfWidth = 4.3f;
+        [Tooltip("Level 1 iki katlı: üst kat mutfak. Mutfak eşyaları markette açık ve üst kata gelir.")]
+        public bool kitchenUpperFloor = true;
+
+        private bool IsLocked(ShopItem item) => level < item.unlockLevel &&
+            !(kitchenUpperFloor && item.unlockLevel == 2 && item.category == "Mobilya");
+
+        private int SpawnFloorFor(ShopItem item)
+        {
+            if (kitchenUpperFloor) return item.unlockLevel == 2 ? 1 : 0;
+            if (singleFloorLevel) return 0;
+            return item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
+        }
         [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
         public bool absoluteTorque = true;
         [Tooltip("Hazırlıkta serbest eşyalar eğimde kendiliğinden kaymaz; kayma yalnız afette olur.")]
@@ -737,7 +749,7 @@ namespace Jam.Levels.Level1
 
         private void Purchase(ShopItem item)
         {
-            if (state != RoundState.Planning || level < item.unlockLevel) return;
+            if (state != RoundState.Planning || IsLocked(item)) return;
             if (budget < item.cost) { Warn("Yeterli altın yok."); return; }
             if (item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id)) { Warn("Bu ekipman zaten kurulu."); return; }
             if (item.category == "Mobilya" && !SpawnFurniture(item)) { Warn("Bu katta yeni eşya için yer yok. Bir eşyayı satabilirsin."); return; }
@@ -774,7 +786,7 @@ namespace Jam.Levels.Level1
             movable.balanceMassKg = item.mass;
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
-            var floor = singleFloorLevel ? 0 : item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
+            var floor = SpawnFloorFor(item);
             var box = clone.GetComponent<BoxCollider>();
             var floorY = FloorY[floor] + box.size.y * 0.5f + 0.03f;
             var start = source.transform.localPosition;
@@ -791,7 +803,7 @@ namespace Jam.Levels.Level1
         {
             var sprite = Icon(item.id);
             if (sprite == null) return false;
-            var floor = singleFloorLevel ? 0 : item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
+            var floor = SpawnFloorFor(item);
             var size = item.id == "wardrobe" ? new Vector3(0.75f, 1.45f, 0.4f) :
                 item.id == "dining_table" ? new Vector3(1.2f, 0.7f, 0.5f) :
                 item.id == "bedside_table" ? new Vector3(0.48f, 0.72f, 0.4f) :

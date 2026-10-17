@@ -13,7 +13,8 @@ namespace Jam.Levels.Level1
     {
         [Header("Paneller")]
         [SerializeField, TextArea(4, 14)] private string howToText =
-            "• Sol fareyle bir eşyayı tut ve yalnız sağa–sola sürükle. Sağ fare sürüklemeyi iptal eder.\n" +
+            "• Sol fareyle bir eşyayı tut ve yalnız sağa–sola sürükle; karakterin taşıması gerekmez. Sağ fare iptal eder.\n" +
+            "• Ev iki katlı: altta oturma odası, üstte mutfak. Karakter A/D ile yürür, merdivende W/S ile kat değiştirir.\n" +
             "• Ev sivri bir kayanın tepesinde durur. Ağır eşya kenara gittikçe ev o yöne eğilir; üstteki su terazisini izle.\n" +
             "• Eşyayı seçip SABİTLE (F) ile duvara bağla (30 altın). Sabit eşya depremde kaymaz.\n" +
             "• MAĞAZA'dan deprem çantası ve yeni eşya al. Çanta olmadan deprem başlatılamaz.\n" +

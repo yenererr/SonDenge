@@ -65,7 +65,7 @@ namespace Jam.Levels.Level1
                 {
                     id = item.id, title = item.title, description = Description(item),
                     cost = item.cost, mass = item.mass, unlockLevel = item.unlockLevel,
-                    locked = level < item.unlockLevel,
+                    locked = IsLocked(item),
                     installed = item.category != "Mobilya" && item.id != "sabitleme_aparati" && equipment.Contains(item.id),
                     affordable = budget >= item.cost
                 });
