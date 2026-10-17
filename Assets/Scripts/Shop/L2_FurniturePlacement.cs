@@ -102,7 +102,19 @@ namespace Jam.Shop
                 ConfirmPlacement();
 
             _pendingFurniture = furniture;
-            GameObject instance = Instantiate(furniture.ModelPrefab, placementRoot);
+            // Unity 6'da bazı prefab varlıkları generic Instantiate<GameObject>
+            // çağrısında geçersiz cast üretebiliyor. Non-generic API ile güvenli
+            // şekilde oluşturup sonucu açıkça kontrol ediyoruz.
+            UnityEngine.Object spawned = UnityEngine.Object.Instantiate((UnityEngine.Object)furniture.ModelPrefab, placementRoot, false);
+            GameObject instance = spawned as GameObject;
+            if (instance == null)
+            {
+                _pendingFurniture = null;
+                shopPanel.RefundPurchase(furniture.PurchasePrice);
+                shopPanel.ShowFeedback(furniture.DisplayName + " modeli oluşturulamadı.");
+                return;
+            }
+
             _preview = instance.GetComponent<L2_PlacedFurniture>();
             if (_preview == null)
                 _preview = instance.AddComponent<L2_PlacedFurniture>();
