@@ -132,7 +132,7 @@ namespace Jam.Levels.Level1
 
         private static Color32 PaperColor(float noise, float edge)
         {
-            var age = 16f * (1f - Mathf.SmoothStep(18f, 44f, edge));
+            var age = 16f * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(18f, 44f, edge)));
             var variation = noise + age;
             return new Color32((byte)(248f - variation * 0.44f), (byte)(226f - variation * 0.74f),
                 (byte)(192f - variation), 255);
