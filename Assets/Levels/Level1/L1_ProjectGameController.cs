@@ -126,6 +126,9 @@ namespace Jam.Levels.Level1
         private int level = 1, budget = 750, score, anchors;
         private float timer = 45f, houseAngle, angularVelocity, baselineTorque, smoothedTorque;
         private bool levelEntryBalanceLocked;
+        [SerializeField, Min(0f)] private float residentBalanceMassKg = 8f;
+        [SerializeField, Min(0f)] private float residentMovementThreshold = 0.12f;
+        private float levelEntryResidentX;
         private float maxTilt;
         private float buildingHealth = 100f, water, indoorFlood, lightningClock, lightningFlash;
         private float evacuatedWater, waterSensorCooldown;
@@ -373,12 +376,24 @@ namespace Jam.Levels.Level1
             TrackLostFurniture();
             if (state == RoundState.Planning && levelEntryBalanceLocked)
             {
-                // Yeni katın eşyaları yerleşirken oluşan pasif tork farkı evi yatırmasın.
-                baselineTorque = ComputeTorque();
-                smoothedTorque = baselineTorque;
-                houseAngle = angularVelocity = 0f;
-                balancePivot.localRotation = Quaternion.identity;
-                return;
+                var residentX = resident != null
+                    ? houseRoot.InverseTransformPoint(resident.transform.position).x : levelEntryResidentX;
+                var residentShift = residentX - levelEntryResidentX;
+                var currentTorque = ComputeTorque();
+                if (Mathf.Abs(residentShift) < residentMovementThreshold)
+                {
+                    // Yeni katın pasif yerleşimi evi yatırmaz; karakter yürüyene kadar dengeyi koru.
+                    baselineTorque = currentTorque;
+                    smoothedTorque = baselineTorque;
+                    houseAngle = angularVelocity = 0f;
+                    balancePivot.localRotation = Quaternion.identity;
+                    return;
+                }
+                // Yürüyüş kilidi açar. O anki mobilya yükünü başlangıç kabul edip yalnız
+                // karakterin kat ettiği mesafeyi eğime ekle; aşağıdaki sönümleme geçerli kalır.
+                baselineTorque = currentTorque - ResidentBalanceMass() * residentShift;
+                smoothedTorque = currentTorque;
+                ReleaseLevelEntryBalance();
             }
             var disturbance = 0f;
             var quake = 0f;
@@ -469,10 +484,12 @@ namespace Jam.Levels.Level1
                 torque += carriedMass * drag.CarriedLocalX;
             }
             if (resident != null)
-                torque += (8f + (bagAttached ? bagMassKg : 0f)) * houseRoot.InverseTransformPoint(resident.transform.position).x;
+                torque += ResidentBalanceMass() * houseRoot.InverseTransformPoint(resident.transform.position).x;
             if (wilson != null) torque += wilson.EggTorque();
             return torque;
         }
+
+        private float ResidentBalanceMass() => residentBalanceMassKg + (bagAttached ? bagMassKg : 0f);
 
         private static float Smooth01(float edge0, float edge1, float value) =>
             Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(edge0, edge1, value));
@@ -480,6 +497,8 @@ namespace Jam.Levels.Level1
         private void LockLevelEntryBalance()
         {
             levelEntryBalanceLocked = true;
+            levelEntryResidentX = resident != null && houseRoot != null
+                ? houseRoot.InverseTransformPoint(resident.transform.position).x : 0f;
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
             houseAngle = angularVelocity = 0f;
