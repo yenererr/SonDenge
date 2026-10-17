@@ -198,7 +198,11 @@ namespace Jam.Shop
 
                 Text label = button.GetComponentInChildren<Text>(true);
                 if (label != null)
-                    label.text = selectedFurniture.DisplayName + "\n" + selectedFurniture.PurchasePrice + " PARA";
+                {
+                    label.text = selectedFurniture.DisplayName + "\nSATIN AL  -  " + selectedFurniture.PurchasePrice + " PARA";
+                    label.fontSize = 16;
+                    label.fontStyle = FontStyle.Bold;
+                }
 
                 button.onClick.AddListener(() => TryPurchase(selectedFurniture));
                 _itemButtons.Add(button);
@@ -214,12 +218,17 @@ namespace Jam.Shop
             EnsureEventSystem();
 
             Canvas canvas = CreateCanvas("Level2ShopCanvas");
-            GameObject panel = CreatePanel("Level2ShopPanel", canvas.transform, new Vector2(760f, 620f), new Vector2(0f, 30f), new Color(0.08f, 0.12f, 0.18f, 0.96f));
+            GameObject panel = CreatePanel("Level2ShopPanel", canvas.transform, new Vector2(820f, 700f), new Vector2(0f, 0f), new Color(0.055f, 0.08f, 0.13f, 0.98f));
             shopContent = panel;
 
-            CreateLabel("Baslik", panel.transform, "LEVEL 2 MAĞAZASI", 30, TextAnchor.UpperCenter, new Vector2(0f, -32f), new Vector2(680f, 60f), new Color(1f, 0.82f, 0.42f, 1f));
-            budgetText = CreateLabel("Butce", panel.transform, string.Empty, 22, TextAnchor.UpperCenter, new Vector2(0f, -90f), new Vector2(680f, 42f), Color.white);
-            feedbackText = CreateLabel("Bilgi", panel.transform, "Yeni eşya alabilirsin — ama her eşya dengeyi etkiler!", 18, TextAnchor.UpperCenter, new Vector2(0f, -132f), new Vector2(680f, 48f), new Color(0.65f, 0.9f, 0.9f, 1f));
+            CreatePanel("UstSerit", panel.transform, new Vector2(820f, 104f), new Vector2(0f, 298f), new Color(0.10f, 0.16f, 0.24f, 1f));
+            CreatePanel("AltinCizgi", panel.transform, new Vector2(820f, 5f), new Vector2(0f, 245f), new Color(0.95f, 0.67f, 0.24f, 1f));
+            CreateLabel("Baslik", panel.transform, "LEVEL 2 MAĞAZASI", 30, TextAnchor.UpperCenter, new Vector2(0f, -20f), new Vector2(650f, 48f), new Color(1f, 0.82f, 0.42f, 1f));
+            CreateLabel("AltBaslik", panel.transform, "Hazırlık aşaması - Dengeyi koru, doğru eşyayı seç", 16, TextAnchor.UpperCenter, new Vector2(0f, -64f), new Vector2(650f, 30f), new Color(0.72f, 0.84f, 0.9f, 1f));
+
+            GameObject budgetCard = CreatePanel("ButceKarti", panel.transform, new Vector2(250f, 62f), new Vector2(-225f, -130f), new Color(0.12f, 0.28f, 0.31f, 1f));
+            budgetText = CreateLabel("Butce", budgetCard.transform, string.Empty, 20, TextAnchor.MiddleCenter, new Vector2(0f, -16f), new Vector2(230f, 44f), Color.white);
+            feedbackText = CreateLabel("Bilgi", panel.transform, "Yeni eşya alabilirsin — ama her eşya dengeyi etkiler!", 16, TextAnchor.MiddleCenter, new Vector2(95f, -130f), new Vector2(445f, 62f), new Color(0.65f, 0.9f, 0.9f, 1f));
 
             GameObject list = new GameObject("EsyaListesi", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
             list.transform.SetParent(panel.transform, false);
@@ -227,11 +236,11 @@ namespace Jam.Shop
             listRect.anchorMin = new Vector2(0.5f, 0.5f);
             listRect.anchorMax = new Vector2(0.5f, 0.5f);
             listRect.pivot = new Vector2(0.5f, 0.5f);
-            listRect.anchoredPosition = new Vector2(0f, -45f);
-            listRect.sizeDelta = new Vector2(650f, 350f);
+            listRect.anchoredPosition = new Vector2(0f, -125f);
+            listRect.sizeDelta = new Vector2(700f, 410f);
             VerticalLayoutGroup layout = list.GetComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(18, 18, 8, 8);
-            layout.spacing = 8f;
+            layout.padding = new RectOffset(20, 20, 10, 10);
+            layout.spacing = 9f;
             layout.childControlWidth = true;
             // Butonların RectTransform yüksekliğini koru; aksi halde layout
             // sistemi tercih edilen yüksekliği 0 hesaplayıp butonları gizler.
@@ -242,10 +251,12 @@ namespace Jam.Shop
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             itemListRoot = list.transform;
 
-            itemButtonPrefab = CreateButton("EsyaButonSablon", panel.transform, "EŞYA", new Vector2(620f, 54f), new Vector2(0f, 0f), new Color(0.19f, 0.3f, 0.38f, 1f));
+            itemButtonPrefab = CreateButton("EsyaButonSablon", panel.transform, "EŞYA", new Vector2(660f, 56f), new Vector2(0f, 0f), new Color(0.14f, 0.27f, 0.36f, 1f));
             itemButtonPrefab.gameObject.SetActive(false);
 
-            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(120f, 42f), new Vector2(300f, -32f), new Color(0.45f, 0.2f, 0.2f, 1f));
+            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(125f, 42f), new Vector2(330f, -20f), new Color(0.45f, 0.2f, 0.2f, 1f));
+
+            CreateLabel("AltBilgi", panel.transform, "İpucu: Ağır eşyalar dengeyi daha çok etkiler.", 14, TextAnchor.MiddleCenter, new Vector2(0f, -665f), new Vector2(680f, 30f), new Color(0.55f, 0.68f, 0.76f, 1f));
 
             Button openButton = CreateButton("MagazayiAc", canvas.transform, "MAĞAZA", new Vector2(220f, 60f), new Vector2(-24f, 28f), new Color(0.75f, 0.46f, 0.16f, 1f));
             RectTransform openRect = openButton.GetComponent<RectTransform>();
