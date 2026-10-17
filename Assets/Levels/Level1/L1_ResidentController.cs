@@ -132,7 +132,13 @@ namespace Jam.Levels.Level1
                     transform.position = bottomPos;
                     EndClimb();
                 }
-                else body.MovePosition(bottomPos + axis * Mathf.Clamp(nextAlong, 0f, length));
+                else
+                {
+                    // Ev pivotu her fizik adımında döndüğü için MovePosition ezilir; konumu doğrudan ata.
+                    var next = bottomPos + axis * Mathf.Clamp(nextAlong, 0f, length);
+                    body.position = next;
+                    transform.position = next;
+                }
             }
             else
             {
