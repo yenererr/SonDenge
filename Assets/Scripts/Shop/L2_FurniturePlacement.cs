@@ -76,7 +76,7 @@ namespace Jam.Shop
         private void LateUpdate()
         {
             if (_preview != null && shopPanel != null)
-                shopPanel.ShowFeedback(_pendingFurniture.DisplayName + " seçildi. KAPAT'a basıp zemine tıkla.");
+                shopPanel.ShowFeedback(_pendingFurniture.DisplayName + " seçildi. Zemine tıkla.");
         }
 
         private void BeginPlacement(FurnitureData furniture)
@@ -122,6 +122,7 @@ namespace Jam.Shop
             _preview.Initialize(furniture);
             _preview.transform.position = GetDefaultPlacementPosition();
             shopPanel.SetPurchasingEnabled(false);
+            shopPanel.Close();
         }
 
         private void ConfirmPlacement()
