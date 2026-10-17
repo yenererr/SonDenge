@@ -148,6 +148,7 @@ namespace Jam.Shop
             _preview = null;
             _pendingFurniture = null;
             shopPanel.SetPurchasingEnabled(true);
+            shopPanel.Open();
         }
 
         private bool TryGetPointerPosition(out Vector3 position)
