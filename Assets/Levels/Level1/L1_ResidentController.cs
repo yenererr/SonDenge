@@ -22,6 +22,7 @@ namespace Jam.Levels.Level1
         private float vertical;
         private float walkTime;
         private int facing = 1;
+        private CollisionDetectionMode climbDetection = CollisionDetectionMode.Discrete;
         // The visible ladder is wider than the character capsule in the 3D house.
         // Keep a forgiving minimum so small prefab/physics offsets do not prevent entry.
         private const float MinimumLadderReach = 0.82f;
@@ -89,12 +90,18 @@ namespace Jam.Levels.Level1
                     if (candidate.bottom == null || candidate.top == null || candidate.landing == null) continue;
                     var entry = vertical > 0 ? candidate.bottom.position : candidate.top.position;
                     var reach = Mathf.Max(ladderReach, MinimumLadderReach);
-                    if (Mathf.Abs(body.position.x - entry.x) < reach &&
-                        Mathf.Abs(body.position.y - entry.y) < LadderEntryHeightTolerance)
+                    // Ev eğilebildiği için mesafe evin kendi ekseninde ölçülür.
+                    var frame = candidate.transform.parent != null ? candidate.transform.parent : candidate.transform;
+                    var delta = frame.InverseTransformPoint(body.position) - frame.InverseTransformPoint(entry);
+                    if (Mathf.Abs(delta.x) < reach && Mathf.Abs(delta.y) < LadderEntryHeightTolerance)
                     {
                         route = candidate;
                         body.useGravity = false;
                         body.linearVelocity = Vector3.zero;
+                        // Tırmanırken eşyalara takılmasın: kinematik ilerle.
+                        climbDetection = body.collisionDetectionMode;
+                        body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                        body.isKinematic = true;
                         if (route.upperFloor != null)
                             UnityEngine.Physics.IgnoreCollision(capsule, route.upperFloor, true);
                         route.SetOpen(true);
@@ -105,19 +112,27 @@ namespace Jam.Levels.Level1
             }
             if (route != null)
             {
-                body.linearVelocity = Vector3.zero;
-                var next = body.position + Vector3.up * (vertical * climbSpeed * Time.fixedDeltaTime);
-                if (vertical > 0 && next.y >= route.top.position.y)
+                // Merdivenin kendi ekseni boyunca (ev eğikken de) tırman.
+                var bottomPos = route.bottom.position;
+                var axis = route.top.position - bottomPos;
+                var length = axis.magnitude;
+                axis = length > 0.001f ? axis / length : Vector3.up;
+                var along = Vector3.Dot(body.position - bottomPos, axis);
+                var nextAlong = along + vertical * climbSpeed * Time.fixedDeltaTime;
+                if (vertical > 0 && nextAlong >= length)
                 {
-                    body.position = route.landing.position;
+                    var landing = FreeLanding(route);
+                    body.position = landing;
+                    transform.position = landing;
                     EndClimb();
                 }
-                else if (vertical < 0 && next.y <= route.bottom.position.y)
+                else if (vertical < 0 && nextAlong <= 0f)
                 {
-                    body.position = route.bottom.position;
+                    body.position = bottomPos;
+                    transform.position = bottomPos;
                     EndClimb();
                 }
-                else body.MovePosition(next);
+                else body.MovePosition(bottomPos + axis * Mathf.Clamp(nextAlong, 0f, length));
             }
             else
             {
@@ -132,10 +147,33 @@ namespace Jam.Levels.Level1
             }
         }
         private void OnDisable() => EndClimb();
+
+        /// <summary>Üst kattaki iniş noktası bir eşyayla doluysa yakındaki boş bir yere iner.</summary>
+        private Vector3 FreeLanding(L1_ClimbRoute ladder)
+        {
+            var landing = ladder.landing.position;
+            var frame = ladder.transform.parent != null ? ladder.transform.parent : ladder.transform;
+            var radius = capsule != null ? capsule.radius * 0.9f : 0.2f;
+            var half = capsule != null ? Mathf.Max(0f, capsule.height * 0.5f - capsule.radius) : 0.3f;
+            foreach (var dx in new[] { 0f, 0.5f, -0.5f, 0.9f, -0.9f, 1.3f, -1.3f, 1.7f })
+            {
+                var candidate = landing + frame.right * dx;
+                var blocked = false;
+                foreach (var hit in UnityEngine.Physics.OverlapCapsule(candidate + frame.up * half, candidate - frame.up * half,
+                    radius, ~0, QueryTriggerInteraction.Ignore))
+                {
+                    if (hit.attachedRigidbody == body || hit.transform.IsChildOf(transform)) continue;
+                    if (hit.attachedRigidbody != null) { blocked = true; break; }
+                }
+                if (!blocked) return candidate;
+            }
+            return landing;
+        }
         private void EndClimb()
         {
             if (body != null) body.useGravity = true;
             if (route == null) return;
+            if (body != null) { body.isKinematic = false; body.collisionDetectionMode = climbDetection; }
             if (route.upperFloor != null)
                 UnityEngine.Physics.IgnoreCollision(capsule, route.upperFloor, false);
             route.SetOpen(false);
