@@ -172,6 +172,7 @@ namespace Jam.Shop
 
                 FurnitureData selectedFurniture = furniture;
                 Button button = Instantiate(itemButtonPrefab, itemListRoot);
+                button.gameObject.SetActive(true);
                 button.name = "Buton_" + selectedFurniture.ItemId;
 
                 Text label = button.GetComponentInChildren<Text>(true);
