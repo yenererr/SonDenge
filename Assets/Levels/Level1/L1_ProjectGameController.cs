@@ -87,6 +87,8 @@ namespace Jam.Levels.Level1
         public L1_ProjectSpriteEntry[] spriteEntries;
         public AudioClip planningMusic;
         public AudioClip disasterMusic;
+        [Tooltip("Level 1 tek katlı oturma odasıyla oynanır; market eşyaları alt kata gelir.")]
+        public bool singleFloorLevel = true;
 
         private readonly HashSet<string> equipment = new HashSet<string>();
         private readonly List<FireSpot> fires = new List<FireSpot>();
@@ -715,7 +717,7 @@ namespace Jam.Levels.Level1
             movable.balanceMassKg = item.mass;
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
-            var floor = item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
+            var floor = singleFloorLevel ? 0 : item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
             var box = clone.GetComponent<BoxCollider>();
             var floorY = FloorY[floor] + box.size.y * 0.5f + 0.03f;
             var start = source.transform.localPosition;
@@ -729,7 +731,7 @@ namespace Jam.Levels.Level1
         {
             var sprite = Icon(item.id);
             if (sprite == null) return false;
-            var floor = item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
+            var floor = singleFloorLevel ? 0 : item.unlockLevel <= 1 ? 1 : item.unlockLevel == 2 ? 0 : 2;
             var size = item.id == "wardrobe" ? new Vector3(0.75f, 1.45f, 0.4f) :
                 item.id == "dining_table" ? new Vector3(1.2f, 0.7f, 0.5f) :
                 item.id == "bedside_table" ? new Vector3(0.48f, 0.72f, 0.4f) :
