@@ -51,6 +51,7 @@ namespace Jam.Shop
         private readonly List<Text> _prices = new List<Text>();
         private GameObject _generatedCanvas;
         private Sprite _cardSurface, _buySurface, _backSurface;
+        private L2_ShopAudio _shopAudio;
         private int _budget;
         private bool _purchasesEnabled = true;
 
@@ -63,6 +64,9 @@ namespace Jam.Shop
         private void Awake()
         {
             _budget = startingBudget;
+            _shopAudio = GetComponent<L2_ShopAudio>();
+            if (_shopAudio == null)
+                _shopAudio = gameObject.AddComponent<L2_ShopAudio>();
 
             CreateDefaultUiIfNeeded();
 
@@ -174,6 +178,8 @@ namespace Jam.Shop
             }
 
             _budget -= furniture.PurchasePrice;
+            if (_shopAudio != null)
+                _shopAudio.PlayPurchase();
             SetFeedback(furniture.DisplayName + " satın alındı.");
             OnFurniturePurchased?.Invoke(furniture);
             if (onFurniturePurchased != null)

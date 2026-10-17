@@ -28,12 +28,18 @@ namespace Jam.Shop
         private readonly List<L2_PlacedFurniture> _placedFurniture = new List<L2_PlacedFurniture>();
         private L2_PlacedFurniture _preview;
         private FurnitureData _pendingFurniture;
+        private L2_ShopAudio _shopAudio;
         private int _purchaseFrame;
 
         private void Awake()
         {
             ResolveReferences();
             EnsurePlacementRoot();
+            _shopAudio = GetComponent<L2_ShopAudio>();
+            if (_shopAudio == null && shopPanel != null)
+                _shopAudio = shopPanel.GetComponent<L2_ShopAudio>();
+            if (_shopAudio == null)
+                _shopAudio = gameObject.AddComponent<L2_ShopAudio>();
         }
 
         private void OnEnable()
@@ -127,6 +133,8 @@ namespace Jam.Shop
 
             _preview.Initialize(furniture);
             _preview.transform.position = GetDefaultPlacementPosition();
+            if (_shopAudio != null)
+                _shopAudio.PlayPlacement();
             shopPanel.SetPurchasingEnabled(false);
             shopPanel.Close();
         }
@@ -149,6 +157,8 @@ namespace Jam.Shop
                 return;
 
             Destroy(_preview.gameObject);
+            if (_shopAudio != null)
+                _shopAudio.PlayCancel();
             shopPanel.RefundPurchase(_pendingFurniture.PurchasePrice);
             shopPanel.ShowFeedback("Yerleştirme iptal edildi; paran iade edildi.");
             _preview = null;
