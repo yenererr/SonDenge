@@ -196,18 +196,53 @@ namespace Jam.Shop
                 button.gameObject.SetActive(true);
                 button.name = "Buton_" + selectedFurniture.ItemId;
 
-                Text label = button.GetComponentInChildren<Text>(true);
-                if (label != null)
-                {
-                    label.text = selectedFurniture.DisplayName + "\nSATIN AL  -  " + selectedFurniture.PurchasePrice + " PARA";
-                    label.fontSize = 16;
-                    label.fontStyle = FontStyle.Bold;
-                }
+                Text icon = FindCardText(button, "KartIkon");
+                Text name = FindCardText(button, "KartAdi");
+                Text description = FindCardText(button, "KartAciklama");
+                Text price = FindCardText(button, "KartSatinAl/KartFiyat");
+                if (icon != null)
+                    icon.text = GetFurnitureIcon(selectedFurniture);
+                if (name != null)
+                    name.text = selectedFurniture.DisplayName;
+                if (description != null)
+                    description.text = GetFurnitureDescription(selectedFurniture);
+                if (price != null)
+                    price.text = "SATIN AL\n" + selectedFurniture.PurchasePrice + " PARA";
 
                 button.onClick.AddListener(() => TryPurchase(selectedFurniture));
                 _itemButtons.Add(button);
                 _catalogItems.Add(selectedFurniture);
             }
+        }
+
+        private static Text FindCardText(Button card, string childName)
+        {
+            Transform child = card != null ? card.transform.Find(childName) : null;
+            return child != null ? child.GetComponent<Text>() : null;
+        }
+
+        private static string GetFurnitureIcon(FurnitureData furniture)
+        {
+            if (furniture == null || string.IsNullOrWhiteSpace(furniture.DisplayName))
+                return "?";
+
+            string name = furniture.DisplayName;
+            if (name.StartsWith("Ki", StringComparison.OrdinalIgnoreCase))
+                return "Kİ";
+
+            return name.Substring(0, 1).ToUpperInvariant();
+        }
+
+        private static string GetFurnitureDescription(FurnitureData furniture)
+        {
+            if (furniture == null)
+                return string.Empty;
+
+            if (furniture.Mass <= 2f)
+                return "Hafif - dengeyi az etkiler.";
+            if (furniture.Mass <= 4f)
+                return "Orta ağırlık - dengeli seçim.";
+            return "Ağır - dengeyi çok etkiler.";
         }
 
         private void CreateDefaultUiIfNeeded()
@@ -218,45 +253,42 @@ namespace Jam.Shop
             EnsureEventSystem();
 
             Canvas canvas = CreateCanvas("Level2ShopCanvas");
-            GameObject panel = CreatePanel("Level2ShopPanel", canvas.transform, new Vector2(820f, 700f), new Vector2(0f, 0f), new Color(0.055f, 0.08f, 0.13f, 0.98f));
+            GameObject panel = CreatePanel("Level2ShopPanel", canvas.transform, new Vector2(900f, 780f), new Vector2(0f, 0f), new Color(0.055f, 0.08f, 0.13f, 0.98f));
             shopContent = panel;
 
-            CreatePanel("UstSerit", panel.transform, new Vector2(820f, 104f), new Vector2(0f, 298f), new Color(0.10f, 0.16f, 0.24f, 1f));
-            CreatePanel("AltinCizgi", panel.transform, new Vector2(820f, 5f), new Vector2(0f, 245f), new Color(0.95f, 0.67f, 0.24f, 1f));
-            CreateLabel("Baslik", panel.transform, "LEVEL 2 MAĞAZASI", 30, TextAnchor.UpperCenter, new Vector2(0f, -20f), new Vector2(650f, 48f), new Color(1f, 0.82f, 0.42f, 1f));
-            CreateLabel("AltBaslik", panel.transform, "Hazırlık aşaması - Dengeyi koru, doğru eşyayı seç", 16, TextAnchor.UpperCenter, new Vector2(0f, -64f), new Vector2(650f, 30f), new Color(0.72f, 0.84f, 0.9f, 1f));
+            CreatePanel("UstSerit", panel.transform, new Vector2(900f, 112f), new Vector2(0f, 334f), new Color(0.10f, 0.16f, 0.24f, 1f));
+            CreatePanel("AltinCizgi", panel.transform, new Vector2(900f, 5f), new Vector2(0f, 276f), new Color(0.95f, 0.67f, 0.24f, 1f));
+            CreateLabel("Baslik", panel.transform, "LEVEL 2 MAĞAZASI", 30, TextAnchor.UpperCenter, new Vector2(0f, -22f), new Vector2(700f, 48f), new Color(1f, 0.82f, 0.42f, 1f));
+            CreateLabel("AltBaslik", panel.transform, "Hazırlık aşaması - Dengeyi koru, doğru eşyayı seç", 16, TextAnchor.UpperCenter, new Vector2(0f, -68f), new Vector2(700f, 30f), new Color(0.72f, 0.84f, 0.9f, 1f));
 
-            GameObject budgetCard = CreatePanel("ButceKarti", panel.transform, new Vector2(250f, 62f), new Vector2(-225f, -130f), new Color(0.12f, 0.28f, 0.31f, 1f));
-            budgetText = CreateLabel("Butce", budgetCard.transform, string.Empty, 20, TextAnchor.MiddleCenter, new Vector2(0f, -16f), new Vector2(230f, 44f), Color.white);
-            feedbackText = CreateLabel("Bilgi", panel.transform, "Yeni eşya alabilirsin — ama her eşya dengeyi etkiler!", 16, TextAnchor.MiddleCenter, new Vector2(95f, -130f), new Vector2(445f, 62f), new Color(0.65f, 0.9f, 0.9f, 1f));
+            GameObject budgetCard = CreatePanel("ButceKarti", panel.transform, new Vector2(250f, 58f), new Vector2(-285f, 235f), new Color(0.12f, 0.28f, 0.31f, 1f));
+            budgetText = CreateLabel("Butce", budgetCard.transform, string.Empty, 20, TextAnchor.MiddleCenter, new Vector2(0f, -15f), new Vector2(230f, 42f), Color.white);
+            feedbackText = CreateLabel("Bilgi", panel.transform, "Yeni eşya alabilirsin - ama her eşya dengeyi etkiler!", 16, TextAnchor.MiddleCenter, new Vector2(95f, -165f), new Vector2(510f, 50f), new Color(0.65f, 0.9f, 0.9f, 1f));
 
-            GameObject list = new GameObject("EsyaListesi", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            GameObject list = new GameObject("EsyaListesi", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
             list.transform.SetParent(panel.transform, false);
             RectTransform listRect = list.GetComponent<RectTransform>();
             listRect.anchorMin = new Vector2(0.5f, 0.5f);
             listRect.anchorMax = new Vector2(0.5f, 0.5f);
             listRect.pivot = new Vector2(0.5f, 0.5f);
-            listRect.anchoredPosition = new Vector2(0f, -125f);
-            listRect.sizeDelta = new Vector2(700f, 410f);
-            VerticalLayoutGroup layout = list.GetComponent<VerticalLayoutGroup>();
-            layout.padding = new RectOffset(20, 20, 10, 10);
-            layout.spacing = 9f;
-            layout.childControlWidth = true;
-            // Butonların RectTransform yüksekliğini koru; aksi halde layout
-            // sistemi tercih edilen yüksekliği 0 hesaplayıp butonları gizler.
-            layout.childControlHeight = false;
-            layout.childForceExpandWidth = true;
-            layout.childForceExpandHeight = false;
+            listRect.anchoredPosition = new Vector2(0f, -60f);
+            listRect.sizeDelta = new Vector2(840f, 500f);
+            GridLayoutGroup layout = list.GetComponent<GridLayoutGroup>();
+            layout.padding = new RectOffset(14, 14, 12, 12);
+            layout.spacing = new Vector2(16f, 16f);
+            layout.cellSize = new Vector2(260f, 224f);
+            layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            layout.constraintCount = 3;
             ContentSizeFitter fitter = list.GetComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             itemListRoot = list.transform;
 
-            itemButtonPrefab = CreateButton("EsyaButonSablon", panel.transform, "EŞYA", new Vector2(660f, 56f), new Vector2(0f, 0f), new Color(0.14f, 0.27f, 0.36f, 1f));
+            itemButtonPrefab = CreateFurnitureCard("EsyaKartSablon", panel.transform);
             itemButtonPrefab.gameObject.SetActive(false);
 
-            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(125f, 42f), new Vector2(330f, -20f), new Color(0.45f, 0.2f, 0.2f, 1f));
+            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(125f, 42f), new Vector2(365f, 342f), new Color(0.45f, 0.2f, 0.2f, 1f));
 
-            CreateLabel("AltBilgi", panel.transform, "İpucu: Ağır eşyalar dengeyi daha çok etkiler.", 14, TextAnchor.MiddleCenter, new Vector2(0f, -665f), new Vector2(680f, 30f), new Color(0.55f, 0.68f, 0.76f, 1f));
+            CreateLabel("AltBilgi", panel.transform, "İpucu: Ağır eşyalar dengeyi daha çok etkiler.", 14, TextAnchor.MiddleCenter, new Vector2(0f, -368f), new Vector2(760f, 28f), new Color(0.55f, 0.68f, 0.76f, 1f));
 
             Button openButton = CreateButton("MagazayiAc", canvas.transform, "MAĞAZA", new Vector2(220f, 60f), new Vector2(-24f, 28f), new Color(0.75f, 0.46f, 0.16f, 1f));
             RectTransform openRect = openButton.GetComponent<RectTransform>();
@@ -311,6 +343,37 @@ namespace Jam.Shop
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Truncate;
             return label;
+        }
+
+        private static Button CreateFurnitureCard(string objectName, Transform parent)
+        {
+            GameObject cardObject = new GameObject(objectName, typeof(RectTransform), typeof(Image), typeof(Button));
+            cardObject.transform.SetParent(parent, false);
+
+            RectTransform cardRect = cardObject.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.pivot = new Vector2(0.5f, 0.5f);
+            cardRect.sizeDelta = new Vector2(260f, 224f);
+
+            Image cardImage = cardObject.GetComponent<Image>();
+            cardImage.color = new Color(0.12f, 0.21f, 0.28f, 1f);
+
+            Button cardButton = cardObject.GetComponent<Button>();
+            ColorBlock colors = cardButton.colors;
+            colors.highlightedColor = new Color(0.2f, 0.38f, 0.48f, 1f);
+            colors.pressedColor = new Color(0.08f, 0.16f, 0.22f, 1f);
+            colors.disabledColor = new Color(0.12f, 0.17f, 0.2f, 0.55f);
+            cardButton.colors = colors;
+
+            CreatePanel("KartGorsel", cardObject.transform, new Vector2(230f, 78f), new Vector2(0f, 63f), new Color(0.08f, 0.14f, 0.19f, 1f));
+            CreateLabel("KartIkon", cardObject.transform, "?", 42, TextAnchor.MiddleCenter, new Vector2(0f, -12f), new Vector2(210f, 62f), new Color(1f, 0.78f, 0.35f, 1f));
+            CreateLabel("KartAdi", cardObject.transform, "EŞYA", 18, TextAnchor.MiddleCenter, new Vector2(0f, -82f), new Vector2(230f, 28f), Color.white);
+            CreateLabel("KartAciklama", cardObject.transform, "Denge bilgisi", 12, TextAnchor.MiddleCenter, new Vector2(0f, -112f), new Vector2(230f, 30f), new Color(0.68f, 0.8f, 0.86f, 1f));
+
+            GameObject priceStrip = CreatePanel("KartSatinAl", cardObject.transform, new Vector2(230f, 38f), new Vector2(0f, -88f), new Color(0.28f, 0.48f, 0.29f, 1f));
+            CreateLabel("KartFiyat", priceStrip.transform, "SATIN AL\n0 PARA", 13, TextAnchor.MiddleCenter, new Vector2(0f, -5f), new Vector2(220f, 32f), Color.white);
+            return cardButton;
         }
 
         private static Button CreateButton(string objectName, Transform parent, string content, Vector2 size, Vector2 position, Color color)
