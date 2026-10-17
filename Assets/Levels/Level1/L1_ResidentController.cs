@@ -24,6 +24,32 @@ namespace Jam.Levels.Level1
         private int facing = 1;
         public int Facing => facing;
         public bool IsClimbing => route != null;
+        [Tooltip("Saklanırken (Çök–Kapan–Tutun) görselin dikey ölçeği.")]
+        public float hideSquash = 0.62f;
+        public bool IsHiding { get; private set; }
+        private Vector3 visualScale = Vector3.one;
+        private Vector3 visualPosition;
+
+        /// <summary>Depremde çömelip başını korur; hareket ve tırmanma durur.</summary>
+        public void SetHiding(bool hide)
+        {
+            if (hide == IsHiding) return;
+            if (hide && route != null) return;
+            IsHiding = hide;
+            if (visual == null) return;
+            if (hide)
+            {
+                visualScale = visual.localScale;
+                visualPosition = visual.localPosition;
+                visual.localScale = new Vector3(visualScale.x * 1.08f, visualScale.y * hideSquash, visualScale.z);
+                visual.localPosition = visualPosition + Vector3.down * (footOffset * (1f - hideSquash));
+            }
+            else
+            {
+                visual.localScale = visualScale;
+                visual.localPosition = visualPosition;
+            }
+        }
         private void Awake()
         {
             body = GetComponent<Rigidbody>();
@@ -38,6 +64,7 @@ namespace Jam.Levels.Level1
                 - (k.sKey.isPressed || k.downArrowKey.isPressed ? 1 : 0);
             horizontal = Mathf.Clamp(horizontal + L1_TouchControls.Horizontal, -1f, 1f);
             vertical = Mathf.Clamp(vertical + L1_TouchControls.Vertical, -1f, 1f);
+            if (IsHiding) { horizontal = 0f; vertical = 0f; }
             if (horizontal > 0.01f) facing = 1;
             else if (horizontal < -0.01f) facing = -1;
             if (Time.timeScale <= 0f) return;

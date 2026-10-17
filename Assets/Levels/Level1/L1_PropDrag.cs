@@ -22,6 +22,8 @@ namespace Jam.Levels.Level1
         public bool mouseRequiresReach = false;
         [Tooltip("Karakterin E ile eşyayı eline alıp taşıması. Kapalıyken eşyalar yalnız fareyle sürüklenir.")]
         public bool allowCarry = false;
+        [Tooltip("Açıkken eşya fareyle her yöne sürüklenir, katlar arasında taşınabilir ve bırakınca en yakın kata oturur.")]
+        public bool freeDrag = true;
         [Tooltip("Odanın iç yarı genişliği (m); L1_ProjectGameController.roomHalfWidth ile aynı olmalı.")]
         public float roomHalfWidth = 4.3f;
         public float contactGap = 0.025f;
@@ -44,6 +46,7 @@ namespace Jam.Levels.Level1
         private Vector3 startWorld;
         private bool previousGravity;
         private bool previousKinematic;
+        private CollisionDetectionMode previousDetection;
         private bool carriedGravity;
         private bool carriedKinematic;
         private Vector3 carryLocalPosition;
@@ -73,11 +76,27 @@ namespace Jam.Levels.Level1
             var touch = Touchscreen.current != null ? Touchscreen.current.primaryTouch : null;
             var touchPressed = touch != null && touch.press.isPressed;
             var pointerIsTouch = held != null ? usingTouch : touchPressed;
-            if (!pointerIsTouch && mouse == null) { ReleasePointer(); return; }
-            var pointerPosition = pointerIsTouch ? touch.position.ReadValue() : mouse.position.ReadValue();
-            var pressedThisFrame = pointerIsTouch ? touch.press.wasPressedThisFrame : mouse.leftButton.wasPressedThisFrame;
-            var isPressed = pointerIsTouch ? touchPressed : mouse.leftButton.isPressed;
-            if (held != null && !pointerIsTouch && mouse.rightButton.wasPressedThisFrame) { CancelDrag(); return; }
+            if (!pointerIsTouch && mouse == null && !testPointer) { ReleasePointer(); return; }
+            Vector2 pointerPosition;
+            bool pressedThisFrame, isPressed, cancel;
+            if (testPointer)
+            {
+                // Editor/MCP testleri için sanal işaretçi (oyunda kapalı).
+                pointerPosition = testPointerPosition;
+                isPressed = testPointerDown;
+                pressedThisFrame = testPointerDown && !testPointerWasDown;
+                testPointerWasDown = testPointerDown;
+                cancel = false;
+                pointerIsTouch = false;
+            }
+            else
+            {
+                pointerPosition = pointerIsTouch ? touch.position.ReadValue() : mouse.position.ReadValue();
+                pressedThisFrame = pointerIsTouch ? touch.press.wasPressedThisFrame : mouse.leftButton.wasPressedThisFrame;
+                isPressed = pointerIsTouch ? touchPressed : mouse.leftButton.isPressed;
+                cancel = !pointerIsTouch && mouse.rightButton.wasPressedThisFrame;
+            }
+            if (held != null && cancel) { CancelDrag(); return; }
             if (held == null && pressedThisFrame && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             { hover = null; return; }
             if (held == null && pointerIsTouch && L1_TouchControls.IsControlPosition(pointerPosition))
@@ -105,9 +124,14 @@ namespace Jam.Levels.Level1
                 held.Body.linearVelocity = Vector3.zero;
                 held.Body.angularVelocity = Vector3.zero;
                 held.Body.useGravity = false;
+                // Kinematik gövde ContinuousDynamic'te MovePosition'ı yok sayar; tutarken speculative kullan.
+                previousDetection = held.Body.collisionDetectionMode;
+                held.Body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
                 held.Body.isKinematic = true;
                 startWorld = held.Body.position;
                 startLocal = houseRoot != null ? houseRoot.InverseTransformPoint(startWorld) : startWorld;
+                // Serbest sürüklemede eşya katların içinden geçebilsin; bırakınca en yakın kata oturur.
+                if (freeDrag && heldCollider != null) heldCollider.enabled = false;
                 var plane = new Plane(Vector3.forward, held.Body.position);
                 if (plane.Raycast(ray, out var d)) offset = held.Body.position - ray.GetPoint(d);
                 target = held.Body.position;
@@ -118,14 +142,26 @@ namespace Jam.Levels.Level1
                 if (plane.Raycast(ray, out var d))
                 {
                     target = ray.GetPoint(d) + offset;
-                    // Yalnız yatay: evin yerel X'i değişir; yükseklik ve derinlik sabit kalır.
                     if (houseRoot != null)
                     {
                         var local = houseRoot.InverseTransformPoint(target);
-                        target = houseRoot.TransformPoint(new Vector3(local.x, startLocal.y, startLocal.z));
+                        if (freeDrag)
+                        {
+                            // Serbest: sağa–sola ve katlar arasında; ev sınırları içinde kalır.
+                            var tops = FloorTops();
+                            var halfWidth = HeldHalfWidth();
+                            local.x = Mathf.Clamp(local.x, -roomHalfWidth + halfWidth, roomHalfWidth - halfWidth);
+                            local.y = Mathf.Clamp(local.y, tops[0], tops[tops.Length - 1] + 1.9f);
+                            target = houseRoot.TransformPoint(new Vector3(local.x, local.y, startLocal.z));
+                        }
+                        else
+                        {
+                            // Yalnız yatay: evin yerel X'i değişir; yükseklik ve derinlik sabit kalır.
+                            target = houseRoot.TransformPoint(new Vector3(local.x, startLocal.y, startLocal.z));
+                        }
                     }
                     target.z = held.Body.position.z;
-                    ClampToFloor();
+                    if (!freeDrag) ClampToFloor();
                 }
                 if (!isPressed) ReleasePointer();
             }
@@ -175,10 +211,89 @@ namespace Jam.Levels.Level1
             if (held == null) return;
             var position = held.Body.position;
             var step = Vector3.ClampMagnitude((target - position) * followGain, maxSpeed) * Time.fixedDeltaTime;
+            if (freeDrag)
+            {
+                // Collider kapalıyken doğrudan konumla: katların içinden geçerken takılma olmaz.
+                position += step;
+                held.Body.position = position;
+                held.transform.position = position;
+                return;
+            }
             position += AllowedMove(position, new Vector3(step.x, 0f, 0f));
             position += AllowedMove(position, new Vector3(0f, step.y, 0f));
             held.Body.MovePosition(position);
         }
+
+        // ---------------------------------------------------------------- serbest sürükleme
+        /// <summary>Katların zemin üstleri (houseRoot yerel Y), aşağıdan yukarı. Kontrolcü atar.</summary>
+        public System.Func<float[]> floorTopsProvider;
+        private static readonly float[] DefaultFloorTops = { -1.15f, 1.10f };
+
+        private float[] FloorTops()
+        {
+            var tops = floorTopsProvider != null ? floorTopsProvider() : null;
+            return tops != null && tops.Length > 0 ? tops : DefaultFloorTops;
+        }
+
+        private float HeldHalfWidth()
+        {
+            if (heldCollider == null) return 0.3f;
+            var half = Vector3.Scale(heldCollider.size * 0.5f, Abs(heldCollider.transform.lossyScale));
+            var right = houseRoot.right;
+            return Mathf.Abs(Vector3.Dot(right, heldCollider.transform.right)) * half.x
+                + Mathf.Abs(Vector3.Dot(right, heldCollider.transform.up)) * half.y
+                + Mathf.Abs(Vector3.Dot(right, heldCollider.transform.forward)) * half.z;
+        }
+
+        /// <summary>Bırakılan eşyayı en yakın katın zeminine, boş bir yere oturtur; yer yoksa başladığı yere döner.</summary>
+        private void DropOnNearestFloor()
+        {
+            if (held == null || houseRoot == null || heldCollider == null) return;
+            var body = held.Body;
+            var bodyLocal = houseRoot.InverseTransformPoint(body.position);
+            var centerLocal = houseRoot.InverseTransformPoint(heldCollider.transform.TransformPoint(heldCollider.center));
+            var pivotAboveCenter = bodyLocal.y - centerLocal.y;
+            var half = Vector3.Scale(heldCollider.size * 0.5f, Abs(heldCollider.transform.lossyScale));
+            var halfHeight = Mathf.Abs(Vector3.Dot(houseRoot.up, heldCollider.transform.right)) * half.x
+                + Mathf.Abs(Vector3.Dot(houseRoot.up, heldCollider.transform.up)) * half.y
+                + Mathf.Abs(Vector3.Dot(houseRoot.up, heldCollider.transform.forward)) * half.z;
+            var bottom = centerLocal.y - halfHeight;
+            var tops = FloorTops();
+            var floorTop = tops[0];
+            foreach (var top in tops) if (Mathf.Abs(top - bottom) < Mathf.Abs(floorTop - bottom)) floorTop = top;
+            var halfWidth = HeldHalfWidth();
+            var centerY = floorTop + halfHeight + 0.02f;
+            var offsets = new[] { 0f, 0.35f, -0.35f, 0.7f, -0.7f, 1.05f, -1.05f, 1.4f, -1.4f };
+            foreach (var dx in offsets)
+            {
+                var x = Mathf.Clamp(centerLocal.x + dx, -roomHalfWidth + halfWidth, roomHalfWidth - halfWidth);
+                var worldCenter = houseRoot.TransformPoint(new Vector3(x, centerY, centerLocal.z));
+                var blocked = false;
+                foreach (var hit in UnityEngine.Physics.OverlapBox(worldCenter, half * 0.95f,
+                    heldCollider.transform.rotation, ~0, QueryTriggerInteraction.Ignore))
+                {
+                    if (hit.transform.IsChildOf(held.transform)) continue;
+                    if (hit.GetComponentInParent<L1_MovableProp>() != null || hit.attachedRigidbody != null) { blocked = true; break; }
+                }
+                if (blocked) continue;
+                var pivot = houseRoot.TransformPoint(new Vector3(x + (bodyLocal.x - centerLocal.x), centerY + pivotAboveCenter, bodyLocal.z));
+                body.position = pivot;
+                held.transform.position = pivot;
+                return;
+            }
+            // Yer bulunamadı: başladığı yere dön.
+            var back = houseRoot.TransformPoint(startLocal);
+            body.position = back;
+            held.transform.position = back;
+            dropBlockedUntil = Time.unscaledTime + 1.5f;
+        }
+
+        [Header("Test (Editor)")]
+        [Tooltip("Açıkken fare yerine aşağıdaki sanal işaretçi kullanılır. Yalnız otomatik testler içindir.")]
+        public bool testPointer;
+        public Vector2 testPointerPosition;
+        public bool testPointerDown;
+        private bool testPointerWasDown;
         private void ClampToFloor()
         {
             if (houseRoot == null || heldCollider == null) return;
@@ -220,7 +335,13 @@ namespace Jam.Levels.Level1
         private void ReleasePointer()
         {
             if (held == null) return;
+            if (heldCollider != null && !heldCollider.enabled)
+            {
+                DropOnNearestFloor();
+                heldCollider.enabled = true;
+            }
             held.Body.isKinematic = previousKinematic;
+            held.Body.collisionDetectionMode = previousDetection;
             held.Body.useGravity = previousGravity;
             if (!held.Body.isKinematic)
             {

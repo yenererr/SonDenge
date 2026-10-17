@@ -120,6 +120,10 @@ namespace Jam.Levels.Level1
             if (game.IsDisaster && !wasDisaster) disasterBannerUntil = Time.unscaledTime + 1.6f;
             wasDisaster = game.IsDisaster;
             safetyPanel.SetActive(game.IsDisaster);
+            if (game.IsDisaster)
+                safetyText.text = game.ResidentHiding
+                    ? "SAKLANDIN ✓  Çök – Kapan – Tutun.  Gerçek depremde eşya taşımayın."
+                    : "BOŞLUK'a bas: Çök – Kapan – Tutun!  Gerçek depremde eşya taşımayın.";
             if (countdownLeft < 0f)
             {
                 var showBanner = Time.unscaledTime < disasterBannerUntil;

@@ -162,6 +162,7 @@ namespace Jam.Levels.Level1
             upperExtras = houseRoot.Find("[L1] Üçüncü kat balkon ve vinç parçaları");
             roof = houseRoot.Find("Asimetrik kiremit çatı");
             SetUpperFloorVisible(false);
+            if (drag != null) drag.floorTopsProvider = FloorTops;
             RefreshFurniture();
             CacheHangingLamps();
             baselineTorque = ComputeTorque();
@@ -309,7 +310,9 @@ namespace Jam.Levels.Level1
             if (keyboard != null)
             {
                 if (keyboard.iKey.wasPressedThisFrame) marketOpen = !marketOpen && state == RoundState.Planning;
-                if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Planning && !countdownActive)
+                if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Disaster && resident != null)
+                    ToggleCover();
+                else if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Planning && !countdownActive)
                 {
                     if (DisasterRequested != null) DisasterRequested();
                     else StartDisaster();
@@ -430,7 +433,7 @@ namespace Jam.Levels.Level1
                 torque += carriedMass * drag.CarriedLocalX;
             }
             if (resident != null)
-                torque += 8f * houseRoot.InverseTransformPoint(resident.transform.position).x;
+                torque += (8f + (bagAttached ? bagMassKg : 0f)) * houseRoot.InverseTransformPoint(resident.transform.position).x;
             return torque;
         }
 
@@ -666,6 +669,7 @@ namespace Jam.Levels.Level1
         {
             if (next != RoundState.Planning && drag != null) drag.DropCarried(true);
             state = next;
+            if (next != RoundState.Disaster && resident != null) resident.SetHiding(false);
             if (next != RoundState.Disaster && foamVisual != null) foamVisual.SetActive(false);
             if (drag != null) drag.canDrag = next == RoundState.Planning;
             if (GameManager.Instance != null)
@@ -869,6 +873,7 @@ namespace Jam.Levels.Level1
 
         private void SpawnBag()
         {
+            if (bagOnBack) { AttachBagToResident(); return; }
             var sprite = Icon("deprem_cantasi");
             if (sprite == null) return;
             var root = new GameObject("Deprem çantası — taşınabilir");

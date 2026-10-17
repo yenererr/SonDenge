@@ -35,6 +35,14 @@ namespace Jam.Levels.Level1
         public bool IsGrowing => growing;
         public int FloorCount => 2 + addedFloors;
 
+        /// <summary>Tüm katların zemin üstleri (houseRoot yerel Y), aşağıdan yukarı.</summary>
+        public float[] FloorTops()
+        {
+            var tops = new float[FloorCount];
+            for (var i = 0; i < tops.Length; i++) tops[i] = lowestFloorTop + i * floorHeight;
+            return tops;
+        }
+
         private void GrowFloorBelow()
         {
             if (growing || houseRoot == null || newFloorPrefab == null || floorTemplate == null) return;

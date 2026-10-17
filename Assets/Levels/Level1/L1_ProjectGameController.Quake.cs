@@ -34,6 +34,47 @@ namespace Jam.Levels.Level1
         public float heavyMassKg = 50f;
         public int levelCompleteBonus = 450;
 
+        [Header("Deprem çantası ve Çök–Kapan–Tutun")]
+        [Tooltip("Açıkken marketten alınan deprem çantası karakterin sırtına takılır.")]
+        public bool bagOnBack = true;
+        public float bagMassKg = 10f;
+        [Tooltip("Depremin en az bu oranında saklanan oyuncu bonus alır.")]
+        [Range(0f, 1f)] public float coverRatioForBonus = 0.5f;
+        public int coverBonus = 10;
+        private bool bagAttached;
+        private float coverSeconds;
+
+        public bool BagAttached => bagAttached;
+        public bool ResidentHiding => resident != null && resident.IsHiding;
+
+        private void AttachBagToResident()
+        {
+            if (resident == null || bagAttached) return;
+            var sprite = Icon("deprem_cantasi");
+            var parent = resident.visual != null ? resident.visual : resident.transform;
+            var bag = new GameObject("Deprem çantası — sırtta");
+            bag.transform.SetParent(parent, false);
+            // Kamera -Z'de: çanta karakterin arkasında (biraz +Z) ve sırt hizasında.
+            bag.transform.localPosition = new Vector3(0f, 0.12f, 0.2f);
+            if (sprite != null)
+            {
+                var renderer = bag.AddComponent<SpriteRenderer>();
+                renderer.sprite = sprite;
+                renderer.sharedMaterial = projectSpriteMaterial;
+                var s = sprite.bounds.size;
+                bag.transform.localScale = new Vector3(0.46f / s.x, 0.52f / s.y, 1f);
+            }
+            bagAttached = true;
+            Warn("Deprem çantası sırtında. Depremde BOŞLUK ile Çök–Kapan–Tutun!");
+        }
+
+        private void ToggleCover()
+        {
+            if (resident == null) return;
+            resident.SetHiding(!resident.IsHiding);
+            if (resident.IsHiding) Warn("Çök – Kapan – Tutun: karakter başını korudu.");
+        }
+
         private sealed class QuakeRecord
         {
             public L1_MovableProp item;
@@ -53,6 +94,7 @@ namespace Jam.Levels.Level1
         private void BeginQuakeRecord()
         {
             quakeRecords.Clear();
+            coverSeconds = 0f;
             maxTilt = 0f;
             quakeStartTime = Time.time;
             quakePhase = Random.Range(0f, Mathf.PI * 2f);
@@ -118,7 +160,9 @@ namespace Jam.Levels.Level1
 
         private void UpdateQuakeCamera()
         {
-            if (state != RoundState.Disaster || level != 1) return;
+            if (state != RoundState.Disaster) return;
+            if (resident != null && resident.IsHiding) coverSeconds += Time.deltaTime;
+            if (level != 1) return;
             if (cameraRig == null && sceneCamera != null) cameraRig = sceneCamera.GetComponent<L1_CameraController>();
             if (cameraRig == null) return;
             shakeClock -= Time.deltaTime;
@@ -158,13 +202,16 @@ namespace Jam.Levels.Level1
             var protectedBonus = Mathf.RoundToInt(20f * protectedValue / Mathf.Max(1, totalValue));
             var balanceBonus = Mathf.Max(0, 10 - Mathf.RoundToInt(maxTilt / 3f));
             var penalty = 10 * lostHeavy;
-            safetyScore = Mathf.Clamp(baseSafety + anchorBonus + protectedBonus + balanceBonus - penalty, 0, 100);
+            var coverRatio = coverSeconds / Mathf.Max(0.1f, quakeDuration);
+            var tookCover = coverRatio >= coverRatioForBonus;
+            safetyScore = Mathf.Clamp(baseSafety + anchorBonus + protectedBonus + balanceBonus - penalty + (tookCover ? coverBonus : 0), 0, 100);
 
             var text = new StringBuilder();
             text.AppendLine(survived ? "Ev ayakta kaldı." : "Ev dengesini kaybetti: " + reason);
             text.AppendLine("Sabitlenen eşya: " + (anchoredNames.Count == 0 ? "yok" : string.Join(", ", anchoredNames)));
             text.AppendLine("Korunan eşya: " + (quakeRecords.Count - lostNames.Count) + " / " + quakeRecords.Count +
                 (lostNames.Count > 0 ? "   ·   Kaybolan: " + string.Join(", ", lostNames) : ""));
+            text.AppendLine("Çök–Kapan–Tutun: " + (tookCover ? "uygulandı ✓ (+" + coverBonus + ")" : "uygulanmadı — depremde BOŞLUK'a bas"));
             text.AppendLine("En yüksek eğim: " + maxTilt.ToString("F1") + "°   ·   Hazırlık puanı: " + safetyScore + " / 100");
             if (survived && !levelRewardGiven)
             {
