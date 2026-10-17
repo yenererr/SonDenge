@@ -22,6 +22,10 @@ namespace Jam.Levels.Level1
         private float vertical;
         private float walkTime;
         private int facing = 1;
+        // The visible ladder is wider than the character capsule in the 3D house.
+        // Keep a forgiving minimum so small prefab/physics offsets do not prevent entry.
+        private const float MinimumLadderReach = 0.82f;
+        private const float LadderEntryHeightTolerance = 0.36f;
         public int Facing => facing;
         public bool IsClimbing => route != null;
         [Tooltip("Saklanırken (Çök–Kapan–Tutun) görselin dikey ölçeği.")]
@@ -82,13 +86,17 @@ namespace Jam.Levels.Level1
                 foreach (var candidate in ladders)
                 {
                     if (candidate == null || !candidate.gameObject.activeInHierarchy) continue;
+                    if (candidate.bottom == null || candidate.top == null || candidate.landing == null) continue;
                     var entry = vertical > 0 ? candidate.bottom.position : candidate.top.position;
-                    if (Mathf.Abs(body.position.x - entry.x) < ladderReach && Mathf.Abs(body.position.y - entry.y) < 0.22f)
+                    var reach = Mathf.Max(ladderReach, MinimumLadderReach);
+                    if (Mathf.Abs(body.position.x - entry.x) < reach &&
+                        Mathf.Abs(body.position.y - entry.y) < LadderEntryHeightTolerance)
                     {
                         route = candidate;
                         body.useGravity = false;
                         body.linearVelocity = Vector3.zero;
-                        UnityEngine.Physics.IgnoreCollision(capsule, route.upperFloor, true);
+                        if (route.upperFloor != null)
+                            UnityEngine.Physics.IgnoreCollision(capsule, route.upperFloor, true);
                         route.SetOpen(true);
                         body.position = entry;
                         break;
@@ -128,7 +136,8 @@ namespace Jam.Levels.Level1
         {
             if (body != null) body.useGravity = true;
             if (route == null) return;
-            UnityEngine.Physics.IgnoreCollision(capsule, route.upperFloor, false);
+            if (route.upperFloor != null)
+                UnityEngine.Physics.IgnoreCollision(capsule, route.upperFloor, false);
             route.SetOpen(false);
             route = null;
         }

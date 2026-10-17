@@ -3947,7 +3947,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Jam.Levels.Level1.L1_ResidentController
   walkSpeed: 2.2
   climbSpeed: 1.6
-  ladderReach: 0.52
+  ladderReach: 0.82
   footOffset: 0.43
   ladders:
   - {fileID: 276394284}
