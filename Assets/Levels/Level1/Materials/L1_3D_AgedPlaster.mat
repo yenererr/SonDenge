@@ -12,7 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _EMISSION
+  - _NORMALMAP
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -27,11 +27,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 36e325a66ad57a24296820a39a80a931, type: 2}
+        m_Texture: {fileID: 2800000, guid: fb0439cbbfa27ef42934e6b4fb6e3197, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: cf9c1c7af02a3e24884e855912f232b2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -51,7 +51,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 36e325a66ad57a24296820a39a80a931, type: 2}
+        m_Texture: {fileID: 2800000, guid: fb0439cbbfa27ef42934e6b4fb6e3197, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -107,7 +107,7 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.1
+    - _Smoothness: 0.08
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -117,9 +117,9 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.97, g: 0.89, b: 0.77, a: 1}
-    - _Color: {r: 0.96999997, g: 0.89, b: 0.77, a: 1}
-    - _EmissionColor: {r: 0.16, g: 0.12, b: 0.085, a: 1}
+    - _BaseColor: {r: 0.96, g: 0.93, b: 0.88, a: 1}
+    - _Color: {r: 0.96, g: 0.93, b: 0.88, a: 1}
+    - _EmissionColor: {r: 0.12, g: 0.09, b: 0.06, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

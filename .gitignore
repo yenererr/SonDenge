@@ -50,3 +50,6 @@ crashlytics-build.properties
 /[Aa]ssets/_Sandbox/*
 !/[Aa]ssets/_Sandbox/.gitkeep
 !/[Aa]ssets/_Sandbox.meta
+
+# Geçici ekran görüntüleri
+/[Aa]ssets/Screenshots/*
