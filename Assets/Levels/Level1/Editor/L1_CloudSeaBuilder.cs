@@ -74,11 +74,12 @@ namespace Jam.Levels.Level1
             AddMountain(mountains, mountainPrefab, "Sağ uzak zirve", 34f, 8.4f, 38.0f, 23f, farMountain, 31f);
 
             var random = new System.Random(4817);
-            AddCloudLayer(cloudBank, cloudPrefabs, farCloud, random, 18f, 0.1f, -43f, 43f, 6.5f, 9.6f, 1, 0.9f);
-            AddCloudLayer(cloudBank, cloudPrefabs, middleCloud, random, 10f, -1.2f, -31f, 31f, 5.3f, 7.8f, 3, 1.2f);
-            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, 5.5f, -3.0f, -22f, 22f, 4.5f, 6.8f, 5, 1.5f);
+            // Keep open sky between the banks, including their slow horizontal drift.
+            AddCloudLayer(cloudBank, cloudPrefabs, farCloud, random, 18f, 0.1f, -43f, 43f, 15f, 7.4f, 1, 0.7f);
+            AddCloudLayer(cloudBank, cloudPrefabs, middleCloud, random, 10f, -1.2f, -31f, 31f, 13f, 6.3f, 3, 0.85f);
+            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, 5.5f, -3.0f, -24f, 24f, 12f, 5.4f, 5, 1.0f);
             // These low clouds pass in front of the central balancing rock, below the playable floor.
-            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, -0.8f, -4.2f, -6f, 6f, 6f, 4.2f, 2, 2.2f, true);
+            AddCloudLayer(cloudBank, cloudPrefabs, nearCloud, random, -0.8f, -4.2f, 0f, 0f, 12f, 3.4f, 2, 2.2f, true);
 
             var camera = Camera.main;
             if (camera != null)
