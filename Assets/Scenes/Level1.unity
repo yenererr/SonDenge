@@ -9056,6 +9056,62 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 70d02a1f450fbcb45b1491a14ec0a60b, type: 3}
   m_PrefabInstance: {fileID: 252543996}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &255991153
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 255991155}
+  - component: {fileID: 255991154}
+  m_Layer: 0
+  m_Name: '[L1] UI'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &255991154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 255991153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7327dc6a248d5247a808ffe13c70b13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Levels.Level1.L1_Hud
+  game: {fileID: 439849233}
+  cameraController: {fileID: 1297112130}
+  levelTitle: "SEV\u0130YE 01 \xB7 \u0130LK SARSINTI"
+  radioLine: "RADYO S\u0130VR\u0130TEPE \u2014 Bu gece sars\u0131nt\u0131 bekleniyor.
+    Haz\u0131rlan!"
+  safetyLine: "Ger\xE7ek depremde e\u015Fya ta\u015F\u0131may\u0131n. \xC7\xF6k \u2013
+    Kapan \u2013 Tutun."
+  safeAngle: 7
+  warningAngle: 16
+  gaugeRangeDegrees: 30
+  countdownSeconds: 3
+  riskWarningAngle: 18
+--- !u!4 &255991155
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 255991153}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &257636614
 GameObject:
   m_ObjectHideFlags: 0
@@ -15355,6 +15411,9 @@ MonoBehaviour:
   holdFurnitureWhilePlanning: 1
   collapseAngle: 26
   collapseHoldSeconds: 1
+  autoStart: 1
+  useLegacyHud: 0
+  menuScene: Menu
 --- !u!1 &442233668
 GameObject:
   m_ObjectHideFlags: 0
@@ -72555,6 +72614,7 @@ MonoBehaviour:
   contactGap: 0.025
   interactionReach: 1.35
   canDrag: 1
+  showLegacyHint: 0
 --- !u!1 &2108933232
 GameObject:
   m_ObjectHideFlags: 0
@@ -74206,3 +74266,4 @@ SceneRoots:
   - {fileID: 1297112129}
   - {fileID: 880944364}
   - {fileID: 163657044}
+  - {fileID: 255991155}

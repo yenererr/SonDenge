@@ -16,6 +16,8 @@ namespace Jam.Levels.Level1
         public float contactGap = 0.025f;
         public float interactionReach = 1.35f;
         public bool canDrag = true;
+        [Tooltip("Eski IMGUI kontrol ipucu çubuğu. uGUI HUD varken kapalı.")]
+        public bool showLegacyHint = false;
         public L1_MovableProp Selected { get; private set; }
         public L1_MovableProp Carried => carried;
         public float CarriedLocalX => carryLocalPosition.x;
@@ -290,7 +292,7 @@ namespace Jam.Levels.Level1
         }
         private void OnGUI()
         {
-            if (L1_TouchControls.Available || !canDrag) return;
+            if (!showLegacyHint || L1_TouchControls.Available || !canDrag) return;
             if (label == null)
             {
                 label = new GUIStyle(GUI.skin.label) { fontSize = 15, alignment = TextAnchor.MiddleLeft,

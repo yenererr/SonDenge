@@ -75,7 +75,7 @@ namespace Jam.Levels.Level1
 
             if (state == RoundState.Disaster && level >= 4) DrawDisasterWeather(width, height);
 
-            if (state != RoundState.StartMenu)
+            if (state != RoundState.StartMenu && useLegacyHud)
             {
                 DrawTopBar(width);
                 if (warningUntil > 0f)
@@ -89,7 +89,7 @@ namespace Jam.Levels.Level1
             }
 
             if (marketOpen && state == RoundState.Planning && !menuOpen && !howToOpen) DrawMarket(width, height);
-            if (state == RoundState.StartMenu && !howToOpen) DrawStartMenu(width, height);
+            if (state == RoundState.StartMenu && !howToOpen && !autoStart) DrawStartMenu(width, height);
             if (state == RoundState.Report) DrawReport(width, height);
             if (state == RoundState.GameOver) DrawGameOver(width, height);
             if (state == RoundState.Victory) DrawVictory(width, height);
@@ -98,7 +98,7 @@ namespace Jam.Levels.Level1
 
             GUI.matrix = previousMatrix;
             if (state == RoundState.Planning || state == RoundState.Disaster) L1_TouchControls.Draw();
-            if (drag != null) drag.canDrag = state == RoundState.Planning && !marketOpen && !menuOpen && !howToOpen;
+            if (drag != null) drag.canDrag = state == RoundState.Planning && !marketOpen && !menuOpen && !howToOpen && !countdownActive;
         }
 
         private void DrawTopBar(float width)
@@ -219,7 +219,9 @@ namespace Jam.Levels.Level1
             GUI.Label(new Rect(panel.x + 324f, 45f, 86f, 27f), budget + " altın", uiSmall);
             if (ActionButton(new Rect(panel.x + 410f, 19f, 29f, 31f), "X", Red)) marketOpen = false;
 
-            for (var i = 0; i < Categories.Length; i++)
+            // Level 1 yalnız deprem bölümü: mobilya ve deprem önlemleri gösterilir.
+            var categoryCount = singleFloorLevel ? 2 : Categories.Length;
+            for (var i = 0; i < categoryCount; i++)
             {
                 var x = panel.x + 13f + (i % 3) * 145f;
                 var y = 93f + (i / 3) * 36f;

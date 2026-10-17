@@ -97,6 +97,10 @@ namespace Jam.Levels.Level1
         public float collapseAngle = 26f;
         public float collapseHoldSeconds = 1f;
         private float collapseClock;
+        [Tooltip("Açıksa bölüm, ana menüden gelindiği için kendi başlangıç menüsünü göstermeden başlar.")]
+        public bool autoStart = true;
+        [Tooltip("Eski IMGUI üst bar/uyarı/seçim çubuğu. Yeni uGUI HUD (L1_Hud) varken kapalı tutun.")]
+        public bool useLegacyHud = false;
 
         private readonly HashSet<string> equipment = new HashSet<string>();
         private readonly List<FireSpot> fires = new List<FireSpot>();
@@ -148,7 +152,7 @@ namespace Jam.Levels.Level1
             CacheHangingLamps();
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
-            if (startImmediatelyOnReload)
+            if (startImmediatelyOnReload || autoStart)
             {
                 startImmediatelyOnReload = false;
                 BeginGame();
@@ -290,12 +294,16 @@ namespace Jam.Levels.Level1
             if (keyboard != null)
             {
                 if (keyboard.iKey.wasPressedThisFrame) marketOpen = !marketOpen && state == RoundState.Planning;
-                if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Planning) StartDisaster();
+                if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Planning && !countdownActive)
+                {
+                    if (DisasterRequested != null) DisasterRequested();
+                    else StartDisaster();
+                }
                 if (keyboard.fKey.wasPressedThisFrame && state == RoundState.Planning) ToggleAnchor();
                 if (keyboard.rKey.wasPressedThisFrame && (state == RoundState.GameOver || state == RoundState.Victory)) Restart();
             }
 
-            if (state == RoundState.Planning)
+            if (state == RoundState.Planning && !countdownActive)
             {
                 timer -= Time.deltaTime;
                 if (timer <= 0f) StartDisaster(true);
@@ -494,10 +502,7 @@ namespace Jam.Levels.Level1
 
         private void StartDisaster(bool forced = false)
         {
-            if (state != RoundState.Planning) return;
-            if (level == 1 && !equipment.Contains("deprem_cantasi") && !forced) { Warn("Deprem çantası olmadan afeti başlatamazsın. Marketten edin."); return; }
-            if (level == 3 && !equipment.Contains("yangin_tupu") && !forced) { Warn("Yangın tüpü olmadan yangına müdahale edemezsin. Marketten edin."); return; }
-            if (level <= 2 && Mathf.Abs(houseAngle) > 18f * Mathf.Deg2Rad && !forced) { Warn("Ev çok eğik. Önce eşyaları dengele."); return; }
+            if (!CanStartDisaster(forced)) return;
             marketOpen = false;
             timer = level == 1 ? 10f : level == 2 ? 12f : level == 3 ? 30f : 25f;
             if (level == 3)
@@ -518,6 +523,15 @@ namespace Jam.Levels.Level1
             SetMusic(disasterMusic);
             SetState(RoundState.Disaster);
             if (sfx != null) sfx.Play(level == 3 ? "strike" : "confirm");
+        }
+
+        private bool CanStartDisaster(bool forced)
+        {
+            if (state != RoundState.Planning) return false;
+            if (level == 1 && !equipment.Contains("deprem_cantasi") && !forced) { Warn("Deprem çantası olmadan afeti başlatamazsın. Marketten edin."); return false; }
+            if (level == 3 && !equipment.Contains("yangin_tupu") && !forced) { Warn("Yangın tüpü olmadan yangına müdahale edemezsin. Marketten edin."); return false; }
+            if (level <= 2 && Mathf.Abs(houseAngle) > 18f * Mathf.Deg2Rad && !forced) { Warn("Ev çok eğik. Önce eşyaları dengele."); return false; }
+            return true;
         }
 
         private void CompleteLevel()
@@ -590,14 +604,18 @@ namespace Jam.Levels.Level1
         {
             startImmediatelyOnReload = true;
             Time.timeScale = 1f;
-            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            if (SceneLoader.Instance != null) SceneLoader.Instance.ReloadCurrent();
+            else UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
+
+        [Tooltip("Ana menü sahnesinin adı (SceneLoader ile yüklenir).")]
+        public string menuScene = "Menu";
 
         private void ReturnToMainMenu()
         {
             startImmediatelyOnReload = false;
             Time.timeScale = 1f;
-            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            if (SceneLoader.Instance != null) SceneLoader.Instance.Load(menuScene);
         }
 
         private void ToggleMenu()
