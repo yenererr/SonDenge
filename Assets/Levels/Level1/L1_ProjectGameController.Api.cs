@@ -50,7 +50,7 @@ namespace Jam.Levels.Level1
             public bool locked, installed, affordable;
         }
 
-        public string[] UiCategories => singleFloorLevel ? new[] { Categories[0], Categories[1] } : Categories;
+        public string[] UiCategories => System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Take(Categories, Mathf.Min(Categories.Length, level + 1)));
         public int AnchorStock => anchors;
 
         public List<ShopEntry> UiShopEntries(int categoryIndex)
@@ -94,9 +94,20 @@ namespace Jam.Levels.Level1
         public bool IsGameOver => state == RoundState.GameOver;
         public string ReportText => report;
         public int SafetyScore => safetyScore;
-        public bool NextLevelAvailable => nextLevelReady && state == RoundState.Report;
+        public bool NextLevelAvailable => state == RoundState.Report && (growDownward ? level < 5 : nextLevelReady);
         public void UiRestart() => Restart();
         public void UiMainMenu() => ReturnToMainMenu();
-        public void UiNextLevel() { if (state == RoundState.Report) GoToNextLevel(); }
+        public void UiNextLevel()
+        {
+            if (state != RoundState.Report) return;
+            if (growDownward) Advance(); else GoToNextLevel();
+        }
+        public int LevelNumber => level;
+        public string LevelTitle => level == 1 ? "İLK SARSINTI" : level == 2 ? "DAĞ FIRTINASI" : level == 3 ? "YANGIN" : level == 4 ? "YILDIRIM" : "ŞİDDETLİ YAĞMUR";
+        public string RadioLine => level == 1 ? "RADYO SİVRİTEPE — Bu gece sarsıntı bekleniyor. Hazırlan!" :
+            level == 2 ? "RADYO SİVRİTEPE — Dağdan sert fırtına geliyor. Ağır eşyaları rüzgârın tersine al!" :
+            level == 3 ? "RADYO SİVRİTEPE — Yangın riski yüksek. Yangın tüpünü hazır et!" :
+            level == 4 ? "RADYO SİVRİTEPE — Zirvede yıldırım uyarısı. Paratoner kur!" :
+            "RADYO SİVRİTEPE — Şiddetli yağmur bekleniyor. Suyu evden uzaklaştır!";
     }
 }

@@ -419,7 +419,7 @@ namespace Jam.Levels.Level1
                 // Mathf.SmoothStep(a, b, t) a→b arası enterpolasyondur; eşik geçişi için
                 // önce t'yi 0–1 aralığına çevirmek gerekir.
                 var edgeWeight = 1f - Smooth01(roomHalfWidth - 0.08f, roomHalfWidth + 1.32f, Mathf.Abs(local.x));
-                var heightWeight = Smooth01(-2.8f, -1.8f, local.y);
+                var heightWeight = Smooth01(lowestFloorTop - 1.65f, lowestFloorTop - 0.65f, local.y);
                 torque += item.Mass * local.x * edgeWeight * heightWeight;
             }
             if (drag != null && drag.Carried != null && drag.Carried.Body != null)
@@ -600,7 +600,7 @@ namespace Jam.Levels.Level1
             maxTilt = 0f;
             houseAngle = angularVelocity = 0f;
             if (balancePivot != null) balancePivot.localRotation = Quaternion.identity;
-            if (level == 3)
+            if (level == 3 && !growDownward)
             {
                 SetUpperFloorVisible(true);
                 RefreshFurniture();
@@ -608,8 +608,10 @@ namespace Jam.Levels.Level1
             baselineTorque = ComputeTorque();
             smoothedTorque = baselineTorque;
             categoryIndex = level == 2 ? 0 : level == 3 ? 3 : level == 4 ? 4 : 5;
-            marketOpen = true;
+            marketOpen = !growDownward;
             SetState(RoundState.Planning);
+            // Her yeni bölümde ev aşağı doğru büyür: mevcut katların altına yeni kat eklenir.
+            if (growDownward) GrowFloorBelow();
             if (sfx != null) sfx.Play("level");
         }
 

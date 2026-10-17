@@ -60,6 +60,18 @@ namespace Jam.Levels.Level1
             panVelocity = Vector2.zero;
         }
 
+        /// <summary>Ev büyüyünce başlangıç kadrajını kaydırır ve biraz uzaklaştırır.</summary>
+        public void ShiftRest(float dy, float fovIncrease)
+        {
+            restPosition += new Vector3(0f, dy, 0f);
+            restFov = Mathf.Min(maxFov, restFov + fovIncrease);
+            maxFov = Mathf.Max(maxFov, restFov + 8f);
+            panMin.y += dy;
+            panMax.y += dy;
+            targetFov = restFov;
+            targetPan = Vector2.zero;
+        }
+
         /// <summary>Kameraya kısa sarsıntı ekler (gerçek zoom/pan konumunu değiştirmez).</summary>
         public void Shake(float duration, float strength)
         {

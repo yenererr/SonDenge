@@ -26,6 +26,8 @@ namespace Jam.Levels.Level1
         [SerializeField] private float riskWarningAngle = 18f;
 
         private CanvasGroup group;
+        private Text levelLabel, radioLabel;
+        private int shownLevel;
         private RectTransform gaugeMarker, gaugeTrack;
         private Image gaugeMarkerImage;
         private Text gaugeText, budgetText, timerText, warningText, selectedText, centerText, safetyText;
@@ -84,6 +86,12 @@ namespace Jam.Levels.Level1
             group.alpha = modal ? 0.35f : 1f;
             if (cameraController != null) cameraController.inputEnabled = !modal;
 
+            if (game.LevelNumber != shownLevel)
+            {
+                shownLevel = game.LevelNumber;
+                levelLabel.text = "SEVİYE " + shownLevel.ToString("00") + " · " + game.LevelTitle;
+                radioLabel.text = game.RadioLine;
+            }
             UpdatePanels();
             UpdateGauge();
             budgetText.text = game.Budget + " altın";
@@ -167,9 +175,9 @@ namespace Jam.Levels.Level1
             var radio = UiKit.Rect(top, "RadioAlert", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
                 new Vector2(24f, -18f), new Vector2(620f, 92f));
             PaperPanel(radio);
-            var levelLabel = UiKit.Label(radio, "Seviye", levelTitle, 30, UiKit.Wood, TextAnchor.UpperLeft, FontStyle.Bold);
+            levelLabel = UiKit.Label(radio, "Seviye", levelTitle, 30, UiKit.Wood, TextAnchor.UpperLeft, FontStyle.Bold);
             Pad(levelLabel, 18f, 10f);
-            var radioLabel = UiKit.Label(radio, "Radyo", radioLine, 21, UiKit.Ink, TextAnchor.LowerLeft, FontStyle.Italic);
+            radioLabel = UiKit.Label(radio, "Radyo", radioLine, 21, UiKit.Ink, TextAnchor.LowerLeft, FontStyle.Italic);
             Pad(radioLabel, 18f, 10f);
 
             // Üst orta: kompakt denge göstergesi (~260 px).
