@@ -28,6 +28,7 @@ namespace Jam.Shop
         private readonly List<L2_PlacedFurniture> _placedFurniture = new List<L2_PlacedFurniture>();
         private L2_PlacedFurniture _preview;
         private FurnitureData _pendingFurniture;
+        private int _purchaseFrame;
 
         private void Awake()
         {
@@ -53,6 +54,10 @@ namespace Jam.Shop
         private void Update()
         {
             if (_preview == null || _pendingFurniture == null)
+                return;
+
+            // Satın alma tıklaması kapanan menünün arkasındaki zemini onaylamasın.
+            if (Time.frameCount <= _purchaseFrame)
                 return;
 
             if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
@@ -102,6 +107,7 @@ namespace Jam.Shop
                 ConfirmPlacement();
 
             _pendingFurniture = furniture;
+            _purchaseFrame = Time.frameCount;
             // Unity 6'da bazı prefab varlıkları generic Instantiate<GameObject>
             // çağrısında geçersiz cast üretebiliyor. Non-generic API ile güvenli
             // şekilde oluşturup sonucu açıkça kontrol ediyoruz.

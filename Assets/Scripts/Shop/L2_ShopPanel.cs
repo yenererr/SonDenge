@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using UnityEngine.Rendering;
 using System.Collections.Generic;
 using Jam.Core;
 using Jam.Economy;
@@ -38,6 +40,17 @@ namespace Jam.Shop
 
         private readonly List<Button> _itemButtons = new List<Button>();
         private readonly List<FurnitureData> _catalogItems = new List<FurnitureData>();
+        [Header("Mağaza görünümü")]
+        [SerializeField] private Color copper = new Color(0.66f, 0.45f, 0.29f);
+        [SerializeField] private Color parchment = new Color(0.94f, 0.86f, 0.74f);
+        [SerializeField] private Color stone = new Color(0.23f, 0.22f, 0.20f);
+        [SerializeField] private Color purchaseGreen = new Color(0.27f, 0.40f, 0.24f);
+        [SerializeField, Range(128, 1024)] private int previewResolution = 384;
+        private readonly List<UnityEngine.Object> _visualResources = new List<UnityEngine.Object>();
+        private readonly List<RawImage> _previews = new List<RawImage>();
+        private readonly List<Text> _prices = new List<Text>();
+        private GameObject _generatedCanvas;
+        private Sprite _cardSurface, _buySurface, _backSurface;
         private int _budget;
         private bool _purchasesEnabled = true;
 
@@ -144,6 +157,9 @@ namespace Jam.Shop
                 return false;
             }
 
+            if (!_purchasesEnabled)
+                return false;
+
             if (!IsPreparationPhase())
             {
                 SetFeedback("Eşya yalnızca hazırlık aşamasında satın alınabilir.");
@@ -177,230 +193,269 @@ namespace Jam.Shop
 
         private void BuildCatalogButtons()
         {
-            if (itemListRoot == null || itemButtonPrefab == null || catalog == null)
-                return;
-
-            for (int i = itemListRoot.childCount - 1; i >= 0; i--)
-                Destroy(itemListRoot.GetChild(i).gameObject);
-
+            if (itemListRoot == null || catalog == null) return;
             _itemButtons.Clear();
             _catalogItems.Clear();
-
+            _previews.Clear();
+            _prices.Clear();
             foreach (FurnitureData furniture in catalog)
             {
-                if (furniture == null)
-                    continue;
-
-                FurnitureData selectedFurniture = furniture;
-                Button button = Instantiate(itemButtonPrefab, itemListRoot);
-                button.gameObject.SetActive(true);
-                button.name = "Buton_" + selectedFurniture.ItemId;
-
-                Text icon = FindCardText(button, "KartIkon");
-                Text name = FindCardText(button, "KartAdi");
-                Text description = FindCardText(button, "KartAciklama");
-                Text price = FindCardText(button, "KartSatinAl/KartFiyat");
-                if (icon != null)
-                    icon.text = GetFurnitureIcon(selectedFurniture);
-                if (name != null)
-                    name.text = selectedFurniture.DisplayName;
-                if (description != null)
-                    description.text = GetFurnitureDescription(selectedFurniture);
-                if (price != null)
-                    price.text = "SATIN AL\n" + selectedFurniture.PurchasePrice + " PARA";
-
-                button.onClick.AddListener(() => TryPurchase(selectedFurniture));
-                _itemButtons.Add(button);
-                _catalogItems.Add(selectedFurniture);
+                if (furniture == null) continue;
+                var card = Surface("Kart_" + furniture.ItemId, itemListRoot, new Vector2(284, 310), Vector2.zero, _cardSurface);
+                var picture = new GameObject("MobilyaGorseli", typeof(RectTransform), typeof(RawImage)).GetComponent<RawImage>();
+                picture.transform.SetParent(card.transform, false);
+                TopRect(picture.rectTransform, new Vector2(250, 160), new Vector2(0, -12));
+                picture.raycastTarget = false;
+                _previews.Add(picture);
+                Label("Ad", card.transform, furniture.DisplayName, 28, new Vector2(258, 38), new Vector2(0, -174), true);
+                Label("Bilgi", card.transform, "Kütle: " + furniture.Mass + "  •  Sabitleme: " + furniture.AnchoringCost + " para",
+                    17, new Vector2(256, 44), new Vector2(0, -213), false);
+                Button buy = StyledButton("SatinAl", card.transform, new Vector2(256, 48), new Vector2(0, -253), _buySurface);
+                Text price = Label("Fiyat", buy.transform, "", 25, new Vector2(246, 46), Vector2.zero, true);
+                _prices.Add(price);
+                FurnitureData selected = furniture;
+                buy.onClick.AddListener(() => TryPurchase(selected));
+                _itemButtons.Add(buy);
+                _catalogItems.Add(furniture);
             }
-        }
-
-        private static Text FindCardText(Button card, string childName)
-        {
-            Transform child = card != null ? card.transform.Find(childName) : null;
-            return child != null ? child.GetComponent<Text>() : null;
-        }
-
-        private static string GetFurnitureIcon(FurnitureData furniture)
-        {
-            if (furniture == null || string.IsNullOrWhiteSpace(furniture.DisplayName))
-                return "?";
-
-            string name = furniture.DisplayName;
-            if (name.StartsWith("Ki", StringComparison.OrdinalIgnoreCase))
-                return "Kİ";
-
-            return name.Substring(0, 1).ToUpperInvariant();
-        }
-
-        private static string GetFurnitureDescription(FurnitureData furniture)
-        {
-            if (furniture == null)
-                return string.Empty;
-
-            if (furniture.Mass <= 2f)
-                return "Hafif - dengeyi az etkiler.";
-            if (furniture.Mass <= 4f)
-                return "Orta ağırlık - dengeli seçim.";
-            return "Ağır - dengeyi çok etkiler.";
         }
 
         private void CreateDefaultUiIfNeeded()
         {
-            if (!autoCreateUi || (shopContent != null && itemListRoot != null && itemButtonPrefab != null && budgetText != null && feedbackText != null && closeButton != null))
-                return;
-
+            if (!autoCreateUi) return;
             EnsureEventSystem();
-
-            Canvas canvas = CreateCanvas("Level2ShopCanvas");
-            GameObject panel = CreatePanel("Level2ShopPanel", canvas.transform, new Vector2(900f, 780f), new Vector2(0f, 0f), new Color(0.055f, 0.08f, 0.13f, 0.98f));
-            shopContent = panel;
-
-            CreatePanel("UstSerit", panel.transform, new Vector2(900f, 112f), new Vector2(0f, 334f), new Color(0.10f, 0.16f, 0.24f, 1f));
-            CreatePanel("AltinCizgi", panel.transform, new Vector2(900f, 5f), new Vector2(0f, 276f), new Color(0.95f, 0.67f, 0.24f, 1f));
-            CreateLabel("Baslik", panel.transform, "LEVEL 2 MAĞAZASI", 30, TextAnchor.UpperCenter, new Vector2(0f, -22f), new Vector2(700f, 48f), new Color(1f, 0.82f, 0.42f, 1f));
-            CreateLabel("AltBaslik", panel.transform, "Hazırlık aşaması - Dengeyi koru, doğru eşyayı seç", 16, TextAnchor.UpperCenter, new Vector2(0f, -68f), new Vector2(700f, 30f), new Color(0.72f, 0.84f, 0.9f, 1f));
-
-            GameObject budgetCard = CreatePanel("ButceKarti", panel.transform, new Vector2(250f, 58f), new Vector2(-285f, 235f), new Color(0.12f, 0.28f, 0.31f, 1f));
-            budgetText = CreateLabel("Butce", budgetCard.transform, string.Empty, 20, TextAnchor.MiddleCenter, new Vector2(0f, -15f), new Vector2(230f, 42f), Color.white);
-            feedbackText = CreateLabel("Bilgi", panel.transform, "Yeni eşya alabilirsin - ama her eşya dengeyi etkiler!", 16, TextAnchor.MiddleCenter, new Vector2(95f, -165f), new Vector2(510f, 50f), new Color(0.65f, 0.9f, 0.9f, 1f));
-
-            GameObject list = new GameObject("EsyaListesi", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
-            list.transform.SetParent(panel.transform, false);
-            RectTransform listRect = list.GetComponent<RectTransform>();
-            listRect.anchorMin = new Vector2(0.5f, 0.5f);
-            listRect.anchorMax = new Vector2(0.5f, 0.5f);
-            listRect.pivot = new Vector2(0.5f, 0.5f);
-            listRect.anchoredPosition = new Vector2(0f, -60f);
-            listRect.sizeDelta = new Vector2(840f, 500f);
-            GridLayoutGroup layout = list.GetComponent<GridLayoutGroup>();
-            layout.padding = new RectOffset(14, 14, 12, 12);
-            layout.spacing = new Vector2(16f, 16f);
-            layout.cellSize = new Vector2(260f, 224f);
-            layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            layout.constraintCount = 3;
-            ContentSizeFitter fitter = list.GetComponent<ContentSizeFitter>();
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            itemListRoot = list.transform;
-
-            itemButtonPrefab = CreateFurnitureCard("EsyaKartSablon", panel.transform);
-            itemButtonPrefab.gameObject.SetActive(false);
-
-            closeButton = CreateButton("MagazayiKapat", panel.transform, "KAPAT", new Vector2(125f, 42f), new Vector2(365f, -24f), new Color(0.45f, 0.2f, 0.2f, 1f));
-
-            CreateLabel("AltBilgi", panel.transform, "İpucu: Ağır eşyalar dengeyi daha çok etkiler.", 14, TextAnchor.MiddleCenter, new Vector2(0f, -368f), new Vector2(760f, 28f), new Color(0.55f, 0.68f, 0.76f, 1f));
-
-            Button openButton = CreateButton("MagazayiAc", canvas.transform, "MAĞAZA", new Vector2(220f, 60f), new Vector2(-24f, 28f), new Color(0.75f, 0.46f, 0.16f, 1f));
-            RectTransform openRect = openButton.GetComponent<RectTransform>();
-            openRect.anchorMin = new Vector2(1f, 0f);
-            openRect.anchorMax = new Vector2(1f, 0f);
-            openRect.pivot = new Vector2(1f, 0f);
-            openButton.onClick.AddListener(Open);
-        }
-
-        private static Canvas CreateCanvas(string objectName)
-        {
-            GameObject canvasObject = new GameObject(objectName, typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-            Canvas canvas = canvasObject.GetComponent<Canvas>();
+            _cardSurface = MakeSurface(284, 310, 22, stone, true);
+            _buySurface = MakeSurface(256, 48, 12, purchaseGreen, true);
+            _backSurface = MakeSurface(360, 72, 17, stone, true);
+            Canvas canvas = new GameObject("Level2ShopCanvas", typeof(RectTransform), typeof(Canvas),
+                typeof(CanvasScaler), typeof(GraphicRaycaster)).GetComponent<Canvas>();
+            _generatedCanvas = canvas.gameObject;
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.matchWidthOrHeight = 0.5f;
-            return canvas;
+
+            // The opener is behind the full-screen shop, so it cannot cover its controls.
+            Button opener = StyledButton("MagazayiAc", canvas.transform, new Vector2(220, 60),
+                Vector2.zero, _backSurface);
+            RectTransform openerRect = (RectTransform)opener.transform;
+            openerRect.anchorMin = openerRect.anchorMax = new Vector2(1, 0);
+            openerRect.pivot = new Vector2(1, 0);
+            openerRect.anchoredPosition = new Vector2(-24, 24);
+            Label("Yazi", opener.transform, "MAĞAZA", 26, new Vector2(210, 58), Vector2.zero, true);
+            opener.onClick.AddListener(Open);
+
+            Image backdrop = new GameObject("Level2ShopPanel", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            backdrop.transform.SetParent(canvas.transform, false);
+            backdrop.rectTransform.anchorMin = Vector2.zero;
+            backdrop.rectTransform.anchorMax = Vector2.one;
+            backdrop.rectTransform.offsetMin = backdrop.rectTransform.offsetMax = Vector2.zero;
+            backdrop.sprite = MakeBackdrop();
+            shopContent = backdrop.gameObject;
+            var content = new GameObject("MagazaIcerik", typeof(RectTransform)).GetComponent<RectTransform>();
+            content.SetParent(backdrop.transform, false);
+            content.anchorMin = content.anchorMax = content.pivot = new Vector2(0.5f, 0.5f);
+            content.sizeDelta = new Vector2(960, 1020);
+            Label("OyunAdi", content, "SON DENGE", 70, new Vector2(900, 94), new Vector2(0, -10), true);
+            Label("Baslik", content, "SİVRİTEPE MOBİLYACISI", 24, new Vector2(900, 38), new Vector2(0, -100), false);
+            budgetText = Label("Butce", content, "", 24, new Vector2(900, 40), new Vector2(0, -143), true);
+
+            var grid = new GameObject("EsyaListesi", typeof(RectTransform), typeof(GridLayoutGroup)).GetComponent<GridLayoutGroup>();
+            grid.transform.SetParent(content, false);
+            TopRect((RectTransform)grid.transform, new Vector2(892, 640), new Vector2(0, -200));
+            grid.cellSize = new Vector2(284, 310);
+            grid.spacing = new Vector2(20, 20);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 3;
+            itemListRoot = grid.transform;
+            feedbackText = Label("Bilgi", content, "Yeni eşya alabilirsin — ama her eşya dengeyi etkiler!",
+                20, new Vector2(900, 48), new Vector2(0, -853), false);
+            closeButton = StyledButton("MagazayiKapat", content, new Vector2(360, 72),
+                new Vector2(0, -920), _backSurface);
+            Label("Yazi", closeButton.transform, "GERİ", 44, new Vector2(340, 70), Vector2.zero, true);
         }
 
-        private static GameObject CreatePanel(string objectName, Transform parent, Vector2 size, Vector2 position, Color color)
+        private static void TopRect(RectTransform rect, Vector2 size, Vector2 position)
         {
-            GameObject panel = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            panel.transform.SetParent(parent, false);
-            RectTransform rect = panel.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = position;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1);
+            rect.pivot = new Vector2(0.5f, 1);
             rect.sizeDelta = size;
-            panel.GetComponent<Image>().color = color;
-            return panel;
-        }
-
-        private static Text CreateLabel(string objectName, Transform parent, string content, int fontSize, TextAnchor alignment, Vector2 position, Vector2 size, Color color)
-        {
-            GameObject labelObject = new GameObject(objectName, typeof(RectTransform), typeof(Text));
-            labelObject.transform.SetParent(parent, false);
-            RectTransform rect = labelObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
             rect.anchoredPosition = position;
-            rect.sizeDelta = size;
-            Text label = labelObject.GetComponent<Text>();
-            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            label.text = content;
-            label.fontSize = fontSize;
-            label.alignment = alignment;
-            label.color = color;
-            label.horizontalOverflow = HorizontalWrapMode.Wrap;
-            label.verticalOverflow = VerticalWrapMode.Truncate;
-            return label;
         }
 
-        private static Button CreateFurnitureCard(string objectName, Transform parent)
+        private Image Surface(string name, Transform parent, Vector2 size, Vector2 position, Sprite sprite)
         {
-            GameObject cardObject = new GameObject(objectName, typeof(RectTransform), typeof(Image), typeof(Button));
-            cardObject.transform.SetParent(parent, false);
-
-            RectTransform cardRect = cardObject.GetComponent<RectTransform>();
-            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
-            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
-            cardRect.pivot = new Vector2(0.5f, 0.5f);
-            cardRect.sizeDelta = new Vector2(260f, 224f);
-
-            Image cardImage = cardObject.GetComponent<Image>();
-            cardImage.color = new Color(0.12f, 0.21f, 0.28f, 1f);
-
-            Button cardButton = cardObject.GetComponent<Button>();
-            ColorBlock colors = cardButton.colors;
-            colors.highlightedColor = new Color(0.2f, 0.38f, 0.48f, 1f);
-            colors.pressedColor = new Color(0.08f, 0.16f, 0.22f, 1f);
-            colors.disabledColor = new Color(0.12f, 0.17f, 0.2f, 0.55f);
-            cardButton.colors = colors;
-
-            CreatePanel("KartGorsel", cardObject.transform, new Vector2(230f, 78f), new Vector2(0f, 63f), new Color(0.08f, 0.14f, 0.19f, 1f));
-            CreateLabel("KartIkon", cardObject.transform, "?", 42, TextAnchor.MiddleCenter, new Vector2(0f, -12f), new Vector2(210f, 62f), new Color(1f, 0.78f, 0.35f, 1f));
-            CreateLabel("KartAdi", cardObject.transform, "EŞYA", 18, TextAnchor.MiddleCenter, new Vector2(0f, -82f), new Vector2(230f, 28f), Color.white);
-            CreateLabel("KartAciklama", cardObject.transform, "Denge bilgisi", 12, TextAnchor.MiddleCenter, new Vector2(0f, -112f), new Vector2(230f, 30f), new Color(0.68f, 0.8f, 0.86f, 1f));
-
-            GameObject priceStrip = CreatePanel("KartSatinAl", cardObject.transform, new Vector2(230f, 38f), new Vector2(0f, -88f), new Color(0.28f, 0.48f, 0.29f, 1f));
-            CreateLabel("KartFiyat", priceStrip.transform, "SATIN AL\n0 PARA", 13, TextAnchor.MiddleCenter, new Vector2(0f, -5f), new Vector2(220f, 32f), Color.white);
-            return cardButton;
+            Image image = new GameObject(name, typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            image.transform.SetParent(parent, false);
+            TopRect(image.rectTransform, size, position);
+            image.sprite = sprite;
+            return image;
         }
 
-        private static Button CreateButton(string objectName, Transform parent, string content, Vector2 size, Vector2 position, Color color)
+        private Button StyledButton(string name, Transform parent, Vector2 size, Vector2 position, Sprite sprite)
         {
-            GameObject buttonObject = new GameObject(objectName, typeof(RectTransform), typeof(Image), typeof(Button));
-            buttonObject.transform.SetParent(parent, false);
-            RectTransform rect = buttonObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.anchoredPosition = position;
-            rect.sizeDelta = size;
-            Image image = buttonObject.GetComponent<Image>();
-            image.color = color;
-            Button button = buttonObject.GetComponent<Button>();
+            Image image = Surface(name, parent, size, position, sprite);
+            Button button = image.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
             ColorBlock colors = button.colors;
-            colors.highlightedColor = Color.Lerp(color, Color.white, 0.25f);
-            colors.pressedColor = Color.Lerp(color, Color.black, 0.2f);
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1.20f, 1.17f, 1.08f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.pressedColor = new Color(0.72f, 0.72f, 0.65f);
+            colors.disabledColor = new Color(0.42f, 0.42f, 0.42f);
+            colors.fadeDuration = 0.12f;
             button.colors = colors;
-            Text label = CreateLabel("Yazi", buttonObject.transform, content, 18, TextAnchor.MiddleCenter, Vector2.zero, size - new Vector2(18f, 8f), Color.white);
-            RectTransform labelRect = label.GetComponent<RectTransform>();
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.pivot = new Vector2(0.5f, 0.5f);
-            labelRect.anchoredPosition = Vector2.zero;
-            labelRect.sizeDelta = new Vector2(-18f, -8f);
             return button;
+        }
+
+        private Text Label(string name, Transform parent, string value, int size, Vector2 bounds, Vector2 position, bool bold)
+        {
+            Text text = new GameObject(name, typeof(RectTransform), typeof(Text)).GetComponent<Text>();
+            text.transform.SetParent(parent, false);
+            TopRect(text.rectTransform, bounds, position);
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.text = value;
+            text.fontSize = size;
+            text.fontStyle = bold ? FontStyle.Bold : FontStyle.Normal;
+            text.color = parchment;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.raycastTarget = false;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Truncate;
+            if (bold)
+            {
+                Outline outline = text.gameObject.AddComponent<Outline>();
+                outline.effectColor = new Color(0.025f, 0.02f, 0.015f, 0.95f);
+                outline.effectDistance = new Vector2(1.5f, -1.5f);
+            }
+            return text;
+        }
+
+        // Generated UI artwork: softly rounded copper edge, worn stone and fine grain.
+        private Sprite MakeSurface(int width, int height, float radius, Color fill, bool border)
+        {
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                Vector2 q = new Vector2(Mathf.Abs(x - (width - 1) * 0.5f) - (width * 0.5f - radius),
+                    Mathf.Abs(y - (height - 1) * 0.5f) - (height * 0.5f - radius));
+                float d = new Vector2(Mathf.Max(q.x, 0), Mathf.Max(q.y, 0)).magnitude
+                    + Mathf.Min(Mathf.Max(q.x, q.y), 0) - radius;
+                float noise = Mathf.PerlinNoise(x * 0.12f, y * 0.12f) - 0.5f;
+                float grain = ((x * 73 + y * 179 + x * y * 3) % 101) / 100f - 0.5f;
+                Color c = fill * (0.88f + noise * 0.34f + grain * 0.12f + 0.18f * y / height);
+                if (border && d > -6) c = copper * (0.93f + 0.16f * y / height + noise * 0.12f);
+                else if (border && d > -9) c *= 0.42f;
+                c.a = Mathf.Clamp01(-d);
+                pixels[y * width + x] = c;
+            }
+            texture.SetPixels(pixels);
+            texture.Apply(false, true);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), Vector2.one * 0.5f, 100);
+            _visualResources.Add(sprite);
+            _visualResources.Add(texture);
+            return sprite;
+        }
+
+        private Sprite MakeBackdrop()
+        {
+            const int w = 512, h = 288;
+            Texture2D texture = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[w * h];
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float radius = new Vector2((x - w * 0.5f) / w, (y - h * 0.5f) / h).magnitude;
+                float glow = Mathf.Clamp01(1 - radius * 1.7f);
+                float cloud = Mathf.PerlinNoise(x * 0.022f, y * 0.022f);
+                pixels[y * w + x] = new Color(0.009f + glow * 0.016f, 0.021f + glow * 0.048f + cloud * 0.008f, 0.008f, 1);
+            }
+            texture.SetPixels(pixels);
+            texture.Apply(false, true);
+            Sprite sprite = Sprite.Create(texture, new Rect(0, 0, w, h), Vector2.one * 0.5f);
+            _visualResources.Add(sprite);
+            _visualResources.Add(texture);
+            return sprite;
+        }
+
+        private IEnumerator Start()
+        {
+            // Wait for the render pipeline to initialize before requesting thumbnails.
+            yield return null;
+            for (int i = 0; i < _previews.Count; i++)
+            {
+                if (_catalogItems[i].ModelPrefab != null)
+                    _previews[i].texture = RenderFurniture(_catalogItems[i].ModelPrefab);
+                yield return null;
+            }
+        }
+
+        private Texture RenderFurniture(GameObject prefab)
+        {
+            GameObject studio = new GameObject("L2_GeciciOnizleme");
+            studio.transform.position = new Vector3(10000, 10000, 10000);
+            RenderTexture target = new RenderTexture(previewResolution, previewResolution, 24, RenderTextureFormat.ARGB32);
+            target.Create();
+            try
+            {
+                // Copy only mesh data: prefab scripts, physics and events must never run here.
+                foreach (MeshFilter source in prefab.GetComponentsInChildren<MeshFilter>(true))
+                {
+                    MeshRenderer sourceRenderer = source.GetComponent<MeshRenderer>();
+                    if (source.sharedMesh == null || sourceRenderer == null) continue;
+                    GameObject mesh = new GameObject("Gorsel", typeof(MeshFilter), typeof(MeshRenderer));
+                    mesh.transform.SetParent(studio.transform, false);
+                    Matrix4x4 local = prefab.transform.worldToLocalMatrix * source.transform.localToWorldMatrix;
+                    mesh.transform.localPosition = local.GetColumn(3);
+                    mesh.transform.localRotation = local.rotation;
+                    mesh.transform.localScale = local.lossyScale;
+                    mesh.GetComponent<MeshFilter>().sharedMesh = source.sharedMesh;
+                    mesh.GetComponent<MeshRenderer>().sharedMaterials = sourceRenderer.sharedMaterials;
+                }
+                Renderer[] renderers = studio.GetComponentsInChildren<Renderer>();
+                if (renderers.Length == 0) return null;
+                Bounds bounds = renderers[0].bounds;
+                foreach (Renderer renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                Camera camera = new GameObject("OnizlemeKamerasi", typeof(Camera)).GetComponent<Camera>();
+                camera.transform.SetParent(studio.transform, false);
+                camera.enabled = false;
+                camera.orthographic = true;
+                camera.orthographicSize = Mathf.Max(0.1f, bounds.extents.magnitude * 1.08f);
+                float distance = Mathf.Max(5, bounds.size.magnitude * 3);
+                camera.transform.position = bounds.center + new Vector3(1, 0.65f, -1.5f).normalized * distance;
+                camera.transform.LookAt(bounds.center);
+                camera.nearClipPlane = 0.01f;
+                camera.farClipPlane = distance * 2;
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.backgroundColor = Color.clear;
+                camera.allowHDR = false;
+                camera.allowMSAA = false;
+                var request = new RenderPipeline.StandardRequest { destination = target };
+                RenderPipeline.SubmitRenderRequest(camera, request);
+                _visualResources.Add(target);
+                return target;
+            }
+            finally
+            {
+                studio.SetActive(false);
+                Destroy(studio);
+                if (!_visualResources.Contains(target)) { target.Release(); Destroy(target); }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_generatedCanvas != null) Destroy(_generatedCanvas);
+            foreach (UnityEngine.Object resource in _visualResources)
+            {
+                if (resource is RenderTexture renderTexture) renderTexture.Release();
+                if (resource != null) Destroy(resource);
+            }
+            _visualResources.Clear();
         }
 
         private static void EnsureEventSystem()
@@ -421,7 +476,10 @@ namespace Jam.Shop
             for (int i = 0; i < _itemButtons.Count && i < _catalogItems.Count; i++)
             {
                 FurnitureData furniture = _catalogItems[i];
-                _itemButtons[i].interactable = _purchasesEnabled && canBuy && furniture.PurchasePrice <= _budget;
+                bool affordable = furniture.PurchasePrice <= _budget;
+                _itemButtons[i].interactable = _purchasesEnabled && canBuy && affordable;
+                if (i < _prices.Count)
+                    _prices[i].text = affordable ? "SATIN AL  " + furniture.PurchasePrice : "YETERSİZ BÜTÇE";
             }
         }
 
