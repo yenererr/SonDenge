@@ -366,14 +366,8 @@ namespace Jam.Shop
             const int w = 512, h = 288;
             Texture2D texture = new Texture2D(w, h, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[w * h];
-            for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
-            {
-                float radius = new Vector2((x - w * 0.5f) / w, (y - h * 0.5f) / h).magnitude;
-                float glow = Mathf.Clamp01(1 - radius * 1.7f);
-                float cloud = Mathf.PerlinNoise(x * 0.022f, y * 0.022f);
-                pixels[y * w + x] = new Color(0.009f + glow * 0.016f, 0.021f + glow * 0.048f + cloud * 0.008f, 0.008f, 1);
-            }
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = Color.clear;
             texture.SetPixels(pixels);
             texture.Apply(false, true);
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, w, h), Vector2.one * 0.5f);
