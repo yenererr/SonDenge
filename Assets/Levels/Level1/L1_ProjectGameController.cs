@@ -108,7 +108,7 @@ namespace Jam.Levels.Level1
         public float collapseAngle = 26f;
         public float collapseHoldSeconds = 1f;
         [Tooltip("Tork -> eğim çarpanı. Büyüdükçe ev daha kolay eğilir.")]
-        public float torqueSensitivity = 0.0016f;
+        public float torqueSensitivity = 0.0057f; // panel 0.00006 / (8.6 m / 820 px)
         [Header("Afet süreleri ve bütçe")]
         public float stormDuration = 12f;
         public float fireMaxTime = 30f;
@@ -136,7 +136,7 @@ namespace Jam.Levels.Level1
         private int level = 1, budget = 750, score, anchors;
         private float timer = 45f, houseAngle, angularVelocity, baselineTorque, smoothedTorque;
         private bool levelEntryBalanceLocked;
-        [SerializeField, Min(0f)] private float residentBalanceMassKg = 8f;
+        [SerializeField, Min(0f)] private float residentBalanceMassKg = 25f; // panel: 65 kg * 0.38
         [SerializeField, Min(0f)] private float residentMovementThreshold = 0.12f;
         private float levelEntryResidentX;
         private float maxTilt;

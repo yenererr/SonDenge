@@ -6,7 +6,7 @@ namespace Jam.Levels.Level1
     [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
     public sealed class L1_ResidentController : MonoBehaviour
     {
-        public float walkSpeed = 2.2f;
+        public float walkSpeed = 2.73f; // panel 260 px/sn * 0.0105 m/px
         public float climbSpeed = 1.6f;
         public float ladderReach = 0.52f;
         public float footOffset = 0.43f;
