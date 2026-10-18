@@ -20,6 +20,17 @@ namespace Jam.Levels.Level1
         [Tooltip("Bu hızın (m/sn) üstü 'yürüyor' sayılır.")]
         [SerializeField] private float walkThreshold = 0.15f;
 
+        [Header("Kucakta taşıma")]
+        [Tooltip("Eşya göğsün ne kadar önünde (kameraya doğru) durur (m).")]
+        [SerializeField] private float carryForward = 0.3f;
+        [Tooltip("Eşyanın göğüs kemiğine göre yüksekliği (m).")]
+        [SerializeField] private float carryHeight = 0.2f;
+        [Tooltip("Kolların eşyaya ne kadar uzandığı (0 = animasyon, 1 = tam).")]
+        [SerializeField, Range(0f, 1f)] private float armReach = 0.9f;
+
+        private Transform chest, upperL, upperR, handL, handR;
+        private L1_PropDrag drag;
+
         private static readonly int SpeedId = Animator.StringToHash("Speed");
         private static readonly int ClimbingId = Animator.StringToHash("Climbing");
         private Rigidbody body;
@@ -34,6 +45,20 @@ namespace Jam.Levels.Level1
             if (model == null && animator != null) model = animator.transform;
             body = resident != null ? resident.GetComponent<Rigidbody>() : null;
             yaw = idleYaw;
+            if (model != null)
+                foreach (var t in model.GetComponentsInChildren<Transform>(true))
+                    switch (t.name)
+                    {
+                        case "chest": chest = t; break;
+                        case "upperarm.l": upperL = t; break;
+                        case "upperarm.r": upperR = t; break;
+                        case "hand.l": handL = t; break;
+                        case "hand.r": handR = t; break;
+                    }
+            drag = resident != null && resident.transform.parent != null
+                ? resident.transform.parent.GetComponentInParent<L1_PropDrag>() : null;
+            if (drag == null) drag = FindAnyObjectByType<L1_PropDrag>();
+            if (drag != null) drag.residentHoldsCarried = chest != null;
             if (resident != null && resident.transform.parent != null)
                 lastLocal = resident.transform.parent.InverseTransformPoint(resident.transform.position);
         }
@@ -59,6 +84,35 @@ namespace Jam.Levels.Level1
             else target = idleYaw;
             yaw = Mathf.LerpAngle(yaw, target, 1f - Mathf.Exp(-turnSpeed * dt));
             if (model != null) model.localRotation = Quaternion.Euler(0f, yaw, 0f);
+            HoldCarried();
+        }
+
+        /// <summary>Taşınan eşyayı göğsün önüne koyar ve iki kolu ona uzatır (ilk yardım çantası gibi kucakta).</summary>
+        private void HoldCarried()
+        {
+            var item = resident.CarriedItem;
+            if (item == null || chest == null || item.Body == null) return;
+            var frame = resident.transform.parent;
+            var toCamera = frame != null ? -frame.forward : Vector3.back;
+            var side = frame != null ? frame.right : Vector3.right;
+            var up = frame != null ? frame.up : Vector3.up;
+            var center = chest.position + toCamera * carryForward + up * carryHeight + side * (resident.Facing * 0.06f);
+            item.transform.position = center;
+            item.Body.position = center;
+            var box = item.GetComponent<BoxCollider>();
+            var half = box != null ? Mathf.Clamp(box.size.x * item.transform.lossyScale.x * 0.5f, 0.08f, 0.3f) : 0.15f;
+            Reach(upperL, handL, center - side * half);
+            Reach(upperR, handR, center + side * half);
+        }
+
+        private void Reach(Transform upper, Transform hand, Vector3 target)
+        {
+            if (upper == null || hand == null) return;
+            var current = hand.position - upper.position;
+            var wanted = target - upper.position;
+            if (current.sqrMagnitude < 1e-6f || wanted.sqrMagnitude < 1e-6f) return;
+            var turn = Quaternion.FromToRotation(current, wanted);
+            upper.rotation = Quaternion.Slerp(Quaternion.identity, turn, armReach) * upper.rotation;
         }
     }
 }

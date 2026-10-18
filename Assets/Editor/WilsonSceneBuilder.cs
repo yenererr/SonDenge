@@ -221,21 +221,9 @@ namespace Jam.EditorTools
                     new Vector3(0.5f, 0.28f, 0.4f), SandbagVisual));
             var barrier = Zone("FrontDoorBarrierZone", new Vector3(3.55f, Floor[0], 0f), new Vector3(1.5f, 1.2f, 2.4f));
             Task("L5_T01", L1_MissionTask.Condition.ItemsInZone, bags.ToArray(), barrier);
-            var drain = Switch("DrainageGrate", new Vector3(2.0f, Floor[0] + 0.15f, -0.4f), "DRENAJI TEMİZLE", "Drenaj açıldı.", false);
-            DrainVisual(drain);
-            Task("L5_T02", L1_MissionTask.Condition.Switches, null, null, new[] { drain });
-            var radio = Prop("Eski radyo", 6f, new Vector3(-1.75f, Floor[0], 0f), new Vector3(0.42f, 0.3f, 0.25f), RadioVisual);
             var album = Prop("Fotoğraf albümü kutusu", 5f, new Vector3(-0.12f, Floor[0], 0f), new Vector3(0.3f, 0.22f, 0.3f), AlbumVisual);
             var dry = Zone("DryStorageZone", new Vector3(2.4f, Floor[2], 0f), new Vector3(1.4f, 1.2f, 2.4f));
-            Task("L5_T03", L1_MissionTask.Condition.ItemsInZone, new[] { radio, album }, dry);
-            var kit = Prop("Conta / yalıtım kiti", 3f, new Vector3(-2.9f, Floor[1], 0f), new Vector3(0.36f, 0.24f, 0.24f), KitVisual);
-            var leakZone = Zone("SealLeakZone", new Vector3(1.05f, Floor[0], 0f), new Vector3(0.9f, 1.2f, 2.4f));
-            var seal = Switch("SealLeak", new Vector3(1.4f, Floor[0] + 1.0f, -0.3f), "CONTAYI UYGULA", "Sızıntı kapandı.", false);
-            seal.requiresItemInZone = leakZone;
-            seal.requiredItem = kit;
-            seal.consumeItem = true;
-            LeakVisual(seal);
-            Task("L5_T04", L1_MissionTask.Condition.Switches, null, leakZone, new[] { seal });
+            Task("L5_T03", L1_MissionTask.Condition.ItemsInZone, new[] { album }, dry);
         }
 
         // ================================================================ yapı taşları

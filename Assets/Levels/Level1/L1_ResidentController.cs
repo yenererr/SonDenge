@@ -32,6 +32,8 @@ namespace Jam.Levels.Level1
         [Tooltip("Saklanırken (Çök–Kapan–Tutun) görselin dikey ölçeği.")]
         public float hideSquash = 0.62f;
         public bool IsHiding { get; private set; }
+        /// <summary>Elde (kucakta) taşınan eşya; karakter animasyonu kollarını buna uzatır.</summary>
+        public L1_MovableProp CarriedItem { get; set; }
         private Vector3 visualScale = Vector3.one;
         private Vector3 visualPosition;
 

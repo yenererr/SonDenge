@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
   id: L5_T03
   levelId: L5
-  titleTr: "HASSAS E\u015EYALARI YUKARI TA\u015EI"
-  descriptionTr: "Alt kattaki iki hassas e\u015Fyay\u0131 \xFCst kattaki kuru depo
-    alan\u0131na ta\u015F\u0131."
+  titleTr: "FOTO\u011ERAF ALB\xDCM\xDCN\xDC YUKARI TA\u015EI"
+  descriptionTr: "Alt kattaki foto\u011Fraf alb\xFCm\xFC kutusunu kuca\u011F\u0131na
+    al, \xFCst kattaki kuru depo alan\u0131na ta\u015F\u0131."
   whyItMattersTr: "Y\xFCksekte duran e\u015Fyalar su bask\u0131n\u0131ndan korunur."
-  hintTr: "E\u015Fyalar\u0131 E ile al, merdivenden (W) \xE7\u0131k\u0131p i\u015Faretli
-    alana b\u0131rak."
-  completionTr: "E\u015Fyalar kuru ve g\xFCvende!"
-  reportTr: "\xDCst kata ta\u015F\u0131nan e\u015Fyalar sudan korundu."
+  hintTr: "Kutuyu E ile kucakla, merdivenden (W) \xE7\u0131k ve i\u015Faretli kuru
+    alanda E ile b\u0131rak."
+  completionTr: "Alb\xFCm kuru ve g\xFCvende!"
+  reportTr: "\xDCst kata ta\u015F\u0131nan alb\xFCm sudan korundu."
   taskType: 0
   prerequisiteTaskIds: []
   safetyCritical: 0

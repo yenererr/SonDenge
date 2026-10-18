@@ -38,6 +38,8 @@ namespace Jam.Levels.Level1
         public L1_MovableProp Selected { get; private set; }
         public event System.Action ManipulationStarted;
         public L1_MovableProp Carried => carried;
+        /// <summary>true: taşınan eşyayı karakter animasyonu ellerinin arasında konumlar.</summary>
+        [System.NonSerialized] public bool residentHoldsCarried;
         public float CarriedLocalX => carryLocalPosition.x;
         private L1_MovableProp held;
         private L1_MovableProp carried;
@@ -224,7 +226,12 @@ namespace Jam.Levels.Level1
         private void FixedUpdate()
         {
             SettleDropped();
-            if (carried != null && resident != null && houseRoot != null)
+            if (carried != null && resident != null && houseRoot != null && residentHoldsCarried)
+            {
+                // Karakter eşyayı kucağında tutuyor (L1_CharacterAnimator konumlar); yalnız denge için yerel x güncellenir.
+                carryLocalPosition = houseRoot.InverseTransformPoint(carried.Body.position);
+            }
+            else if (carried != null && resident != null && houseRoot != null)
             {
                 var local = houseRoot.InverseTransformPoint(resident.transform.position);
                 var halfWidth = carriedCollider != null ? carriedCollider.size.x * 0.5f : 0.3f;
@@ -421,6 +428,7 @@ namespace Jam.Levels.Level1
             if (nearest == null) return;
             ReleasePointer();
             Selected = carried = nearest;
+            if (resident != null) resident.CarriedItem = carried;
             ManipulationStarted?.Invoke();
             carriedCollider = carried.GetComponent<BoxCollider>();
             carriedGravity = carried.Body.useGravity;
@@ -483,6 +491,7 @@ namespace Jam.Levels.Level1
                 carried.Body.linearVelocity = Vector3.zero;
                 carried.Body.angularVelocity = Vector3.zero;
             }
+            if (resident != null) resident.CarriedItem = null;
             carried = null;
             carriedCollider = null;
             return true;

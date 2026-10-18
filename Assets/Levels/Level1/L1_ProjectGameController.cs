@@ -380,6 +380,7 @@ namespace Jam.Levels.Level1
             maxTilt = 0f;
             LockLevelEntryBalance();
             evacuatedWater = waterSensorCooldown = 0f;
+            HideFlood();
             extinguishedFires = fireSpreads = lightningHits = lightningBlocked = 0;
             marketOpen = menuOpen = howToOpen = false;
             SetMusic(planningMusic);
@@ -643,6 +644,7 @@ namespace Jam.Levels.Level1
                     if (buildingHealth <= 0f) Lose("Yıldırım darbeleri evi yıktı.");
                 }
             }
+            else if (level == 5 && missionMode) UpdateFlood(dt);
             else if (level == 5)
             {
                 var evacuation = (equipment.Contains("gutter_system") ? 5.5f : 0f) +
@@ -699,7 +701,7 @@ namespace Jam.Levels.Level1
                 if (equipment.Contains("duman_dedektoru")) Warn("Duman dedektörü: yangın erken algılandı!");
             }
             if (level == 4) { buildingHealth = 100f; lightningClock = 2.5f; lightningHits = lightningBlocked = 0; }
-            if (level == 5) { water = indoorFlood = evacuatedWater = waterSensorCooldown = 0f; }
+            if (level == 5) { water = indoorFlood = evacuatedWater = waterSensorCooldown = 0f; if (missionMode) BeginFlood(); }
             SetMusic(disasterMusic);
             SetState(RoundState.Disaster);
             if (sfx != null) sfx.Play(level == 3 ? "strike" : "confirm");

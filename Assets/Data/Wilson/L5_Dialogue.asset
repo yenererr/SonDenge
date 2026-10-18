@@ -29,19 +29,18 @@ MonoBehaviour:
   - id: L5_TASKS_01
     trigger: 1
     mood: 5
-    textTr: "Kum torbalar\u0131n\u0131 giri\u015Fe yerle\u015Ftir ve t\u0131kal\u0131
-      drenaj\u0131 a\xE7."
+    textTr: "Kum torbalar\u0131n\u0131 giri\u015Fe diz; su yava\u015Flas\u0131n."
     cluck: {fileID: 0}
   - id: L5_TASKS_02
     trigger: 1
     mood: 5
-    textTr: "Hassas e\u015Fyalar\u0131 g\xFCvenli y\xFCksek yere ta\u015F\u0131,
-      su yal\u0131t\u0131m\u0131ndaki a\xE7\u0131kl\u0131\u011F\u0131 kapat."
+    textTr: "Foto\u011Fraf alb\xFCm\xFCn\xFC kucakla ve \xFCst kattaki kuru yere
+      ta\u015F\u0131."
     cluck: {fileID: 0}
   - id: L5_READY
     trigger: 2
     mood: 1
-    textTr: "\xDC\xE7 kat, d\xF6rt g\xF6rev, tek denge! Haz\u0131rsan son s\u0131nav
+    textTr: "\xDC\xE7 kat, iki g\xF6rev, tek denge! Haz\u0131rsan son s\u0131nav
       ba\u015Fl\u0131yor."
     cluck: {fileID: 0}
   - id: L5_TIME
@@ -52,8 +51,7 @@ MonoBehaviour:
   - id: L5_DISASTER
     trigger: 5
     mood: 2
-    textTr: "Su y\xFCkseliyor! Elektri\u011Fe dokunma; g\xFCvenli yere ge\xE7. Pompa
-      yaln\u0131z g\xFCvenli \xF6n kurulumla \xE7al\u0131\u015Fs\u0131n!"
+    textTr: "Su y\xFCkseliyor! Elektri\u011Fe dokunma; \xFCst kata \xE7\u0131k!"
     cluck: {fileID: 0}
   - id: L5_REPORT_GOOD
     trigger: 6
@@ -63,7 +61,7 @@ MonoBehaviour:
   - id: L5_REPORT_BAD
     trigger: 7
     mood: 4
-    textTr: "Su bu sefer i\xE7eri girdi. Bariyeri ve drenaj\u0131 haz\u0131rlay\u0131p
+    textTr: "Su bu sefer i\xE7eri girdi. Kum torbalar\u0131n\u0131 giri\u015Fe dizip
       tekrar deneyelim."
     cluck: {fileID: 0}
   - id: L5_FINAL

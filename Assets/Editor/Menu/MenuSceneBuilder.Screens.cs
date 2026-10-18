@@ -560,7 +560,7 @@ namespace Jam.EditorTools
                     select = "Son bölüm! Suyun eve girmemesi için birlikte hazırlanalım.",
                     brief = "Gıdak! Çok yağmur yağacak! Suyun eve girmemesi için hazırlanalım!",
                     safety = "Su baskınında elektrikli cihazlardan uzak dur; güvenli yere geç.",
-                    tasks = new[] { "sandbag", "drop", "arrow_up", "shield" }, dch = false }
+                    tasks = new[] { "sandbag", "arrow_up" }, dch = false }
             };
             SetValue(flow, "chapters", p =>
             {

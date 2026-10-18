@@ -146,7 +146,7 @@ namespace Jam.Levels.Level1
             level == 2 ? "RADYO SİVRİTEPE — Sert fırtına geliyor. Pencereleri kapatın, camlardan uzak durun!" :
             level == 3 ? "RADYO SİVRİTEPE — Yangın riski yüksek. Duman alarmını ve kaçış yolunu kontrol edin!" :
             level == 4 ? "RADYO SİVRİTEPE — Yıldırım uyarısı. Cihazların fişini fırtınadan önce çekin!" :
-            "RADYO SİVRİTEPE — Şiddetli yağmur geliyor. Girişi ve drenajı önceden hazırlayın!";
+            ""; // Bölüm 5: radyo yok (uzun başlıkla çakışıyordu, istek üzerine kaldırıldı)
         public int TasksDone => missions != null ? missions.CompletedCount : 0;
         public int TasksTotal => missions != null ? missions.TotalCount : 0;
         public string DisasterName => missionMode && levelDefinition != null ? levelDefinition.disasterNameTr : "DEPREM";
