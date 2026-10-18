@@ -83,6 +83,9 @@ namespace Jam.EditorTools
             var so = new SerializedObject(director);
             so.FindProperty("game").objectReferenceValue = game;
             so.FindProperty("drag").objectReferenceValue = game.drag;
+            var reportPrefab = AssetDatabase.LoadAssetAtPath<Jam.UI.DisasterReportPanel>(DisasterReportPrefabBuilder.PrefabPath);
+            if (reportPrefab == null) reportPrefab = DisasterReportPrefabBuilder.Build()?.GetComponent<Jam.UI.DisasterReportPanel>();
+            so.FindProperty("reportPrefab").objectReferenceValue = reportPrefab;
             so.ApplyModifiedPropertiesWithoutUndo();
             if (game.drag != null) { game.drag.allowCarry = true; game.drag.carryOnlyMarked = true; EditorUtility.SetDirty(game.drag); }
 

@@ -99,3 +99,38 @@
 - Çantanın kütlesi (10 kg) karakterle birlikte dengeye girer: ölçülen karakter yükü 25 → 35 kg.
 - L1_T03 artık "Çantanın yanına git, E ile sırtına tak". Şartnamedeki bölgeye bırakma kuralı Lead isteğiyle değiştirildi.
 - Play (gerçek E/A/D girdisi): **PASS** — L1_T03 Completed, `bagAttached=True`. Ekran görüntüleri: `screenshots/L1_bag_E_badge.jpg`, `screenshots/L1_bag_on_back.jpg`.
+
+## Geri bildirim 2 — Ortak AFET RAPORU şablonu (UI_DisasterReportTemplate)
+- Kaynak görsel: `Dağ Günbatımında Oyun Sonuç Paneli.png` (1672×941, 16:9) → `Assets/Levels/Level1/Art/UI/L1_UI_DisasterReportTemplate_Source.png` (orijinal, değiştirilmedi).
+- Şablon: `L1_UI_DisasterReportTemplate.png`. Görsele işlenmiş 1 altın + 2 gri yıldız, madde noktaları/çizgileri ve Wilson resmi, kartın kendi renkleriyle (sütun/satır geçişli dolgu + hafif bulanıklaştırma) temizlendi. Böylece dinamik UI üst üste binmiyor. Çerçeveler, kutular, düğme çerçeveleri ve üst orta denge çubuğu aynen kaldı.
+- Yıldız sprite'ları üretildi: `L1_UI_Star_Active.png`, `L1_UI_Star_Inactive.png`.
+- İçe aktarma (editör aracıyla): Sprite (2D and UI), Single, Full Rect, CompressedHQ, mipmap kapalı, Clamp, en fazla 2048.
+- TextMeshPro: Unity 6 `com.unity.ugui` içinde; TMP Essential Resources `Assets/TextMesh Pro` altına aktarıldı (Packages/ProjectSettings değişmedi). TMP kendi ayar dosyası için `Resources/` klasörü kullanır; bu kural 27'nin zorunlu bir istisnasıdır. Türkçe karakterler ve ●○×–·° sembolleri fontta doğrulandı.
+- Prefab `Assets/Levels/Level1/Prefabs/UI_DisasterReportTemplate.prefab` (`Jam > Wilson > Afet raporu prefab'ını kur`):
+  - Canvas (Screen Space Overlay, sıra 75) + CanvasScaler (Scale With Screen Size, 1920×1080, 0,5) + GraphicRaycaster + CanvasGroup.
+  - Şablon görseli `AspectRatioFitter (FitInParent)` ile 16:9 korunarak sığar; 16:9 dışı ekranlarda koyu kenar dolgusu gelir, kart kesilmez.
+  - Bütün UI öğeleri görselin piksel koordinatlarından normalize anchor'larla yerleşir; çözünürlük değişince görselle birlikte ölçeklenir.
+  - Öğeler (hepsi TMP / gerçek UI):
+    - Başlık "AFET RAPORU" ve bölüm adı.
+    - Sol üst çerçevede durum (EV AYAKTA KALDI / DENGE BOZULDU).
+    - Sağ üst çerçevede toplam puan.
+    - Üst orta çubukta en yüksek eğim işaretçisi ve yazısı.
+    - 3 yıldız (aktif/pasif sprite).
+    - 4 kategori satırı.
+    - Dinamik madde listesi (VerticalLayoutGroup; ● başarı yeşil, × eksik kırmızı, kritik kalın kırmızı, – bilgi).
+    - Canlı 3D Wilson portresi (RawImage), "WILSON:" mesajı ve yeşil italik gerçek hayat notu.
+    - Gerçek Button bileşenli 3 düğme; orta düğme vurgulu ve daha büyük, üzerine gelince/basınca vurgu.
+- Kod: `Assets/Scripts/UI/DisasterReportPanel.cs` (`Show(Data)`). Bölüm adı, puanlar, yıldız, maddeler, Wilson mesajı ve notu, eğim ile düğme metinleri ve callback'leri dışarıdan gelir.
+- `L1_MissionDirector.reportPrefab` → 5 sahnenin hepsinde bu prefab (sahne YAML'larında GUID `25ff1010…` doğrulandı). Eski kodla kurulan rapor yedek olarak kaldı.
+- Düğme davranışı:
+  - Başarı: TEKRAR DENE / **SONRAKİ BÖLÜM** / ANA MENÜ.
+  - Son bölüm: **YENİDEN OYNA**.
+  - Başarısızlık: WILSON'I TEKRAR DİNLE / **BU BÖLÜMÜ TEKRAR DENE** / ANA MENÜ.
+- Rapor açıkken oyun HUD'u tamamen gizlenir (ilk testte HUD yarı saydam olarak raporun üstünde görünüyordu — düzeltildi). Yıldızlar renk çarpımıyla turuncuya dönüyordu — düzeltildi.
+- Play testleri:
+  - **L1 başarı** (gerçek BOŞLUK ile Çök–Kapan–Tutun): 84/100, 2 yıldız, düzen temiz.
+  - **L2 başarısızlık** (devrilme zorlandı): 0 yıldız, kırmızı neden satırı, düğmeler doğru; "WILSON'I TEKRAR DİNLE" gerçek tıklamayla bölümü tam brifingle yeniden açtı.
+  - **L5 başarısızlık** (su bastı): karışık başarı/eksik maddeler hizalı.
+  - Ekranlar: `screenshots/Report_L1_success.jpg`, `Report_L2_fail.jpg`, `Report_L5_fail.jpg`.
+- NOT_RUN: L3 ve L4 raporu bu turda yeniden çekilmedi (aynı prefab ve aynı kod yolu). L5 başarı/final ("YENİDEN OYNA") görünümü bu turda ekranda görülmedi; test sırasında oyun menüye geçti.
+- Commit'lenmeyenler: Unity'nin kendiliğinden değiştirdiği `Assets/Settings/*` (URP) ve `ProjectSettings.asset`.

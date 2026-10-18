@@ -104,7 +104,9 @@ namespace Jam.Levels.Level1
             if (game == null) return;
             var modal = game.HasModal;
             group.blocksRaycasts = !modal;
-            group.alpha = modal ? 0.35f : 1f;
+            // Görev modunda AFET RAPORU tam ekran şablondur; HUD arkasında kalmaz, tamamen gizlenir.
+            var reportOpen = game.missionMode && (game.IsReport || game.IsGameOver);
+            group.alpha = reportOpen ? 0f : modal ? 0.35f : 1f;
             if (cameraController != null) cameraController.inputEnabled = !modal;
 
             if (game.LevelNumber != shownLevel)

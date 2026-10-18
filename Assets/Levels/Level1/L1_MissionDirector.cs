@@ -22,16 +22,20 @@ namespace Jam.Levels.Level1
         [SerializeField] private float criticalTiltWarning = 16f;
         [Tooltip("Pencere/elektrik gibi tehlike noktasına bu mesafeden yakın olmak güvensiz sayılır (m).")]
         [SerializeField] private float hazardDistance = 1.6f;
+        [Tooltip("Beş bölümün ortak AFET RAPORU prefab'ı (UI_DisasterReportTemplate). Boşsa eski kodla kurulan rapor kullanılır.")]
+        [SerializeField] private DisasterReportPanel reportPrefab;
 
         private MissionManager missions;
         private WilsonPortrait portrait;
         private WilsonBriefingPanel briefing;
         private MissionHudPanel hud;
         private DisasterResultPanel result;
+        private DisasterReportPanel report;
         private L1_MissionSwitch[] switches = new L1_MissionSwitch[0];
         private float pollClock, tiltWarnClock;
         private bool timeWarned, started;
         private static bool retrying;
+        private static bool forceFullBriefing;
 
         private LevelDefinition Level => game != null ? game.levelDefinition : null;
 
@@ -58,22 +62,31 @@ namespace Jam.Levels.Level1
             portrait = WilsonPortrait.Create(transform, BuildPortraitModel);
             hud = MissionHudPanel.Create(transform, portrait);
             briefing = WilsonBriefingPanel.Create(transform, portrait);
-            result = DisasterResultPanel.Create(transform, portrait);
+            if (reportPrefab != null)
+            {
+                report = Instantiate(reportPrefab, transform);
+                report.BindPortrait(portrait);
+            }
+            else result = DisasterResultPanel.Create(transform, portrait);
             hud.Bind(missions);
             hud.HintRequested = ShowHint;
             hud.ReplayRequested = () => OpenBriefing(true);
-            result.RetryRequested = () => { retrying = true; game.UiRestart(); };
-            result.NextRequested = () => { retrying = false; game.UiNextLevel(); };
-            result.MenuRequested = () => { retrying = false; game.UiMainMenu(); };
-            result.ReplayAllRequested = () => { retrying = false; game.UiLoadScene(firstLevelScene); };
+            if (result != null)
+            {
+                result.RetryRequested = Retry;
+                result.NextRequested = Next;
+                result.MenuRequested = Menu;
+                result.ReplayAllRequested = ReplayAll;
+            }
 
             missions.TaskCompleted += OnTaskCompleted;
             game.DisasterStarted += OnDisasterStarted;
             game.LevelFinished += OnLevelFinished;
             if (drag != null) { drag.allowCarry = true; drag.carryOnlyMarked = true; drag.interactOverride = TryUseSwitch; }
 
-            OpenBriefing(!retrying || !LevelProgressSave.BriefingSeen(Level.levelNumber));
+            OpenBriefing(!retrying || forceFullBriefing || !LevelProgressSave.BriefingSeen(Level.levelNumber));
             retrying = false;
+            forceFullBriefing = false;
         }
 
         /// <summary>Deprem çantası noktası: E ile alınınca çanta yerden kalkar, karakterin sırtına takılır.</summary>
@@ -83,6 +96,12 @@ namespace Jam.Levels.Level1
             var model = s.offVisual != null ? s.offVisual.transform.Find("Çanta modeli") : null;
             game.EquipEmergencyBag(model);
         }
+
+        private void Retry() { retrying = true; game.UiRestart(); }
+        private void RetryWithBriefing() { retrying = true; forceFullBriefing = true; game.UiRestart(); }
+        private void Next() { retrying = false; game.UiNextLevel(); }
+        private void Menu() { retrying = false; game.UiMainMenu(); }
+        private void ReplayAll() { retrying = false; game.UiLoadScene(firstLevelScene); }
 
         private Material BuildPortraitModel(Transform host) =>
             game.wilsonModel != null ? L1_WilsonChicken.BuildPortraitModel(game.wilsonModel, game.wilsonTexture, host, 0.62f) : null;
@@ -195,9 +214,11 @@ namespace Jam.Levels.Level1
         private void OnLevelFinished(L1_ProjectGameController.MissionResult r)
         {
             hud.SetVisible(false);
+            hud.briefingUsesPortrait = true; // rapor açıkken portre kamerası çalışmaya devam etsin
             var d = Level.dialogue;
             var good = r.survived ? d?.First(WilsonTrigger.ReportGood) : d?.First(WilsonTrigger.ReportBad);
             var final = d?.First(WilsonTrigger.Final);
+            if (report != null) { ShowReport(r, good, final); return; }
             result.Show(new DisasterResultPanel.Data
             {
                 levelTitle = "BÖLÜM " + Level.levelNumber.ToString("00") + " · " + Level.titleTr,
@@ -218,6 +239,70 @@ namespace Jam.Levels.Level1
                 finalLine = final != null ? final.textTr : ""
             });
         }
+
+        /// <summary>Ortak şablon prefab'ına bölüm verisini aktarır; düğmeler sonuca göre değişir.</summary>
+        private void ShowReport(L1_ProjectGameController.MissionResult r, WilsonLine good, WilsonLine final)
+        {
+            var lines = new System.Collections.Generic.List<DisasterReportPanel.Line>();
+            if (!r.survived && !string.IsNullOrEmpty(r.failReason))
+                lines.Add(new DisasterReportPanel.Line(DisasterReportPanel.LineKind.Critical, "Neden: " + r.failReason));
+            foreach (var raw in r.lines)
+            {
+                if (string.IsNullOrEmpty(raw)) continue;
+                var kind = raw.StartsWith("●") ? DisasterReportPanel.LineKind.Success :
+                    raw.StartsWith("×") ? DisasterReportPanel.LineKind.Missing : DisasterReportPanel.LineKind.Info;
+                var text = kind == DisasterReportPanel.LineKind.Info ? raw : raw.Substring(1).TrimStart();
+                lines.Add(new DisasterReportPanel.Line(kind, text));
+            }
+            var isFinal = !game.HasNextScene;
+            if (isFinal && r.survived)
+            {
+                var summary = "Beş bölüm:";
+                for (var i = 1; i <= LevelProgressSave.LevelCount; i++)
+                    summary += "  " + i + " " + new string('●', LevelProgressSave.BestStars(i)) + new string('○', 3 - LevelProgressSave.BestStars(i));
+                lines.Add(new DisasterReportPanel.Line(DisasterReportPanel.LineKind.Info, summary + "  —  AFETE HAZIRLIK HAYAT KURTARIR."));
+            }
+            var wilson = good != null ? good.textTr : "";
+            if (isFinal && r.survived && final != null) wilson += " " + final.textTr;
+            var data = new DisasterReportPanel.Data
+            {
+                chapterTitle = "BÖLÜM " + Level.levelNumber.ToString("00") + " · " + Level.titleTr + " — " + Level.disasterNameTr,
+                survived = r.survived,
+                statusText = r.survived ? "EV AYAKTA KALDI" : "DENGE BOZULDU",
+                totalScore = r.score,
+                stars = r.stars,
+                preparation = r.preparation,
+                behaviour = r.behaviour,
+                balance = r.balance,
+                protection = r.protection,
+                maxTiltDegrees = r.maxTilt,
+                collapseAngle = game.CollapseAngle,
+                lines = lines,
+                wilsonMessage = wilson,
+                wilsonMood = good != null ? good.mood : WilsonMood.Normal,
+                safetyNote = "Gerçek hayatta: " + StripPrefix(Level.realLifeTipTr) + "  ·  Evin ağırlıkla dengelenmesi oyunun hayal ürünü kuralıdır.",
+                rightLabel = "ANA MENÜ",
+                onRight = Menu
+            };
+            if (!r.survived)
+            {
+                data.leftLabel = "WILSON'I TEKRAR DİNLE";
+                data.onLeft = RetryWithBriefing;
+                data.primaryLabel = "BU BÖLÜMÜ TEKRAR DENE";
+                data.onPrimary = Retry;
+            }
+            else
+            {
+                data.leftLabel = "BU BÖLÜMÜ TEKRAR DENE";
+                data.onLeft = Retry;
+                data.primaryLabel = isFinal ? "YENİDEN OYNA" : "SONRAKİ BÖLÜM";
+                data.onPrimary = isFinal ? (System.Action)ReplayAll : Next;
+            }
+            report.Show(data);
+        }
+
+        private static string StripPrefix(string tip) =>
+            string.IsNullOrEmpty(tip) ? "" : tip.StartsWith("Gerçek hayatta:") ? tip.Substring("Gerçek hayatta:".Length).TrimStart() : tip;
 
         // ------------------------------------------------------------------ etkileşim
         /// <summary>E: yakında görev noktası varsa onu kullanır (taşıma yerine). Tek giriş sözleşmesi.</summary>
