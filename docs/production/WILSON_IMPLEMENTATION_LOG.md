@@ -82,3 +82,13 @@
 - Kayıt (`sondenge.v1.*`): en iyi yıldız korunur (L1: 2 yıldızdan sonra 0 yıldızlık deneme 2'yi silmedi), 1+ yıldız sonraki bölümü açar, sıfırlama sonrası yalnız Bölüm 1 açık — **PASS** (Play'de görüldü).
 - Menü → Bölüm 1 → Wilson brifingi (SceneLoader ile) — **PASS**.
 - Ekran görüntüleri: `docs/production/screenshots/` (Menu_level_select, L2_preparation, L3_wilson_briefing, L3_preparation_3floors, L3_report_3stars, L1_fail_report).
+
+## FAZ 11 — Entegrasyon ve build
+- Lead onayıyla `EditorBuildSettings`: Menu, Level1, Level2, Level3, Level4, Level5 (CoreTest yok).
+- `Jam > Build > Windows`: **Succeeded** — `Builds/Windows/Son Denge.exe`, 502 MB (Console: "[Jam] Build tamam").
+- Build çalıştırıldı (1280×720 pencere): Menü → OYNA → BÖLÜM SEÇ (yeni kurulumda yalnız Bölüm 1 açık) → Bölüm 1 → Wilson brifingi (3D portre, Türkçe). `Player.log`: exception/error 0.
+- NOT_RUN: build içinde afet akışı, Level4→Level5 geçişi, FPS ölçümü.
+- Build sırasında Unity'nin `ProjectSettings.asset`'e yazdığı farklar (preloadedAssets, batching) commit'lenmedi.
+
+## FAZ 12 — Belgeler
+- `docs/production/FINAL_VALIDATION_REPORT.md`, `docs/production/SAFETY_REVIEW.md` (resmî kaynaklarla çevrim içi doğrulama yapılmadı, açıkça belirtildi), README "Wilson görev modu" bölümü, `ZORUNLU_KURALLAR.md` kural 18'e Level5 eklendi.

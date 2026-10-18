@@ -75,6 +75,24 @@ Assets/
 docs/            ← GDD, API sözleşmesi, görev panosu, playtest
 ```
 
+## Wilson görev modu — 5 bölüm (feature/wilson-missions-five-levels)
+
+Mağaza ve altın kaldırıldı. Her bölümde Wilson önce görevleri anlatır (süre durur), sonra hazırlık → 3-2-1 → afet → yıldızlı AFET RAPORU.
+
+| Bölüm | Afet | Hazırlık / Afet | Kat | Görev |
+|---|---|---|---|---|
+| 1 | Deprem | 90 / 12 sn | 2 | 4 |
+| 2 | Fırtına | 100 / 12 sn | 2 | 4 |
+| 3 | Yangın | 120 / 30 sn | 3 | 4 |
+| 4 | Yıldırım | 110 / 25 sn | 3 | 3 |
+| 5 | Şiddetli yağmur | 140 / 25 sn | 3 | 4 |
+
+- Kontroller: A/D yürü, W/S merdiven, E al/bırak/kullan, fare seç/sürükle, F sabitle, BOŞLUK afete hazırım / depremde Çök–Kapan–Tutun, ESC duraklat, yangında T tahliye.
+- Veriler: `Assets/Data/{Levels,Missions,Wilson}`. Kod: `Assets/Scripts/Missions`, `Assets/Scripts/UI`, `Assets/Levels/Level1/L1_Mission*.cs`.
+- Sahneleri yeniden üretmek: `Jam > Wilson > Bölüm verilerini oluştur`, `Jam > Wilson > Level1 görevlerini kur`, `Jam > Wilson > Level2-5 sahnelerini Level1'den üret`.
+- Rapor ve testler: `docs/production/` (WILSON_IMPLEMENTATION_LOG, FINAL_VALIDATION_REPORT, SAFETY_REVIEW).
+- Evin ağırlıkla dengelenmesi oyunun hayal ürünü kuralıdır; gerçek afet tavsiyesi değildir.
+
 ## Atıflar
 
 Aktif Level1 evi gerçek 3D geometri ve aşağıdaki paketlerin modellerinden oluşur. Dağ ve gökyüzü sprite olarak kalır. Ev referans resimleri yalnız arşivde tutulur, aktif sahnede kullanılmaz.

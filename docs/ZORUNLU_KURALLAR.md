@@ -47,7 +47,7 @@
 15. **Her sahnede tam olarak:** 1 `Main Camera` (tag: MainCamera, perspektif, konum (0, 2, -14) — sahnelerde hazır, yerini değiştirme), 1 `Directional Light`, 1 `AudioListener` (kamerada), en fazla 1 `EventSystem` (UI varsa; **Input System UI Input Module** ile).
 16. **`DontDestroyOnLoad` kullanma.** Bölüme ait hiçbir nesne sahne değişince yaşamaya devam etmemeli.
 17. **Sahne geçişi yalnızca `SceneLoader` ile:** `SceneLoader.Instance.Load("Level3")`. `SceneManager.LoadScene` doğrudan çağrılmaz. Sonraki sahne adı koda gömülmez; `LevelSetup` üzerindeki Inspector alanından okunur.
-18. **Sahne adları sabittir:** `Menu`, `Level1`, `Level2`, `Level3`, `Level4`, `CoreTest`. Sahne yeniden adlandırılmaz, taşınmaz, yeni build sahnesi eklenmez (gerekirse Lead ekler).
+18. **Sahne adları sabittir:** `Menu`, `Level1`, `Level2`, `Level3`, `Level4`, `Level5`, `CoreTest` (Level5 Lead kararıyla 18.10.2026'da eklendi). Sahne yeniden adlandırılmaz, taşınmaz, yeni build sahnesi eklenmez (gerekirse Lead ekler).
 19. **Bölüm `LevelTemplate` prefab'ından kurulur** (Aşama 1 sonunda Lead hazırlar). Ev, HUD ve `LevelSetup` her bölümde bu prefab'dan gelir; bölüm farkları `LevelSetup` ayarları ve `Levels/LevelX/` içeriğiyle yapılır.
 20. **Bölüm biterken** `Time.timeScale` 1 olmalı, müzik/ses sonraki sahneye taşmamalı.
 
