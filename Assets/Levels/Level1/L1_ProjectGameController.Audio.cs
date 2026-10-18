@@ -33,6 +33,7 @@ namespace Jam.Levels.Level1
             sfx.SetLoop("spray", disaster && level == 3 && sprayingNow, loopVolume * 0.8f, 4f);
             sfx.SetLoop("wind", disaster && (level == 2 || level == 4 || level == 5), loopVolume * (level == 2 ? 1f : 0.45f));
             sfx.SetLoop("flood", disaster && level == 5, loopVolume);
+            sfx.SetLoop("quake", disaster && level == 1, loopVolume * 1.2f, 2.5f);
             if (!disaster) sprayingNow = false;
 
             if (disaster && level == 2)
