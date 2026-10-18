@@ -438,8 +438,10 @@ namespace Jam.Levels.Level1
 
             // Orta: geri sayım / DEPREM!
             var centerRect = UiKit.Rect(root, "CountdownOverlay", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(600f, 220f));
+                new Vector2(0.5f, 0.5f), new Vector2(0f, 120f), new Vector2(1400f, 220f));
             centerText = UiKit.Label(centerRect, "Yazı", "", 150, UiKit.Cream, TextAnchor.MiddleCenter, FontStyle.Bold);
+            // Uzun afet adları (YILDIRIM!, ŞİDDETLİ YAĞMUR!) kelime ortasından bölünmesin: kutu geniş, yazı gerekirse küçülür.
+            Fit(centerText, 60, 150);
             UiKit.Border(centerText, new Color(0.35f, 0.12f, 0.06f, 0.95f), 5f);
             centerPanel = centerRect.gameObject;
             centerPanel.SetActive(false);

@@ -21,13 +21,14 @@ namespace Jam.UI
             public WilsonMood mood;
             public TaskDefinition task;
             public int taskIndex, taskCount;
+            public bool controls;
         }
 
         private readonly List<Page> pages = new List<Page>();
         private WilsonPortrait portrait;
         private CanvasGroup group;
         private Text headerText, levelText, bodyText, pageText, taskTitle, taskBody, taskWhy, taskNumber;
-        private GameObject taskCard;
+        private GameObject taskCard, controlsCard;
         private Button backButton, nextButton, skipButton, startButton;
         private RawImage portraitImage;
         private Action onStart;
@@ -88,6 +89,18 @@ namespace Jam.UI
             bodyText = UiKit.Label(card, "Metin", "", 36, new Color32(40, 42, 44, 255), TextAnchor.UpperLeft);
             Inset(bodyText.rectTransform, 52f, 172f, 52f, 0f, 190f);
             bodyText.lineSpacing = 1.1f;
+
+            // Kontroller sayfası: tuş görseli (Art/UI/Resources/ui_controls.png).
+            var controls = UiKit.Rect(card, "Kontroller görseli", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f),
+                Vector2.zero, Vector2.zero);
+            controls.offsetMin = new Vector2(40f, 112f);
+            controls.offsetMax = new Vector2(-40f, -160f);
+            var controlsImage = controls.gameObject.AddComponent<Image>();
+            controlsImage.sprite = Resources.Load<Sprite>("ui_controls");
+            controlsImage.preserveAspect = true;
+            controlsImage.raycastTarget = false;
+            controlsCard = controls.gameObject;
+            controlsCard.SetActive(false);
 
             // Görev kartı (görev sayfalarında görünür).
             var task = UiKit.Rect(card, "Görev kartı", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
@@ -165,8 +178,8 @@ namespace Jam.UI
             }
             pages.Add(new Page
             {
-                header = "KONTROLLER", mood = WilsonMood.Normal,
-                body = "A / D  yürü     ·     W / S  merdiven\nE  al / bırak / kullan     ·     F  seçili eşyayı sabitle\n" +
+                header = "KONTROLLER", mood = WilsonMood.Normal, controls = Resources.Load<Sprite>("ui_controls") != null,
+                body = Resources.Load<Sprite>("ui_controls") != null ? "" : "A / D  yürü     ·     W / S  merdiven\nE  al / bırak / kullan     ·     F  seçili eşyayı sabitle\n" +
                        "Fare  eşya seç ve sürükle     ·     Tekerlek  yakınlaş\nBOŞLUK  afeti başlat · depremde Çök–Kapan–Tutun     ·     ESC  duraklat"
             });
             var ready = d != null ? d.First(WilsonTrigger.PrepStart) : null;
@@ -189,6 +202,7 @@ namespace Jam.UI
             typeStart = Time.unscaledTime;
             bodyText.text = "";
             taskCard.SetActive(page.task != null);
+            controlsCard.SetActive(page.controls);
             if (page.task != null)
             {
                 taskNumber.text = "GÖREV " + (page.taskIndex + 1) + " / " + page.taskCount;
