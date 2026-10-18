@@ -29,6 +29,10 @@ namespace Jam.Levels.Level1
         public float contactGap = 0.025f;
         public float interactionReach = 1.35f;
         public bool canDrag = true;
+        [Tooltip("Açıksa E yalnız 'carryable' işaretli küçük eşyaları alır.")]
+        public bool carryOnlyMarked = true;
+        /// <summary>E basıldığında önce bu çağrılır; true dönerse (ör. yakında görev düğmesi var) taşıma yapılmaz.</summary>
+        public System.Func<bool> interactOverride;
         [Tooltip("Eski IMGUI kontrol ipucu çubuğu. uGUI HUD varken kapalı.")]
         public bool showLegacyHint = false;
         public L1_MovableProp Selected { get; private set; }
@@ -56,6 +60,21 @@ namespace Jam.Levels.Level1
         private bool actionWasHeld;
         private float dropBlockedUntil;
         private GUIStyle label;
+        // Taşıma sırasında kuyruğa alınmış MovePosition bırakma konumunu ezmesin diye
+        // bırakılan eşya birkaç fizik adımı boyunca hedefte tutulur.
+        private Rigidbody settleBody;
+        private Vector3 settlePosition;
+        private int settleSteps;
+
+        private void SettleDropped()
+        {
+            if (settleBody == null || settleSteps <= 0) return;
+            settleBody.position = settlePosition;
+            settleBody.transform.position = settlePosition;
+            settleBody.linearVelocity = Vector3.zero;
+            settleSteps--;
+            if (settleSteps <= 0) settleBody = null;
+        }
         private void Awake()
         {
             if (houseRoot != null) resident = houseRoot.GetComponentInChildren<L1_ResidentController>(true);
@@ -71,7 +90,7 @@ namespace Jam.Levels.Level1
             if (allowCarry && ((keyboard != null && keyboard.eKey.wasPressedThisFrame) || actionPressed))
             {
                 if (carried != null) DropCarried();
-                else PickUpNearest();
+                else if (interactOverride == null || !interactOverride()) PickUpNearest();
             }
             if (carried != null) { hover = carried; return; }
             var mouse = Mouse.current;
@@ -117,7 +136,7 @@ namespace Jam.Levels.Level1
             if (pressedThisFrame && hover != null)
             {
                 Selected = hover;
-                if (hover.IsAnchored || hover.IsPlacementGraceActive ||
+                if (hover.IsAnchored || hover.IsPlacementGraceActive || (hover.carryable && allowCarry) ||
                     (mouseRequiresReach && !CanReach(hover))) return;
                 usingTouch = pointerIsTouch;
                 held = hover;
@@ -204,6 +223,7 @@ namespace Jam.Levels.Level1
         }
         private void FixedUpdate()
         {
+            SettleDropped();
             if (carried != null && resident != null && houseRoot != null)
             {
                 var local = houseRoot.InverseTransformPoint(resident.transform.position);
@@ -392,6 +412,7 @@ namespace Jam.Levels.Level1
             foreach (var item in houseRoot.GetComponentsInChildren<L1_MovableProp>())
             {
                 if (item.IsAnchored || item.IsPlacementGraceActive || !CanReach(item)) continue;
+                if (carryOnlyMarked && !item.carryable) continue;
                 var distance = Mathf.Abs(houseRoot.InverseTransformPoint(item.transform.position).x - player.x);
                 if (distance >= best) continue;
                 best = distance;
@@ -449,6 +470,10 @@ namespace Jam.Levels.Level1
                 destination = houseRoot.TransformPoint(new Vector3(Mathf.Clamp(preferred, -(roomHalfWidth - 0.33f), roomHalfWidth - 0.33f),
                     floorY + half.y + 0.04f, 0.25f));
             carried.Body.position = destination;
+            carried.transform.position = destination;
+            settleBody = carried.Body;
+            settlePosition = destination;
+            settleSteps = 2;
             if (box != null) box.enabled = true;
             carried.AllowFallAtEdges(houseRoot);
             carried.Body.isKinematic = carriedKinematic;

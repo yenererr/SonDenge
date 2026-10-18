@@ -37,6 +37,7 @@ namespace Jam.Levels.Level1
         private Button anchorButton, shopButton, readyButton, sellButton;
         private Text anchorLabel;
         private GameObject selectedPanel, centerPanel, safetyPanel, warningPanel, confirmPanel;
+        private Text confirmText;
         private float countdownLeft = -1f;
         private float disasterBannerUntil;
         private bool wasDisaster;
@@ -52,11 +53,13 @@ namespace Jam.Levels.Level1
         private void OnEnable()
         {
             if (game != null) game.DisasterRequested += RequestDisaster;
+            if (game != null) game.ForcedDisasterRequested += ForceCountdown;
         }
 
         private void OnDisable()
         {
             if (game != null) game.DisasterRequested -= RequestDisaster;
+            if (game != null) game.ForcedDisasterRequested -= ForceCountdown;
             if (game != null) game.CountdownActive = false;
         }
 
@@ -65,11 +68,26 @@ namespace Jam.Levels.Level1
         {
             if (game == null || !game.IsPlanning || countdownLeft >= 0f) return;
             if (!game.UiCanStartDisaster()) return;
-            if (Mathf.Abs(game.TiltDegrees) > riskWarningAngle * 0.75f && !confirmPanel.activeSelf)
+            // Görev modunda eksik görevle başlatma engellenmez, yalnız onay istenir (şartname §4.4).
+            if (game.missionMode && game.TasksDone < game.TasksTotal && !confirmPanel.activeSelf)
             {
+                confirmText.text = game.TasksDone + "/" + game.TasksTotal + " görev tamamlandı.\nEksik görevler afette riski artırır. Yine de başlatılsın mı?";
                 confirmPanel.SetActive(true);
                 return;
             }
+            if (Mathf.Abs(game.TiltDegrees) > riskWarningAngle * 0.75f && !confirmPanel.activeSelf)
+            {
+                confirmText.text = "Ev şu an belirgin şekilde eğik. Afet bu eğimi büyütebilir.\nYine de başlatılsın mı?";
+                confirmPanel.SetActive(true);
+                return;
+            }
+            BeginCountdown();
+        }
+
+        /// <summary>Hazırlık süresi bitti: onay sormadan 3-2-1 ile afet başlar.</summary>
+        private void ForceCountdown()
+        {
+            if (game == null || !game.IsPlanning || countdownLeft >= 0f) return;
             BeginCountdown();
         }
 
@@ -99,8 +117,8 @@ namespace Jam.Levels.Level1
             }
             UpdatePanels();
             UpdateGauge();
-            budgetText.text = game.Budget + " altın";
-            if (game.IsDisaster) timerText.text = "DEPREM!  " + Mathf.CeilToInt(game.TimeLeft) + " sn";
+            budgetText.text = game.missionMode ? "Görev " + game.TasksDone + "/" + game.TasksTotal : game.Budget + " altın";
+            if (game.IsDisaster) timerText.text = game.DisasterName + "!  " + Mathf.CeilToInt(game.TimeLeft) + " sn";
             else if (game.IsPlanning) timerText.text = "Hazırlık  " + Mathf.CeilToInt(game.TimeLeft) + " sn";
             else timerText.text = "";
 
@@ -125,8 +143,11 @@ namespace Jam.Levels.Level1
             anchorButton.gameObject.SetActive(planning && item != null && item.gameObject.activeInHierarchy);
             anchorButton.interactable = planning && item != null;
             sellButton.interactable = planning && item != null;
-            anchorLabel.text = item != null && item.IsAnchored ? "SABİTİ SÖK" : "SABİTLE (" + game.AnchorCost + ")";
+            anchorLabel.text = item != null && item.IsAnchored ? "SABİTİ SÖK" :
+                game.missionMode ? "SABİTLE (F)" : "SABİTLE (" + game.AnchorCost + ")";
             shopButton.interactable = planning;
+            shopButton.gameObject.SetActive(!game.missionMode);
+            sellButton.gameObject.SetActive(!game.missionMode);
             readyButton.interactable = planning;
 
             UpdateCountdown();
@@ -135,14 +156,16 @@ namespace Jam.Levels.Level1
             wasDisaster = game.IsDisaster;
             safetyPanel.SetActive(game.IsDisaster);
             if (game.IsDisaster)
-                safetyText.text = game.ResidentHiding
-                    ? "SAKLANDIN ✓  Çök – Kapan – Tutun.  Gerçek depremde eşya taşımayın."
-                    : "BOŞLUK'a bas: Çök – Kapan – Tutun!  Gerçek depremde eşya taşımayın.";
+                safetyText.text = game.missionMode && game.Disaster != Jam.Missions.LevelDisaster.Earthquake
+                    ? game.DisasterSafetyLine
+                    : game.ResidentHiding
+                        ? "SAKLANDIN ●  Çök – Kapan – Tutun.  Gerçek depremde eşya taşımayın."
+                        : "BOŞLUK'a bas: Çök – Kapan – Tutun!  Gerçek depremde eşya taşımayın.";
             if (countdownLeft < 0f)
             {
                 var showBanner = Time.unscaledTime < disasterBannerUntil;
                 centerPanel.SetActive(showBanner);
-                if (showBanner) centerText.text = "DEPREM!";
+                if (showBanner) centerText.text = game.DisasterName + "!";
             }
         }
 
@@ -272,6 +295,8 @@ namespace Jam.Levels.Level1
             var economyCoinImage = economyCoin.gameObject.AddComponent<Image>();
             economyCoinImage.sprite = L1_HudSkin.Coin;
             economyCoinImage.raycastTarget = false;
+            // Görev modunda altın yok: simge gösterilmez (oyun Awake'te kurulduğu için kontrolcüden okunur).
+            if (game != null && game.missionMode) economyCoin.gameObject.SetActive(false);
             budgetText = UiKit.Label(economy, "Bütçe", "750 altın", 28, UiKit.Ink, TextAnchor.UpperRight, FontStyle.Bold);
             Pad(budgetText, 55f, 10f);
             timerText = UiKit.Label(economy, "Süre", "Hazırlık 45 sn", 24, UiKit.Ink, TextAnchor.LowerRight);
@@ -380,7 +405,7 @@ namespace Jam.Levels.Level1
                 Vector2.zero, new Vector2(760f, 260f));
             var confirmImage = UiKit.Panel(confirm, UiKit.Paper, true);
             L1_HudSkin.Apply(confirmImage, L1_HudSkin.Surface.FramedPaper);
-            var confirmText = UiKit.Label(confirm, "Yazı",
+            confirmText = UiKit.Label(confirm, "Yazı",
                 "Ev şu an belirgin şekilde eğik. Deprem bu eğimi büyütebilir.\nYine de başlatılsın mı?", 28, UiKit.Ink,
                 TextAnchor.UpperCenter);
             Pad(confirmText, 30f, 30f);

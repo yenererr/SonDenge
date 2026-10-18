@@ -58,7 +58,8 @@ namespace Jam.Levels.Level1
             // Kontrolcü, nasıl oynanır açıkken ESC'yi yok sayar; kapatmayı burada yaparız.
             if (game.IsHowToOpen && esc) game.UiCloseHowTo();
 
-            var finished = game.IsReport || game.IsGameOver;
+            // Görev modunda rapor yıldızlı DisasterResultPanel'dedir; eskisi gösterilmez.
+            var finished = (game.IsReport || game.IsGameOver) && !game.missionMode;
             if (finished && !reportPanel.activeSelf) FillReport();
             reportPanel.SetActive(finished);
 

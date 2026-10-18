@@ -33,3 +33,34 @@
 - Mantık testleri (MCP `execute_code`, EditMode eşdeğeri): **21/21 PASS** — bilinmeyen ID reddi, idempotent tamamlama (tek olay), hazırlık puanı 35 normalize, kritik görev kontrolü, koruma anahtarı, afette Missed, kilit sonrası tamamlanmama, reset, ön koşul, yıldız eşikleri (0/1/2@70/3@90+kritik), denge puanı, toplam clamp.
 - PlayMode testi: NOT_RUN (henüz sahneye bağlanmadı).
 - Kapı kararı: PASS. Sonraki faz: FAZ 3.
+
+## FAZ 3 — Wilson anlatıcı ve briefing modalı
+- Dokunulan dosyalar: `Assets/Scripts/UI/{WilsonPortrait,WilsonBriefingPanel,MissionHudPanel,DisasterResultPanel}.cs`, `L1_WilsonChicken.cs`, `L1_ProjectGameController.Wilson.cs`.
+- Wilson modelleri Unity Editor içinden (`AssetDatabase.MoveAsset`) `Assets/Resources/Wilson` → `Assets/Levels/Level1/Art/Characters/Wilson` taşındı; GUID'ler aynı (chicken obj `9f821595…`, png `5f8f092e…`, egg `683b928c…`). `Resources.Load` kaldırıldı; model/doku Inspector referansı. `Assets/Resources` boş kaldığı için silindi.
+- Portre: mevcut 3D tavuğun kütlesiz kopyası, sahneden uzakta (y=-400) yardımcı kamera → RenderTexture. Kamera MainCamera değil, AudioListener yok.
+- Yumurta: en fazla 2; altın yumurta para vermez (yalnız 5 kg denge yükü).
+- Manuel Play (Unity öne alınarak, gerçek fare/klavye): **PASS** — 5 sayfa (Giriş×2, Neden önemli, 4 görev kartı, Kontroller, Hazır mısın) sırayla, daktilo efekti, GERİ/İLERİ/ATLA/GÖREVLERE BAŞLA çalışıyor. Briefing açıkken `timeScale=0`, hazırlık süresi 89,96 sn'de sabit kaldı (frame 1863'te ölçüldü). Kamera sayısı 2 (ana + portre), MainCamera 1, AudioListener 1, EventSystem 1, dünya Wilson'ı 1.
+- Kapı: PASS.
+
+## FAZ 4 — Fiziksel etkileşim / taşıma / görev hedefleri
+- Yeni: `L1_MissionZone` (yerel kutu + parlayan işaret), `L1_MissionSwitch` (E noktası; zincirleme ön koşul, montajda eşyayı tüketme, tehlike işareti), `L1_MissionTask` (Anchored / ItemsInZone / Switches / Balance / ZoneClear), `L1_MissionDirector`.
+- `L1_PropDrag`: E yalnız `carryable` eşyaları alır; yakında görev noktası varsa E onu kullanır (tek giriş sözleşmesi); taşınabilir eşyalar fareyle kat atlatılamaz. **Hata düzeltmesi:** bırakılan eşya evin dışına düşüyordu (z=-1,55) → bırakma konumu 2 fizik adımı sabitleniyor.
+- Denge: taşınan kütle tam ve bir kez sayılır; 26°+1 sn kuralı görev modunda 5 bölümde ve hazırlıkta etkin; Level≥3 eğim kısıtı görev modunda kaldırıldı.
+- **Hata düzeltmesi:** görünmez yan duvarlar simetrik ±5,55'teydi, katların zemini asimetrik (Kat1 −5,8…4,8; Kat2 −4,77…5,87) → eşyalar duvara varmadan düşüyordu. Duvarlar artık her katın zemin kenarında.
+- Ayar (görev sahneleri): tork hassasiyeti 0,0057 → 0,002 (karakter uçtan uca ~14°; eski değerde tek başına 23° sınırına dayanıyordu ve 7° görevi yapılamıyordu). Hazırlıkta kayma yalnız 8° üstünde, 0,06 m/sn.
+- Kapı: PASS (aşağıdaki Level1 testi ile).
+
+## FAZ 5 — Level 1: Deprem vertical slice
+- Sahne kurulumu: `Jam > Wilson > Level1 görevlerini kur` (`Assets/Editor/WilsonSceneBuilder.cs`). Low-poly deprem çantası, `EmergencyBagZone`, 4 `L1_MissionTask`. Materyaller `Assets/Levels/Level1/Materials/Missions/`.
+- Manuel Play (gerçek girdi): **PASS**
+  1. Briefing görünür, süre durur. ✓
+  2. ATLA → GÖREVLERE BAŞLA; HUD "Görev 0/4", "Hazırlık 87 sn", görev listesi, İPUCU/TEKRAR DİNLE. ✓ Altın simgesi ve mağaza/sat düğmeleri gizli. ✓
+  3. E ile çanta alındı, D ile taşındı, E ile hedefe bırakıldı → L1_T03 ✓. Fare ile buzdolabı ve kitaplık seçilip F ile sabitlendi (bütçe değişmedi) → L1_T02, L1_T01 ✓. Karakter merkeze dönünce eğim 6,5° → L1_T04 ✓ (4/4).
+  4. BOŞLUK → 3-2-1 → DEPREM 12 sn; BOŞLUK ile Çök–Kapan–Tutun. ✓
+  5. Rapor: 83/100 (hazırlık 35, davranış 35, denge 3, koruma 10), **2 yıldız**, kayıt L1=2, L2 açıldı. ✓ Wilson ipucu: "Denge çok bozuldu!" uyarısı görüldü.
+  6. Süre bitişi (zamanlayıcı 0,3 sn'ye çekilerek hızlandırıldı): onaysız 3-2-1 ile afet başladı, 4 görev Missed (×). ✓
+  7. 26° üstü zorlandı → "DENGE BOZULDU", 0 yıldız, nedenler; en iyi kayıt 2 yıldız korundu; TEKRAR DENE kısa brifingle yeniden açtı. ✓
+  8. Eski IMGUI/uGUI raporu görev modunda kapatıldı (ilk denemede iki rapor üst üste çıkıyordu — düzeltildi).
+- Ekran görüntüsü: `docs/production/screenshots/L1_fail_report.jpg`.
+- Bilinen: Deprem sarsıntısı (quakeTiltPerAcceleration) maks. eğimi ~23°'ye çıkarıyor → denge puanı düşük (3/20). Ayar gerekebilir.
+- Kapı kararı: PASS. Sonraki faz: FAZ 6–9.

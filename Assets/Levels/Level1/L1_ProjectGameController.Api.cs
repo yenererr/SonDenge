@@ -13,11 +13,11 @@ namespace Jam.Levels.Level1
         public bool IsDisaster => state == RoundState.Disaster;
         public bool IsPausedMenu => menuOpen || howToOpen;
         public bool IsMarketOpen => marketOpen;
-        public bool HasModal => (marketOpen && useLegacyHud) || menuOpen || howToOpen || state == RoundState.Report ||
+        public bool HasModal => (marketOpen && useLegacyHud) || menuOpen || howToOpen || briefingOpen || state == RoundState.Report ||
             state == RoundState.GameOver || state == RoundState.Victory || state == RoundState.StartMenu;
         public int Budget => budget;
         public float TimeLeft => Mathf.Max(0f, timer);
-        public float PlanningDuration => 45f;
+        public float PlanningDuration => PreparationSeconds;
         /// <summary>Pozitif değer: evin sağ tarafı aşağıda.</summary>
         public float TiltDegrees => -houseAngle * Mathf.Rad2Deg;
         public float CollapseAngle => collapseAngle;
@@ -126,16 +126,37 @@ namespace Jam.Levels.Level1
         public bool IsGameOver => state == RoundState.GameOver;
         public string ReportText => report;
         public int SafetyScore => safetyScore;
-        public bool NextLevelAvailable => state == RoundState.Report && (growDownward ? level < 5 : nextLevelReady);
+        public bool NextLevelAvailable => state == RoundState.Report &&
+            (missionMode ? HasNextScene : growDownward ? level < 5 : nextLevelReady);
         public void UiRestart() => Restart();
         public void UiMainMenu() => ReturnToMainMenu();
         public void UiNextLevel()
         {
             if (state != RoundState.Report) return;
-            if (growDownward) Advance(); else GoToNextLevel();
+            if (missionMode) GoToNextMissionScene();
+            else if (growDownward) Advance(); else GoToNextLevel();
         }
         public int LevelNumber => level;
-        public string LevelTitle => level == 1 ? "İLK SARSINTI" : level == 2 ? "DAĞ FIRTINASI" : level == 3 ? "YANGIN" : level == 4 ? "YILDIRIM" : "ŞİDDETLİ YAĞMUR";
+        public int TasksDone => missions != null ? missions.CompletedCount : 0;
+        public int TasksTotal => missions != null ? missions.TotalCount : 0;
+        public string DisasterName => missionMode && levelDefinition != null ? levelDefinition.disasterNameTr : "DEPREM";
+        /// <summary>Afet sırasında HUD'da gösterilen gerçek güvenlik satırı.</summary>
+        public string DisasterSafetyLine
+        {
+            get
+            {
+                var line = levelDefinition != null && levelDefinition.safetyWarningsTr.Length > 0
+                    ? string.Join("  ·  ", levelDefinition.safetyWarningsTr) : "";
+                if (level == 3) line += equipment.Contains("exit_clear")
+                    ? "  ·  Yangın büyürse T: açık yoldan TAHLİYE"
+                    : "  ·  Kaçış yolu kapalı!";
+                if (level == 3 && equipment.Contains("yangin_tupu")) line += "  ·  Küçük alevde E: söndür";
+                return line;
+            }
+        }
+        /// <summary>Hazırlık süresi bitti; HUD 3-2-1 geri sayımını onay sormadan başlatır.</summary>
+        public event System.Action ForcedDisasterRequested;
+        public string LevelTitle => missionMode && levelDefinition != null ? levelDefinition.titleTr : level == 1 ? "İLK SARSINTI" : level == 2 ? "DAĞ FIRTINASI" : level == 3 ? "YANGIN" : level == 4 ? "YILDIRIM" : "ŞİDDETLİ YAĞMUR";
         public string RadioLine => level == 1 ? "RADYO SİVRİTEPE — Bu gece sarsıntı bekleniyor. Hazırlan!" :
             level == 2 ? "RADYO SİVRİTEPE — Dağdan sert fırtına geliyor. Ağır eşyaları rüzgârın tersine al!" :
             level == 3 ? "RADYO SİVRİTEPE — Yangın riski yüksek. Yangın tüpünü hazır et!" :

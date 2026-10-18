@@ -130,6 +130,8 @@ namespace Jam.Levels.Level1
         public float planningMaxSlideSpeed = 0.12f;
         [Tooltip("Bu açının (derece) altında sürtünme eşyayı tutar; deprem sarsıntısı yine iter.")]
         public float minSlideTiltDeg = 4f;
+        [Tooltip("Hazırlıkta kaymanın başladığı açı (derece). Küçük eğimde eşyalar yerinde kalır, kısır döngü oluşmaz.")]
+        public float planningMinSlideTiltDeg = 8f;
         [Tooltip("Eşya ağırlığının evi yatırabileceği en büyük açı (derece). Devrilme açısının altında kalırsa ev ancak afetin ekstra itişiyle devrilir.")]
         public float maxTargetTiltDeg = 23f;
         [Tooltip("Odanın iki yanındaki görünmez duvarların merkezden uzaklığı (m). Eşyalar evden dökülmez.")]
@@ -372,7 +374,9 @@ namespace Jam.Levels.Level1
             level = 1;
             budget = 750;
             score = anchors = 0;
-            timer = 45f;
+            equipment.Clear();
+            ApplyLevelSetup();
+            timer = PreparationSeconds;
             maxTilt = 0f;
             LockLevelEntryBalance();
             evacuatedWater = waterSensorCooldown = 0f;
@@ -389,12 +393,12 @@ namespace Jam.Levels.Level1
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && state != RoundState.StartMenu && !howToOpen &&
                 !(marketOpen && !useLegacyHud))
                 ToggleMenu();
-            if (state == RoundState.StartMenu || menuOpen || howToOpen || Time.timeScale <= 0f) return;
+            if (state == RoundState.StartMenu || menuOpen || howToOpen || briefingOpen || Time.timeScale <= 0f) return;
             if (warningUntil > 0f) warningUntil -= Time.deltaTime;
             lightningFlash = Mathf.MoveTowards(lightningFlash, 0f, Time.deltaTime * 2.5f);
             if (keyboard != null)
             {
-                if (keyboard.iKey.wasPressedThisFrame) marketOpen = !marketOpen && state == RoundState.Planning;
+                if (keyboard.iKey.wasPressedThisFrame && !missionMode) marketOpen = !marketOpen && state == RoundState.Planning;
                 if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Disaster && resident != null)
                     ToggleCover();
                 else if (keyboard.spaceKey.wasPressedThisFrame && state == RoundState.Planning && !countdownActive)
@@ -404,12 +408,19 @@ namespace Jam.Levels.Level1
                 }
                 if (keyboard.fKey.wasPressedThisFrame && state == RoundState.Planning) ToggleAnchor();
                 if (keyboard.rKey.wasPressedThisFrame && (state == RoundState.GameOver || state == RoundState.Victory)) Restart();
+                if (keyboard.tKey.wasPressedThisFrame && missionMode && state == RoundState.Disaster && level == 3) UiEvacuate();
             }
 
             if (state == RoundState.Planning && !countdownActive)
             {
                 timer -= Time.deltaTime;
-                if (timer <= 0f) StartDisaster(true);
+                if (timer <= 0f)
+                {
+                    timer = 0f;
+                    // Süre bitince de afet 3-2-1 geri sayımından geçer (şartname §2.1).
+                    if (missionMode && ForcedDisasterRequested != null) ForcedDisasterRequested();
+                    else StartDisaster(true);
+                }
             }
             else if (state == RoundState.Disaster)
             {
@@ -418,20 +429,39 @@ namespace Jam.Levels.Level1
                 UpdateQuakeCamera();
                 if (state == RoundState.Disaster && timer <= 0f)
                 {
-                    if (level == 3 && fires.Count > 0) Lose("Yangın zamanında söndürülemedi.");
+                    if (level == 3 && fires.Count > 0)
+                    {
+                        // Görev modunda açık kaçış yolu varsa büyüyen yangından tahliye doğru karardır.
+                        if (missionMode && equipment.Contains("exit_clear")) Evacuate();
+                        else Lose(missionMode ? "Yangın büyüdü ve kaçış yolu kapalıydı." : "Yangın zamanında söndürülemedi.");
+                    }
                     else CompleteLevel();
                 }
             }
         }
 
+        /// <summary>
+        /// Her katın yürünebilir zemininin iki ucuna görünmez duvar kurar. Katlar simetrik değildir;
+        /// duvar zeminin bittiği yerde olmazsa eşya duvara varmadan boşluktan düşer.
+        /// </summary>
         private void BuildSideWalls()
         {
-            for (var side = -1; side <= 1; side += 2)
+            foreach (var floor in houseRoot.GetComponentsInChildren<BoxCollider>(true))
             {
-                var wall = new GameObject(side < 0 ? "[L1] Görünmez sol duvar" : "[L1] Görünmez sağ duvar");
-                wall.transform.SetParent(houseRoot, false);
-                wall.transform.localPosition = new Vector3(side * (sideWallInnerX + 0.25f), 0f, 0f);
-                wall.AddComponent<BoxCollider>().size = new Vector3(0.5f, 40f, 12f);
+                if (floor.name != "Yürünebilir zemin" || floor.GetComponentInParent<L1_MovableProp>() != null) continue;
+                var t = floor.transform;
+                var scale = t.lossyScale;
+                const float thickness = 0.3f, height = 2.3f;
+                for (var side = -1; side <= 1; side += 2)
+                {
+                    var wall = new GameObject(side < 0 ? "[L1] Görünmez sol kenar" : "[L1] Görünmez sağ kenar");
+                    wall.transform.SetParent(t, false);
+                    var halfX = floor.size.x * 0.5f + thickness * 0.5f / Mathf.Abs(scale.x);
+                    wall.transform.localPosition = floor.center + new Vector3(side * halfX,
+                        floor.size.y * 0.5f + height * 0.5f / Mathf.Abs(scale.y), 0f);
+                    wall.AddComponent<BoxCollider>().size = new Vector3(thickness / Mathf.Abs(scale.x),
+                        height / Mathf.Abs(scale.y), Mathf.Max(floor.size.z, 3f / Mathf.Abs(scale.z)));
+                }
             }
         }
 
@@ -439,7 +469,7 @@ namespace Jam.Levels.Level1
         {
             if (balancePivot == null || houseRoot == null || state == RoundState.StartMenu ||
                 state == RoundState.Report || state == RoundState.GameOver || state == RoundState.Victory ||
-                growing || menuOpen || howToOpen) return;
+                growing || menuOpen || howToOpen || briefingOpen) return;
             TrackLostFurniture();
             if (state == RoundState.Planning && levelEntryBalanceLocked)
             {
@@ -470,12 +500,14 @@ namespace Jam.Levels.Level1
                 disturbance = quake * quakeTiltPerAcceleration;
             }
             else if (state == RoundState.Disaster && level == 2)
-                disturbance = (equipment.Contains("storm_brace") ? 0.012f : 0.035f) * (1f + Mathf.Sin(Time.time * 1.3f));
+                disturbance = (equipment.Contains("storm_brace") ? 0.012f : 0.035f) * (1f + Mathf.Sin(Time.time * 1.3f)) *
+                    (equipment.Contains("windows_closed") ? 0.75f : 1f) * (equipment.Contains("balcony_cleared") ? 0.85f : 1f);
 
             foreach (var item in furniture)
             {
                 if (item == null || !item.gameObject.activeInHierarchy || item.IsAnchored || item.Body == null || item.Body.isKinematic) continue;
-                var heldByFriction = Mathf.Abs(houseAngle) < minSlideTiltDeg * Mathf.Deg2Rad && quake == 0f;
+                var slideThreshold = state == RoundState.Planning ? Mathf.Max(minSlideTiltDeg, planningMinSlideTiltDeg) : minSlideTiltDeg;
+                var heldByFriction = Mathf.Abs(houseAngle) < slideThreshold * Mathf.Deg2Rad && quake == 0f;
                 var slowPlanning = holdFurnitureWhilePlanning && state == RoundState.Planning && !item.AllowPlanningSlide;
                 if (heldByFriction || slowPlanning && planningMaxSlideSpeed <= 0f)
                 {
@@ -515,16 +547,20 @@ namespace Jam.Levels.Level1
             // The source game keeps the house nearly level from the fire stage
             // onward so those rounds are decided by their own hazards. Retain a
             // small visible response for the physical 3D house.
-            if (level >= 3) target = Mathf.Clamp(target * 0.16f, -0.065f, 0.065f);
+            if (level >= 3 && !missionMode) target = Mathf.Clamp(target * 0.16f, -0.065f, 0.065f);
             houseAngle = Mathf.SmoothDamp(houseAngle, target, ref angularVelocity,
                 1.55f, 0.15f, Time.fixedDeltaTime);
             balancePivot.localRotation = Quaternion.Euler(0f, 0f, houseAngle * Mathf.Rad2Deg);
             maxTilt = Mathf.Max(maxTilt, Mathf.Abs(houseAngle * Mathf.Rad2Deg));
             // Anlık sıçrama oyunu bitirmez; açı eşiğin üstünde kesintisiz kalmalı.
-            if (state == RoundState.Disaster && level <= 2 && Mathf.Abs(houseAngle) >= collapseAngle * Mathf.Deg2Rad)
+            // Görev modunda 26° + 1 sn kuralı beş bölümde ve hazırlıkta da geçerlidir.
+            var collapseArmed = missionMode ? state == RoundState.Disaster || state == RoundState.Planning
+                : state == RoundState.Disaster && level <= 2;
+            if (collapseArmed && Mathf.Abs(houseAngle) >= collapseAngle * Mathf.Deg2Rad)
             {
                 collapseClock += Time.fixedDeltaTime;
-                if (collapseClock >= collapseHoldSeconds) Lose("Ev denge sınırını aşıp devrildi.");
+                if (collapseClock >= collapseHoldSeconds)
+                    Lose(state == RoundState.Planning ? "Denge bozuldu: ev hazırlık sırasında 26 dereceyi aştı." : "Ev denge sınırını aşıp devrildi.");
             }
             else collapseClock = 0f;
         }
@@ -550,7 +586,8 @@ namespace Jam.Levels.Level1
             {
                 // A carried item no longer presses on the floor, but its load
                 // still acts at the resident's hand position as they walk.
-                var carriedMass = Mathf.Max(10f, drag.Carried.Mass * 0.75f);
+                // Görev modunda taşınan kütle tam ve bir kez sayılır (şartname §2.3).
+                var carriedMass = missionMode ? drag.Carried.Mass : Mathf.Max(10f, drag.Carried.Mass * 0.75f);
                 torque += carriedMass * drag.CarriedLocalX;
             }
             if (resident != null)
@@ -593,7 +630,8 @@ namespace Jam.Levels.Level1
                     if (!equipment.Contains("lightning_rod_system"))
                     {
                         lightningHits++;
-                        buildingHealth -= equipment.Contains("surge_protector") ? 25f : 37f;
+                        buildingHealth -= (equipment.Contains("surge_protector") ? 25f : 37f) *
+                            (equipment.Contains("unplugged") ? 0.8f : 1f);
                         if (sfx != null) sfx.Play("strike");
                     }
                     else
@@ -638,21 +676,25 @@ namespace Jam.Levels.Level1
             }
             ReleaseLevelEntryBalance();
             marketOpen = false;
-            timer = level == 1 ? quakeDuration : level == 2 ? stormDuration : level == 3 ? fireMaxTime :
-                Mathf.Max(lightningDuration, rainDuration);
-            if (level == 1) BeginQuakeRecord();
+            timer = DisasterSeconds;
+            if (missionMode) BeginMissionDisaster();
+            else if (level == 1) BeginQuakeRecord();
             if (level == 3)
             {
                 extinguishedFires = fireSpreads = 0;
                 BeginFireDisaster();
                 var source = UnityEngine.Random.Range(0, 4);
+                // Ocak kapatıldıysa ocak kaynaklı tutuşma olmaz; başka küçük bir arıza olabilir.
+                if (missionMode && equipment.Contains("stove_off") && (source == 0 || source == 3)) source = UnityEngine.Random.Range(1, 3);
                 var floor = Mathf.Clamp(source == 1 ? 1 : source == 2 ? 2 : 0, 0, FloorCount - 1);
                 var x = source == 0 ? -0.2f : source == 1 ? 1.1f : source == 2 ? -0.7f : 0.8f;
                 fireCause = source == 0 ? "Mutfakta aşırı ısınan ocak" : source == 1 ?
                     "Oturma odasında aşırı yüklü priz" : source == 2 ?
                     "Yatak odasında arızalı ısıtıcı" : "Ocakta unutulan kızgın tava";
                 SpawnFire(floor, x, 100f);
-                SpawnFire(floor == 1 ? 0 : 1, x > 0f ? -0.8f : 0.8f, 85f);
+                // Görev modunda tek küçük tutuşma; alarm yoksa geç fark edildiği için yayılmış başlar.
+                if (!missionMode || !equipment.Contains("duman_dedektoru"))
+                    SpawnFire(floor == 1 ? 0 : 1, x > 0f ? -0.8f : 0.8f, 85f);
                 if (equipment.Contains("duman_dedektoru")) Warn("Duman dedektörü: yangın erken algılandı!");
             }
             if (level == 4) { buildingHealth = 100f; lightningClock = 2.5f; lightningHits = lightningBlocked = 0; }
@@ -665,6 +707,7 @@ namespace Jam.Levels.Level1
         private bool CanStartDisaster(bool forced)
         {
             if (state != RoundState.Planning) return false;
+            if (missionMode) return true;
             if (level == 1 && !equipment.Contains("deprem_cantasi") && !forced) { Warn("Deprem çantası olmadan afeti başlatamazsın. Marketten edin."); return false; }
             if (level == 3 && !equipment.Contains("yangin_tupu") && !forced) { Warn("Yangın tüpü olmadan yangına müdahale edemezsin. Marketten edin."); return false; }
             if (level <= 2 && Mathf.Abs(houseAngle) > 18f * Mathf.Deg2Rad && !forced) { Warn("Ev çok eğik. Önce eşyaları dengele."); return false; }
@@ -674,6 +717,7 @@ namespace Jam.Levels.Level1
         private void CompleteLevel()
         {
             if (state != RoundState.Disaster) return;
+            if (missionMode) { CompleteMissionLevel(true, null); return; }
             if (level == 1 && singleFloorLevel) { CompleteEarthquakeLevel(true, null); return; }
             var anchored = 0;
             foreach (var item in furniture) if (item != null && item.IsAnchored) anchored++;
@@ -744,6 +788,7 @@ namespace Jam.Levels.Level1
         private void Lose(string reason)
         {
             if (state == RoundState.GameOver || state == RoundState.Victory) return;
+            if (missionMode) { CompleteMissionLevel(false, reason); return; }
             if (level == 1 && singleFloorLevel && state == RoundState.Disaster) { CompleteEarthquakeLevel(false, reason); return; }
             report = reason;
             marketOpen = false;
@@ -779,7 +824,7 @@ namespace Jam.Levels.Level1
 
         private void SyncPause()
         {
-            var playing = (state == RoundState.Planning || state == RoundState.Disaster) && !menuOpen && !howToOpen;
+            var playing = (state == RoundState.Planning || state == RoundState.Disaster) && !menuOpen && !howToOpen && !briefingOpen;
             Time.timeScale = playing ? 1f : 0f;
             if (music != null)
             {
@@ -1038,7 +1083,8 @@ namespace Jam.Levels.Level1
             var item = drag.Selected;
             if (drag.Carried == item) { Warn("Sabitlemeden önce eşyayı yere bırak."); return; }
             if (item.IsAnchored) { item.SetAnchored(false); RefreshAnchorVisual(item); anchors++; Warn(PlayerFacingName(item) + " serbest bırakıldı."); if (sfx != null) sfx.Play("confirm"); return; }
-            if (anchors <= 0)
+            if (missionMode) { }
+            else if (anchors <= 0)
             {
                 if (budget < 30) { Warn("Sabitleme aparatı için 30 altın gerekli."); return; }
                 budget -= 30;

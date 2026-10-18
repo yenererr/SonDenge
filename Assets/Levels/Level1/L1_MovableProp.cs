@@ -10,6 +10,8 @@ namespace Jam.Levels.Level1
         public string itemId;
         public int value = 10;
         public float balanceMassKg;
+        [Tooltip("Küçük görev eşyası: yalnız E ile alınıp taşınır, fareyle sürüklenmez.")]
+        public bool carryable;
         public Rigidbody Body { get; private set; }
         public string ItemId => itemId;
         public float Mass => balanceMassKg > 0f ? balanceMassKg :

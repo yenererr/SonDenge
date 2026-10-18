@@ -11,7 +11,7 @@ namespace Jam.Levels.Level1
         private const float WalkSpeed = 0.82f;
         private const float ClimbSpeed = 0.7f;
         private const float EggMassKg = 5f;
-        private const int MaxEggs = 8;
+        private const int MaxEggs = 2; // şartname §3.5: en fazla 2 yumurta
 
         private readonly List<L1_WilsonEgg> eggs = new List<L1_WilsonEgg>();
         private L1_ProjectGameController game;
@@ -27,22 +27,20 @@ namespace Jam.Levels.Level1
         private int facing = 1;
 
         public void Initialize(L1_ProjectGameController controller, Transform houseRoot,
-            L1_ResidentController houseResident)
+            L1_ResidentController houseResident, GameObject chickenModel, GameObject egg, Texture2D chickenTexture)
         {
             game = controller;
             house = houseRoot;
             resident = houseResident;
-            var chickenModel = Resources.Load<GameObject>("Wilson/low_poly_chicken");
-            eggModel = Resources.Load<GameObject>("Wilson/egg");
+            eggModel = egg;
             if (chickenModel == null || eggModel == null)
             {
-                Debug.LogError("Wilson için tavuk veya yumurta modeli bulunamadı (Resources/Wilson).", this);
+                Debug.LogError("Wilson için tavuk veya yumurta modeli atanmadı (L1_ProjectGameController > Wilson).", this);
                 enabled = false;
                 return;
             }
 
-            chickenMaterial = MakeMaterial(new Color(1f, 1f, 1f),
-                Resources.Load<Texture2D>("Wilson/low_poly_chicken"));
+            chickenMaterial = MakeMaterial(new Color(1f, 1f, 1f), chickenTexture);
             shellMaterial = MakeMaterial(new Color(0.96f, 0.88f, 0.68f));
             goldMaterial = MakeMaterial(new Color(1f, 0.69f, 0.08f), null, true);
             feedMaterial = MakeMaterial(new Color(0.55f, 0.36f, 0.15f));
@@ -306,6 +304,17 @@ namespace Jam.Levels.Level1
             for (var i = 1; i < floors.Length; i++)
                 if (Mathf.Abs(y - floors[i]) < Mathf.Abs(y - floors[best])) best = i;
             return best;
+        }
+
+        /// <summary>Briefing portresi için kütlesiz, fiziksiz bir Wilson kopyası kurar.</summary>
+        public static Material BuildPortraitModel(GameObject chickenModel, Texture2D texture, Transform host, float height)
+        {
+            var material = MakeMaterial(Color.white, texture);
+            var model = Instantiate(chickenModel, host);
+            model.name = "Wilson portre modeli";
+            FitModel(model.transform, host, height, material);
+            foreach (var c in model.GetComponentsInChildren<Collider>(true)) Destroy(c);
+            return material;
         }
 
         private static Material MakeMaterial(Color color, Texture texture = null, bool glowing = false)

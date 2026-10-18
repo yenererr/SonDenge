@@ -24,7 +24,10 @@ MonoBehaviour:
   completionTr: "Denge tamam! G\xF6sterge ye\u015Filde."
   reportTr: "Haz\u0131rl\u0131kta e\u011Fimi g\xFCvenli seviyeye indirdin."
   taskType: 5
-  prerequisiteTaskIds: []
+  prerequisiteTaskIds:
+  - L1_T01
+  - L1_T02
+  - L1_T03
   safetyCritical: 0
   scoreWeight: 1
   protectionKey: balanced

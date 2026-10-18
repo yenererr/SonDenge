@@ -129,7 +129,7 @@ namespace Jam.EditorTools
                     "Sivritepe'de bu evin eşyaları bütün binayı eğiyor. Bu bizim oyunumuzun fantastik kuralı!",
                     "Denge tamam! Gösterge yeşilde.",
                     "Hazırlıkta eğimi güvenli seviyeye indirdin.",
-                    TaskType.RebalanceHouse, "balanced", false),
+                    TaskType.RebalanceHouse, "balanced", false, 1f, "L1_T01", "L1_T02", "L1_T03"),
             };
             var d = Dialogue("L1_Dialogue", new List<WilsonLine>
             {
