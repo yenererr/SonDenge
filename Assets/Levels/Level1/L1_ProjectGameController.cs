@@ -103,7 +103,10 @@ namespace Jam.Levels.Level1
         [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
         public bool absoluteTorque = false;
         [Tooltip("Hazırlıkta mevcut eşyalar kaymaz; yeni yerleştirilenler 1,5 saniye sonra eğime tepki verir.")]
-        public bool holdFurnitureWhilePlanning = true;
+        public bool holdFurnitureWhilePlanning = false;
+        [Tooltip("Eğimde eşyaları kaydıran ek ivme (m/sn²) ve en yüksek kayma hızı. Panel oyunu: 420 px/sn² ≈ 4.4.")]
+        public float tiltSlideAccel = 4.4f;
+        public float maxSlideSpeed = 1.6f;
         [Tooltip("Devrilme açısı (derece) ve bu açıda kesintisiz kalma süresi (saniye).")]
         public float collapseAngle = 26f;
         public float collapseHoldSeconds = 1f;
@@ -429,12 +432,12 @@ namespace Jam.Levels.Level1
                 }
                 // Gravity already pulls props down the rotated floor. A small,
                 // continuous assist overcomes contact friction without a sudden threshold.
-                var slope = -Mathf.Sin(houseAngle) * 2.5f;
+                var slope = -Mathf.Sin(houseAngle) * tiltSlideAccel;
                 var shake = quake;
                 var wind = state == RoundState.Disaster && level == 2 ? (equipment.Contains("storm_brace") ? 0.8f : 2.5f) : 0f;
                 item.Body.AddForce(houseRoot.right * (slope + shake + wind), ForceMode.Acceleration);
                 var along = Vector3.Dot(item.Body.linearVelocity, houseRoot.right);
-                var excessSpeed = Mathf.Max(0f, Mathf.Abs(along) - 1.1f);
+                var excessSpeed = Mathf.Max(0f, Mathf.Abs(along) - maxSlideSpeed);
                 if (excessSpeed > 0f)
                     item.Body.AddForce(-houseRoot.right * (Mathf.Sign(along) * excessSpeed * 4f),
                         ForceMode.Acceleration);
