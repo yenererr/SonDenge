@@ -107,6 +107,16 @@ namespace Jam.Levels.Level1
         [Tooltip("Devrilme açısı (derece) ve bu açıda kesintisiz kalma süresi (saniye).")]
         public float collapseAngle = 26f;
         public float collapseHoldSeconds = 1f;
+        [Tooltip("Tork -> eğim çarpanı. Büyüdükçe ev daha kolay eğilir.")]
+        public float torqueSensitivity = 0.0016f;
+        [Header("Afet süreleri ve bütçe")]
+        public float stormDuration = 12f;
+        public float fireMaxTime = 30f;
+        public float lightningDuration = 25f;
+        public float rainDuration = 25f;
+        [Tooltip("Her bölüm geçişinde bütçeye eklenen sabit bonus.")]
+        public int budgetBonusPerLevel = 450;
+        [Range(0f, 1f)] public float defaultMusicVolume = 0.5f;
         private float collapseClock;
         [Tooltip("Açıksa bölüm, ana menüden gelindiği için kendi başlangıç menüsünü göstermeden başlar.")]
         public bool autoStart = true;
@@ -149,7 +159,7 @@ namespace Jam.Levels.Level1
             music = gameObject.AddComponent<AudioSource>();
             music.loop = true;
             music.playOnAwake = false;
-            music.volume = 0.42f;
+            music.volume = defaultMusicVolume;
             var effects = new GameObject("Proje dosyası efekt sesleri");
             effects.transform.SetParent(transform, false);
             sfx = effects.AddComponent<L1_ProjectSfx>();
@@ -441,7 +451,7 @@ namespace Jam.Levels.Level1
                 (Mathf.Sqrt(torqueDelta * torqueDelta + 25f) - 5f);
             // Use the same limit before and during a disaster; switching states
             // must not release a previously clamped target in one step.
-            var target = Mathf.Clamp(-torqueDelta * 0.0016f + disturbance, -0.52f, 0.52f);
+            var target = Mathf.Clamp(-torqueDelta * torqueSensitivity + disturbance, -0.52f, 0.52f);
             // The source game keeps the house nearly level from the fire stage
             // onward so those rounds are decided by their own hazards. Retain a
             // small visible response for the physical 3D house.
@@ -568,7 +578,8 @@ namespace Jam.Levels.Level1
             }
             ReleaseLevelEntryBalance();
             marketOpen = false;
-            timer = level == 1 ? quakeDuration : level == 2 ? 12f : level == 3 ? 30f : 25f;
+            timer = level == 1 ? quakeDuration : level == 2 ? stormDuration : level == 3 ? fireMaxTime :
+                Mathf.Max(lightningDuration, rainDuration);
             if (level == 1) BeginQuakeRecord();
             if (level == 3)
             {
@@ -649,6 +660,7 @@ namespace Jam.Levels.Level1
             }
             score += 500 + budget;
             level++;
+            budget += budgetBonusPerLevel;
             timer = 45f;
             maxTilt = 0f;
             houseAngle = angularVelocity = 0f;

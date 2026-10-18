@@ -13,7 +13,7 @@ namespace Jam.Levels.Level1
     {
         [Header("Level 1 depremi")]
         [Tooltip("Deprem süresi (sn). 10–25 arası önerilir.")]
-        [Range(5f, 25f)] public float quakeDuration = 10f;
+        [Range(5f, 25f)] public float quakeDuration = 12f;
         [Tooltip("En yüksek yatay ivme (m/sn²); serbest eşyalara uygulanır.")]
         public float quakeAcceleration = 4.5f;
         public float quakeFrequencyA = 1.3f;

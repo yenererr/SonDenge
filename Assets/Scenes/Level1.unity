@@ -18270,7 +18270,7 @@ MonoBehaviour:
   floorHeight: 2.25
   growSeconds: 1.6
   lowestFloorTop: -1.15
-  quakeDuration: 10
+  quakeDuration: 12
   quakeAcceleration: 6
   quakeFrequencyA: 1.3
   quakeFrequencyB: 2.9
