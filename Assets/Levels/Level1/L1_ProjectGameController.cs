@@ -29,6 +29,25 @@ namespace Jam.Levels.Level1
             { this.id = id; this.title = title; this.category = category; this.cost = cost; this.unlockLevel = unlockLevel; this.mass = mass; this.template = template; }
         }
 
+        // Her katın eşyaları ağırlıkça iki eşit gruba bölünebilir; ev matematiksel olarak dengelenebilir.
+        // Kat 1 (280): kitaplık 80 + kanepe 60 = sandık 40 + koltuk 40 + TV 20 + sehpa 20 + komodin 20
+        // Kat 2 (240): buzdolabı 80 + fıçı 40 = ocak 70 + masa 50
+        // Kat 3 (140): yatak 70 = küvet 50 + lavabo 20
+        private static readonly (string key, int kg)[] BalancedWeights =
+        {
+            ("kitaplık", 80), ("kanepe", 60), ("sandık", 40), ("tekli koltuk", 40), ("televizyon", 20),
+            ("sehpa", 20), ("komodin", 20), ("buzdolabı", 80), ("fıçı", 40), ("ocak", 70),
+            ("yemek masası", 50), ("yatak", 70), ("küvet", 50), ("lavabo", 20),
+        };
+
+        private static int BalancedWeight(string displayName)
+        {
+            var name = (displayName ?? string.Empty).ToLowerInvariant();
+            foreach (var entry in BalancedWeights)
+                if (name.Contains(entry.key)) return entry.kg;
+            return 0;
+        }
+
         private sealed class FireSpot
         {
             public GameObject visual;
@@ -56,17 +75,17 @@ namespace Jam.Levels.Level1
         private static readonly ShopItem[] Catalog =
         {
             new ShopItem("green_sofa", "Adaçayı koltuk", "Mobilya", 150, 1, 60, "MIX — yıpranmış deri kanepe"),
-            new ShopItem("red_armchair", "Tekli koltuk", "Mobilya", 90, 1, 35, "StylArts — orta kat tekli koltuk"),
+            new ShopItem("red_armchair", "Tekli koltuk", "Mobilya", 90, 1, 40, "StylArts — orta kat tekli koltuk"),
             new ShopItem("coffee_table", "Ahşap sehpa", "Mobilya", 60, 1, 20, "MIX — sehpa"),
-            new ShopItem("bookshelf", "Kitaplık", "Mobilya", 200, 1, 85, "MIX — dokulu kitaplık"),
-            new ShopItem("refrigerator", "Retro buzdolabı", "Mobilya", 220, 2, 90, "StylArts — buzdolabı"),
-            new ShopItem("stove_counter", "Ocak ve fırın", "Mobilya", 190, 2, 75, "StylArts — ocak ve fırın"),
+            new ShopItem("bookshelf", "Kitaplık", "Mobilya", 200, 1, 80, "MIX — dokulu kitaplık"),
+            new ShopItem("refrigerator", "Retro buzdolabı", "Mobilya", 220, 2, 80, "StylArts — buzdolabı"),
+            new ShopItem("stove_counter", "Ocak ve fırın", "Mobilya", 190, 2, 70, "StylArts — ocak ve fırın"),
             new ShopItem("dining_table", "Yemek masası", "Mobilya", 130, 2, 50, "Yemek masası"),
             new ShopItem("wooden_barrel", "Erzak fıçısı", "Mobilya", 100, 2, 40, "Erzak fıçısı"),
             new ShopItem("cozy_bed", "Çift kişilik yatak", "Mobilya", 175, 3, 70, "Realistic Bed 01 — yatak"),
-            new ShopItem("wardrobe", "Gardırop", "Mobilya", 210, 3, 85),
+            new ShopItem("wardrobe", "Gardırop", "Mobilya", 210, 3, 60),
             new ShopItem("bedside_table", "Komodin ve şamdan", "Mobilya", 50, 3, 20, "Komodin"),
-            new ShopItem("standing_lamp", "Pirinç lambader", "Mobilya", 45, 1, 15),
+            new ShopItem("standing_lamp", "Pirinç lambader", "Mobilya", 45, 1, 20),
             new ShopItem("deprem_cantasi", "Deprem çantası", "Deprem", 80, 1, 10),
             new ShopItem("sabitleme_aparati", "Mobilya sabitleme", "Deprem", 30, 1, 2),
             new ShopItem("storm_brace", "Çatı güçlendirici", "Fırtına", 50, 2, 10),
@@ -213,7 +232,9 @@ namespace Jam.Levels.Level1
             foreach (var item in furniture)
             {
                 if (item == null) continue;
-                if (item.balanceMassKg <= 0f)
+                var balanced = BalancedWeight(item.displayName);
+                if (balanced > 0) item.balanceMassKg = balanced;
+                else if (item.balanceMassKg <= 0f)
                 {
                     var catalogMass = 0;
                     foreach (var entry in Catalog)
