@@ -51,7 +51,7 @@ namespace Jam.Levels.Level1
                 if (esc) game.UiCloseMarket();
             }
 
-            pausePanel.SetActive(game.IsMenuOpen && !game.IsHowToOpen);
+            pausePanel.SetActive(game.IsMenuOpen && !game.IsHowToOpen && !game.ExternalPauseMenu);
             if (pausePanel.activeSelf) musicLabel.text = game.MusicMuted ? "MÜZİK: KAPALI" : "MÜZİK: AÇIK";
 
             howToPanel.SetActive(game.IsHowToOpen);

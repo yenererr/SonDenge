@@ -18613,6 +18613,7 @@ MonoBehaviour:
   criticalTiltWarning: 16
   hazardDistance: 1.6
   reportPrefab: {fileID: 653119406232978328, guid: 25ff10108a99154479a96064f7e9ac9d, type: 3}
+  pauseMenuPrefab: {fileID: 5347084243173111359, guid: 4dd6a2b6c032a2241aa3c78d89a20cb3, type: 3}
 --- !u!1 &440488009
 GameObject:
   m_ObjectHideFlags: 0

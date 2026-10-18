@@ -24,6 +24,8 @@ namespace Jam.Levels.Level1
         [SerializeField] private float hazardDistance = 1.6f;
         [Tooltip("Beş bölümün ortak AFET RAPORU prefab'ı (UI_DisasterReportTemplate). Boşsa eski kodla kurulan rapor kullanılır.")]
         [SerializeField] private DisasterReportPanel reportPrefab;
+        [Tooltip("Menü tasarım dilindeki Duraklat menüsü (UI_PauseMenu). Boşsa eski kodla kurulan panel kullanılır.")]
+        [SerializeField] private Jam.UI.Menu.PauseMenuView pauseMenuPrefab;
 
         private MissionManager missions;
         private WilsonPortrait portrait;
@@ -31,6 +33,7 @@ namespace Jam.Levels.Level1
         private MissionHudPanel hud;
         private DisasterResultPanel result;
         private DisasterReportPanel report;
+        private Jam.UI.Menu.PauseMenuView pauseMenu;
         private L1_MissionSwitch[] switches = new L1_MissionSwitch[0];
         private float pollClock, tiltWarnClock;
         private bool timeWarned, started;
@@ -68,6 +71,18 @@ namespace Jam.Levels.Level1
                 report.BindPortrait(portrait);
             }
             else result = DisasterResultPanel.Create(transform, portrait);
+            if (pauseMenuPrefab != null)
+            {
+                pauseMenu = Instantiate(pauseMenuPrefab, transform);
+                pauseMenu.IsPauseOpen = () => game.IsMenuOpen && !game.IsHowToOpen;
+                pauseMenu.SubMenuChanged = open => game.PauseSubMenuOpen = open;
+                pauseMenu.Resume = game.UiTogglePause;
+                pauseMenu.Restart = game.UiRestart;
+                pauseMenu.MainMenu = game.UiMainMenu;
+                game.ExternalPauseMenu = true;
+            }
+            // ESC'nin tek sahibi bölüm kontrolcüsü: GameManager ikinci kez duraklatmasın.
+            if (Jam.Core.GameManager.Instance != null) Jam.Core.GameManager.Instance.PauseInputEnabled = false;
             hud.Bind(missions);
             hud.HintRequested = ShowHint;
             hud.ReplayRequested = () => OpenBriefing(true);
@@ -108,6 +123,7 @@ namespace Jam.Levels.Level1
 
         private void OnDestroy()
         {
+            if (Jam.Core.GameManager.Instance != null) Jam.Core.GameManager.Instance.PauseInputEnabled = true;
             if (missions != null) missions.TaskCompleted -= OnTaskCompleted;
             foreach (var s in switches) if (s != null) s.Changed -= OnSwitchChanged;
             if (game != null) { game.DisasterStarted -= OnDisasterStarted; game.LevelFinished -= OnLevelFinished; }

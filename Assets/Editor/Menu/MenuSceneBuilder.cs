@@ -148,6 +148,90 @@ namespace Jam.EditorTools
             Debug.Log("[Menü] Menu.unity kuruldu: 7 ekran, " + WilsonTargets.Count + " Wilson görünümü.");
         }
 
+        // ------------------------------------------------------------------ oyun içi Duraklat menüsü
+        public const string PausePrefabPath = MenuPrefabBuilder.Dir + "/UI_PauseMenu.prefab";
+        private static readonly string[] LevelScenes =
+            { "Assets/Scenes/Level1.unity", "Assets/Scenes/Level2.unity", "Assets/Scenes/Level3.unity", "Assets/Scenes/Level4.unity", "Assets/Scenes/Level5.unity" };
+
+        [MenuItem("Jam/Menü/Duraklat menüsünü kur ve bölümlere bağla")]
+        public static void BuildPauseAndWire()
+        {
+            EnsureFont();
+            BuildAll();
+            var prefab = BuildPausePrefab();
+            var active = EditorSceneManager.GetActiveScene().path;
+            foreach (var path in LevelScenes)
+            {
+                var scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+                var director = Object.FindAnyObjectByType<Jam.Levels.Level1.L1_MissionDirector>();
+                if (director == null) { Debug.LogWarning("[Menü] L1_MissionDirector yok: " + path); continue; }
+                Set(director, "pauseMenuPrefab", prefab.GetComponent<PauseMenuView>());
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+            }
+            if (!string.IsNullOrEmpty(active)) EditorSceneManager.OpenScene(active, OpenSceneMode.Single);
+            Debug.Log("[Menü] UI_PauseMenu 5 bölüme bağlandı.");
+        }
+
+        private static GameObject BuildPausePrefab()
+        {
+            WilsonTargets.Clear();
+            var go = new GameObject("UI_PauseMenu", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
+            var canvas = go.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 150;
+            var scaler = go.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
+            var audio = go.AddComponent<MenuAudioBridge>();
+            Set(audio, "click", Clip("ui_click"));
+            Set(audio, "hover", Clip("ui_hover"));
+            Set(audio, "open", Clip("ui_open"));
+            Set(audio, "confirm", Clip("ui_confirm"));
+            Set(audio, "error", Clip("ui_error"));
+            var c = (RectTransform)go.transform;
+            var root = Stretch("Root", c);
+            var group = root.gameObject.AddComponent<CanvasGroup>();
+            Img(root, (Sprite)null, new Color(0.06f, 0.03f, 0.02f, 0.6f), true);
+            var window = Centered("Window", root, 0, -10, 680, 720);
+            var paperGo = (GameObject)PrefabUtility.InstantiatePrefab(ParchmentPanel, window);
+            var prt = (RectTransform)paperGo.transform;
+            prt.anchorMin = Vector2.zero;
+            prt.anchorMax = Vector2.one;
+            prt.offsetMin = new Vector2(0, 0);
+            prt.offsetMax = new Vector2(0, -70);
+            var sign = (GameObject)PrefabUtility.InstantiatePrefab(TitleSign, window);
+            var srt = (RectTransform)sign.transform;
+            srt.anchorMin = srt.anchorMax = new Vector2(0.5f, 1f);
+            srt.pivot = new Vector2(0.5f, 1f);
+            srt.anchoredPosition = new Vector2(0, 10);
+            srt.sizeDelta = new Vector2(640, 150);
+            srt.Find("Label").GetComponent<TMP_Text>().text = "OYUN DURAKLATILDI";
+            var col = new Vector2(0.5f, 1f);
+            var resume = Btn(WoodPrimary, window, "ResumeButton", "DEVAM ET", "play", col, new Vector2(0, -230), new Vector2(500, 108));
+            var restart = Btn(WoodSecondary, window, "RestartButton", "YENİDEN BAŞLAT", "arrow_up", col, new Vector2(0, -352), new Vector2(480, 98));
+            restart.transform.Find("Icon").localEulerAngles = new Vector3(0, 0, 135);
+            var settingsBtn = Btn(WoodSecondary, window, "SettingsButton", "AYARLAR", "gear", col, new Vector2(0, -464), new Vector2(480, 98));
+            var menuBtn = Btn(WoodSecondary, window, "MenuButton", "ANA MENÜ", "home", col, new Vector2(0, -576), new Vector2(480, 98));
+            var confirm = (GameObject)PrefabUtility.InstantiatePrefab(ConfirmDialogPrefab, c);
+            confirm.name = "ConfirmDialog";
+            var settings = BuildSettings(c, confirm.GetComponent<ConfirmDialog>(), true);
+            confirm.transform.SetAsLastSibling();
+            var view = go.AddComponent<PauseMenuView>();
+            Set(view, "root", group);
+            Set(view, "window", window);
+            Set(view, "resumeButton", resume);
+            Set(view, "restartButton", restart);
+            Set(view, "settingsButton", settingsBtn);
+            Set(view, "menuButton", menuBtn);
+            Set(view, "confirm", confirm.GetComponent<ConfirmDialog>());
+            Set(view, "settings", settings);
+            var prefab = PrefabUtility.SaveAsPrefabAsset(go, PausePrefabPath);
+            Object.DestroyImmediate(go);
+            return prefab;
+        }
+
         private static AudioClip Clip(string name) => AssetDatabase.LoadAssetAtPath<AudioClip>(MenuArtGenerator.AudioDir + "/" + name + ".wav");
 
         // ------------------------------------------------------------------ ortak parçalar

@@ -20,6 +20,12 @@ namespace Jam.Core
         public GamePhase Phase { get; private set; } = GamePhase.Preparation;
         public bool IsPaused { get; private set; }
 
+        /// <summary>
+        /// false: ESC'yi bu sınıf değil sahnedeki bölüm kontrolcüsü yönetir (çifte duraklatmayı önler).
+        /// Bölüm kontrolcüsü kendi duraklatmasını kurarken kapatır, sahneden çıkarken geri açar.
+        /// </summary>
+        public bool PauseInputEnabled { get; set; } = true;
+
         public static event Action<GamePhase> OnPhaseChanged;
         public static event Action<bool> OnPauseChanged;
 
@@ -32,7 +38,7 @@ namespace Jam.Core
         private void Update()
         {
             bool pausable = Phase == GamePhase.Preparation || Phase == GamePhase.Disaster;
-            if (pausable && PausePressed()) SetPaused(!IsPaused);
+            if (pausable && PauseInputEnabled && PausePressed()) SetPaused(!IsPaused);
         }
 
         public void SetPhase(GamePhase newPhase)

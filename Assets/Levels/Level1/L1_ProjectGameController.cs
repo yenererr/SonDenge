@@ -391,6 +391,7 @@ namespace Jam.Levels.Level1
         {
             var keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && state != RoundState.StartMenu && !howToOpen &&
+                !PauseSubMenuOpen && !briefingOpen &&
                 !(marketOpen && !useLegacyHud))
                 ToggleMenu();
             if (state == RoundState.StartMenu || menuOpen || howToOpen || briefingOpen || Time.timeScale <= 0f) return;

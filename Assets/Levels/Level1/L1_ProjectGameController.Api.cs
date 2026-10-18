@@ -115,6 +115,10 @@ namespace Jam.Levels.Level1
 
         // ---------------------------------------------------------------- duraklatma
         public bool IsMenuOpen => menuOpen;
+        /// <summary>Yeni Duraklat menüsünde ayarlar/onay açıkken ESC duraklatmayı kapatmaz (alt panel kapanır).</summary>
+        public bool PauseSubMenuOpen { get; set; }
+        /// <summary>true: duraklatma menüsünü PauseMenuView prefab'ı gösterir, eski kodla kurulan panel gizlenir.</summary>
+        public bool ExternalPauseMenu { get; set; }
         public bool IsHowToOpen => howToOpen;
         public bool MusicMuted => musicMuted;
         public void UiToggleMusic() { musicMuted = !musicMuted; SyncPause(); }

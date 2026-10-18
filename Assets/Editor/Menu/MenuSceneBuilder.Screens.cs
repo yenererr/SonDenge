@@ -303,12 +303,16 @@ namespace Jam.EditorTools
         }
 
         // ------------------------------------------------------------------ 06 AYARLAR
-        private static MenuPage BuildSettings(Transform pages, ConfirmDialog confirm)
+        private static SettingsView BuildSettings(Transform pages, ConfirmDialog confirm, bool embedded = false)
         {
             var rt = Page<SettingsView>(pages, "06_Settings", out var view);
-            PageBackdrop(rt, "bg_06_ayarlar");
-            Logo(rt, 60, 70, 0.72f);
-            Wilson(rt, BL, new Vector2(200, 40), 430);
+            if (embedded) Img(Stretch("Dim", rt), (Sprite)null, new Color(0.05f, 0.03f, 0.02f, 0.55f), true);
+            else
+            {
+                PageBackdrop(rt, "bg_06_ayarlar");
+                Logo(rt, 60, 70, 0.72f);
+                Wilson(rt, BL, new Vector2(200, 40), 430);
+            }
             var content = Panel(rt, "SettingsPanel", 420, 288, 1300, 690);
             Title(rt, "AYARLAR", 1070, 150, 560, 160);
             var catCol = TopLeft("Categories", content, 22, 22, 330, 620);
