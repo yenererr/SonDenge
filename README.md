@@ -93,7 +93,18 @@ Mağaza ve altın kaldırıldı. Her bölümde Wilson önce görevleri anlatır 
 - Rapor ve testler: `docs/production/` (WILSON_IMPLEMENTATION_LOG, FINAL_VALIDATION_REPORT, SAFETY_REVIEW).
 - Evin ağırlıkla dengelenmesi oyunun hayal ürünü kuralıdır; gerçek afet tavsiyesi değildir.
 
+## Menü (yedi ekran)
+
+`Assets/Scenes/Menu.unity` → Ana Menü · Bölüm Seçimi · Wilson Görev Tanıtımı · Yükleme · Nasıl Oynanır? · Ayarlar · Oyun Hakkında; bölümlerde ESC ile Duraklat menüsü.
+
+- Kurulum/yeniden kurma: Unity'de **Jam > Menü > Hepsini kur** (sanat + prefab + sahne) veya **Menü sahnesini kur**; duraklatma için **Duraklat menüsünü kur ve bölümlere bağla**.
+- Kod: `Assets/Scripts/UI/Menu/` (`MenuFlowController` tek akış kaynağı), prefablar ve menü sanatı: `Assets/Prefabs/UI/Menu/`.
+- Bölüm verisi `Assets/Data/Levels/*.asset`'ten, yıldız/kilit `LevelProgressSave`'den, geçiş `SceneLoader.LoadWithProgress` ile (gerçek async ilerleme).
+- Menü UI görselleri (ahşap/parşömen sprite'ları, ikonlar, arayüz sesleri) proje içinde kodla üretildi; arka plan görselleri ekibin hazırladığı yazısız sahne görselleridir. Ayrıntı: `docs/production/MENU_IMPLEMENTATION_LOG.md`.
+
 ## Atıflar
+
+- **Menü yazı tipi:** Liberation Sans (SIL Open Font License), TextMesh Pro ile gelen `LiberationSans.ttf`.
 
 Aktif Level1 evi gerçek 3D geometri ve aşağıdaki paketlerin modellerinden oluşur. Dağ ve gökyüzü sprite olarak kalır. Ev referans resimleri yalnız arşivde tutulur, aktif sahnede kullanılmaz.
 
