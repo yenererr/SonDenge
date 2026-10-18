@@ -17,9 +17,80 @@ namespace Jam.Levels.Level1
             source.volume = 0.23f;
         }
 
+        private const string ClipFolder = "Sfx/sfx_";
+        private readonly Dictionary<string, AudioClip[]> recorded = new Dictionary<string, AudioClip[]>();
+        private readonly Dictionary<string, AudioSource> loops = new Dictionary<string, AudioSource>();
+        private AudioSource clipSource;
+
+        private static float SfxVolume => Jam.Core.AudioManager.Instance != null ? Jam.Core.AudioManager.Instance.sfxVolume : 1f;
+
+        /// <summary>
+        /// Kayıtlı ses (Resources/Sfx/sfx_cue.wav ya da sfx_cue_1..n varyasyonları) varsa onu çalar.
+        /// Yoksa false döner; Play() bu durumda sentez sese düşer.
+        /// </summary>
+        public bool PlayClip(string cue, float volume = 1f, float pitchJitter = 0.05f)
+        {
+            var variants = Recorded(cue);
+            if (variants.Length == 0) return false;
+            if (clipSource == null)
+            {
+                clipSource = gameObject.AddComponent<AudioSource>();
+                clipSource.playOnAwake = false;
+                clipSource.spatialBlend = 0f;
+            }
+            clipSource.pitch = 1f + Random.Range(-pitchJitter, pitchJitter);
+            clipSource.PlayOneShot(variants[Random.Range(0, variants.Length)], volume * SfxVolume);
+            return true;
+        }
+
+        /// <summary>Döngü sesini (sfx_cue_loop) yumuşakça açar/kapatır. Her karede çağrılabilir.</summary>
+        public void SetLoop(string cue, bool on, float volume = 0.6f, float fadePerSecond = 1.5f)
+        {
+            if (!loops.TryGetValue(cue, out var loop))
+            {
+                if (!on) return;
+                var clip = Resources.Load<AudioClip>(ClipFolder + cue + "_loop");
+                if (clip == null) return;
+                loop = gameObject.AddComponent<AudioSource>();
+                loop.clip = clip;
+                loop.loop = true;
+                loop.playOnAwake = false;
+                loop.volume = 0f;
+                loops.Add(cue, loop);
+            }
+            var target = on ? volume * SfxVolume : 0f;
+            loop.volume = Mathf.MoveTowards(loop.volume, target, fadePerSecond * Time.unscaledDeltaTime);
+            if (loop.volume > 0f && !loop.isPlaying) loop.Play();
+            else if (loop.volume <= 0f && loop.isPlaying) loop.Stop();
+        }
+
+        /// <summary>Tüm döngüleri hemen susturur (menü, rapor, bölüm sonu).</summary>
+        public void StopLoops()
+        {
+            foreach (var loop in loops.Values) { loop.volume = 0f; loop.Stop(); }
+        }
+
+        private AudioClip[] Recorded(string cue)
+        {
+            if (recorded.TryGetValue(cue, out var found)) return found;
+            var list = new List<AudioClip>();
+            var single = Resources.Load<AudioClip>(ClipFolder + cue);
+            if (single != null) list.Add(single);
+            for (var i = 1; i < 10; i++)
+            {
+                var variant = Resources.Load<AudioClip>(ClipFolder + cue + "_" + i);
+                if (variant == null) break;
+                list.Add(variant);
+            }
+            found = list.ToArray();
+            recorded.Add(cue, found);
+            return found;
+        }
+
         public void Play(string cue)
         {
             if (source == null) return;
+            if (PlayClip(cue)) return;
             if (!clips.TryGetValue(cue, out var clip))
             {
                 clip = Build(cue);

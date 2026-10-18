@@ -142,6 +142,7 @@ namespace Jam.Levels.Level1
             hud.SetVisible(false);
             hud.briefingUsesPortrait = true;
             briefing.Open(Level, fullFlow, OnBriefingClosed);
+            game.PlayRecordedSfx("wilson_voice", 0.9f);
         }
 
         private void OnBriefingClosed()
@@ -469,7 +470,11 @@ namespace Jam.Levels.Level1
                 hud.Say("Orası hazır değil; önce gerekli eşyayı işaretli yere bırak.", WilsonMood.Anlatici, 2.5f);
                 return true;
             }
-            if (best.TryActivate()) hud.Say(best.doneTr, WilsonMood.Normal, 1.5f);
+            if (best.TryActivate())
+            {
+                hud.Say(best.doneTr, WilsonMood.Normal, 1.5f);
+                if (best.actionTr != null && best.actionTr.ToUpperInvariant().Contains("PENCERE")) game.PlayRecordedSfx("window_close");
+            }
             return true;
         }
 

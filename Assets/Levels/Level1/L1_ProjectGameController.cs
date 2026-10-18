@@ -395,6 +395,7 @@ namespace Jam.Levels.Level1
                 !PauseSubMenuOpen && !briefingOpen && !eggTipOpen &&
                 !(marketOpen && !useLegacyHud))
                 ToggleMenu();
+            UpdateAudio(state == RoundState.StartMenu || menuOpen || howToOpen || briefingOpen || eggTipOpen || Time.timeScale <= 0f);
             if (state == RoundState.StartMenu || menuOpen || howToOpen || briefingOpen || eggTipOpen || Time.timeScale <= 0f) return;
             if (warningUntil > 0f) warningUntil -= Time.deltaTime;
             lightningFlash = Mathf.MoveTowards(lightningFlash, 0f, Time.deltaTime * 2.5f);
@@ -634,12 +635,12 @@ namespace Jam.Levels.Level1
                         lightningHits++;
                         buildingHealth -= (equipment.Contains("surge_protector") ? 25f : 37f) *
                             (equipment.Contains("unplugged") ? 0.8f : 1f);
-                        if (sfx != null) sfx.Play("strike");
+                        if (sfx != null && !sfx.PlayClip("thunder")) sfx.Play("strike");
                     }
                     else
                     {
                         lightningBlocked++;
-                        if (sfx != null) sfx.Play("shield");
+                        if (sfx != null) { sfx.PlayClip("thunder", 0.6f); sfx.Play("shield"); }
                     }
                     if (buildingHealth <= 0f) Lose("Yıldırım darbeleri evi yıktı.");
                 }
@@ -1096,7 +1097,7 @@ namespace Jam.Levels.Level1
             item.SetAnchored(true);
             RefreshAnchorVisual(item);
             Warn(PlayerFacingName(item) + " sabitlendi.");
-            if (sfx != null) sfx.Play("confirm");
+            if (sfx != null) sfx.Play("secure");
         }
 
         private void RefreshAnchorVisual(L1_MovableProp item)

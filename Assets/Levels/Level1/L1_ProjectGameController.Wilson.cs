@@ -27,6 +27,7 @@ namespace Jam.Levels.Level1
 
         public void WilsonEggLaid(bool golden)
         {
+            if (sfx != null) sfx.PlayClip("cluck", 0.7f, 0.1f);
             if (level != 1 || state != RoundState.Planning || PlayerPrefs.GetInt(EggTipKey, 0) == 1) return;
             PlayerPrefs.SetInt(EggTipKey, 1);
             PlayerPrefs.Save();

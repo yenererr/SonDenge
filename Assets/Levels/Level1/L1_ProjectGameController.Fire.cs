@@ -199,6 +199,7 @@ namespace Jam.Levels.Level1
         {
             var spraying = equipment.Contains("yangin_tupu") && resident != null && !resident.IsClimbing &&
                 ((keyboard != null && (keyboard.eKey.isPressed || keyboard.enterKey.isPressed)) || L1_TouchControls.ActionHeld);
+            sprayingNow = spraying;
             PoseExtinguisher(spraying);
             ShowFoam(spraying);
             for (var i = fires.Count - 1; i >= 0; i--)
