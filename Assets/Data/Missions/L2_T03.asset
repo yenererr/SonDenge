@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L2_T03
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L2_T03
+  levelId: L2
+  titleTr: "BALKONDAK\u0130 E\u015EYALARI \u0130\xC7ER\u0130 AL"
+  descriptionTr: "Balkondaki gev\u015Fek e\u015Fyalar\u0131 E ile al, i\xE7erideki
+    depo alan\u0131na b\u0131rak."
+  whyItMattersTr: "R\xFCzg\xE2rda savrulan e\u015Fyalar tehlikelidir."
+  hintTr: "Balkondaki saks\u0131lar savrulabilir. \u0130\xE7erideki i\u015Faretli
+    alana ta\u015F\u0131."
+  completionTr: "Balkon bo\u015Fald\u0131, savrulacak bir \u015Fey kalmad\u0131!"
+  reportTr: "Balkondan savrulabilecek e\u015Fyalar g\xFCvenli yere al\u0131nd\u0131."
+  taskType: 0
+  prerequisiteTaskIds: []
+  safetyCritical: 0
+  scoreWeight: 1
+  protectionKey: balcony_cleared

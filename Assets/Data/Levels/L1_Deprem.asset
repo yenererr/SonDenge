@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dde88ee7507b2f84c9d9c41dbd12d1c2, type: 3}
+  m_Name: L1_Deprem
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.LevelDefinition
+  levelId: L1
+  levelNumber: 1
+  sceneName: Level1
+  nextSceneName: Level2
+  titleTr: "\u0130LK SARSINTI"
+  disasterNameTr: DEPREM
+  disaster: 0
+  floorCount: 2
+  preparationSeconds: 90
+  disasterSeconds: 12
+  timeWarningSeconds: 20
+  tasks:
+  - {fileID: 11400000, guid: 65348f8ed81c452459083774581ccaf0, type: 2}
+  - {fileID: 11400000, guid: e1759c22c20452e49abef1d77e7cb97b, type: 2}
+  - {fileID: 11400000, guid: 9e55038d9eb2f004ba9833a40ea12cb3, type: 2}
+  - {fileID: 11400000, guid: d64fc11c8eacaa049a442ba98635a40a, type: 2}
+  dialogue: {fileID: 11400000, guid: 5fc23ab1a33d59a46bd33d551afe575f, type: 2}
+  safetyWarningsTr:
+  - "Deprem s\u0131ras\u0131nda e\u015Fya ta\u015F\u0131ma."
+  - "Sars\u0131nt\u0131da ko\u015Fma; g\xFCvenli yerde \xC7\xF6k\u2013Kapan\u2013Tutun."
+  realLifeTipTr: "Ger\xE7ek hayatta: a\u011F\u0131r e\u015Fyalar\u0131 \xF6nceden
+    duvara sabitle, deprem an\u0131nda \xC7\xD6K \u2013 KAPAN \u2013 TUTUN."

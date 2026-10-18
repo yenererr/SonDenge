@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad24797fc3bb47148bf0e8a956dff761, type: 3}
+  m_Name: L5_Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.WilsonDialogueSet
+  speaker: WILSON
+  lines:
+  - id: L5_INTRO_01
+    trigger: 0
+    mood: 2
+    textTr: "G\u0131dak! Da\u011F\u0131n \xFCst\xFCne \xE7ok \u015Fiddetli ya\u011Fmur
+      geliyor!"
+    cluck: {fileID: 0}
+  - id: L5_INTRO_02
+    trigger: 0
+    mood: 5
+    textTr: "Bu kez sorun dalgalar de\u011Fil: yama\xE7tan akan ya\u011Fmur suyu
+      evin giri\u015Fine birikiyor."
+    cluck: {fileID: 0}
+  - id: L5_TASKS_01
+    trigger: 1
+    mood: 5
+    textTr: "Kum torbalar\u0131n\u0131 giri\u015Fe yerle\u015Ftir ve t\u0131kal\u0131
+      drenaj\u0131 a\xE7."
+    cluck: {fileID: 0}
+  - id: L5_TASKS_02
+    trigger: 1
+    mood: 5
+    textTr: "Hassas e\u015Fyalar\u0131 g\xFCvenli y\xFCksek yere ta\u015F\u0131,
+      su yal\u0131t\u0131m\u0131ndaki a\xE7\u0131kl\u0131\u011F\u0131 kapat."
+    cluck: {fileID: 0}
+  - id: L5_READY
+    trigger: 2
+    mood: 1
+    textTr: "\xDC\xE7 kat, d\xF6rt g\xF6rev, tek denge! Haz\u0131rsan son s\u0131nav
+      ba\u015Fl\u0131yor."
+    cluck: {fileID: 0}
+  - id: L5_TIME
+    trigger: 4
+    mood: 2
+    textTr: "G\u0131dak! Ya\u011Fmur yakla\u015F\u0131yor, \xF6nce bariyeri kur!"
+    cluck: {fileID: 0}
+  - id: L5_DISASTER
+    trigger: 5
+    mood: 2
+    textTr: "Su y\xFCkseliyor! Elektri\u011Fe dokunma; g\xFCvenli yere ge\xE7. Pompa
+      yaln\u0131z g\xFCvenli \xF6n kurulumla \xE7al\u0131\u015Fs\u0131n!"
+    cluck: {fileID: 0}
+  - id: L5_REPORT_GOOD
+    trigger: 6
+    mood: 3
+    textTr: "Ba\u015Fard\u0131k! Afete haz\u0131rl\u0131k hayat kurtar\u0131r!"
+    cluck: {fileID: 0}
+  - id: L5_REPORT_BAD
+    trigger: 7
+    mood: 4
+    textTr: "Su bu sefer i\xE7eri girdi. Bariyeri ve drenaj\u0131 haz\u0131rlay\u0131p
+      tekrar deneyelim."
+    cluck: {fileID: 0}
+  - id: L5_FINAL
+    trigger: 8
+    mood: 0
+    textTr: "Bu evin dengesi hayal \xFCr\xFCn\xFC. Ger\xE7ek hayatta \xF6nlem almak
+      ve do\u011Fru davranmak \xE7ok \xF6nemlidir."
+    cluck: {fileID: 0}

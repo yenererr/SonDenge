@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad24797fc3bb47148bf0e8a956dff761, type: 3}
+  m_Name: L3_Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.WilsonDialogueSet
+  speaker: WILSON
+  lines:
+  - id: L3_INTRO_01
+    trigger: 0
+    mood: 2
+    textTr: "\xDC\xE7\xFCnc\xFC kat a\xE7\u0131ld\u0131! Ama evde bu kez yang\u0131n
+      riski var."
+    cluck: {fileID: 0}
+  - id: L3_INTRO_02
+    trigger: 0
+    mood: 5
+    textTr: "Duman alarm\u0131 bizi erkenden uyar\u0131r. Yang\u0131n\u0131 kendi
+      ba\u015F\u0131na s\xF6nd\xFCrmez."
+    cluck: {fileID: 0}
+  - id: L3_TASKS_01
+    trigger: 1
+    mood: 5
+    textTr: "Alarm\u0131 yerle\u015Ftir, oca\u011F\u0131 kapat ve yang\u0131n t\xFCp\xFCn\xFC
+      eri\u015Filebilir yere getir."
+    cluck: {fileID: 0}
+  - id: L3_TASKS_02
+    trigger: 1
+    mood: 5
+    textTr: "En \xF6nemlisi, ka\xE7\u0131\u015F yolunu a\xE7\u0131k tut."
+    cluck: {fileID: 0}
+  - id: L3_READY
+    trigger: 2
+    mood: 1
+    textTr: "G\u0131dak! Bu b\xF6l\xFCmde h\u0131zdan \xF6nce g\xFCvenlik!"
+    cluck: {fileID: 0}
+  - id: L3_TIME
+    trigger: 4
+    mood: 2
+    textTr: "G\u0131dak! Zaman daral\u0131yor, \xF6nce ka\xE7\u0131\u015F yolunu
+      a\xE7!"
+    cluck: {fileID: 0}
+  - id: L3_DISASTER
+    trigger: 5
+    mood: 2
+    textTr: "Duman var! K\xFC\xE7\xFCk ve g\xFCvenli bi\xE7imde kontrol edilemiyorsa
+      yang\u0131ndan uzakla\u015F ve \xE7\u0131k!"
+    cluck: {fileID: 0}
+  - id: L3_REPORT_GOOD
+    trigger: 6
+    mood: 3
+    textTr: "Alarm, a\xE7\u0131k \xE7\u0131k\u0131\u015F ve do\u011Fru karar hayat
+      kurtar\u0131r."
+    cluck: {fileID: 0}
+  - id: L3_REPORT_BAD
+    trigger: 7
+    mood: 4
+    textTr: "Yang\u0131n bu kez zor oldu. Alarm\u0131 ve ka\xE7\u0131\u015F yolunu
+      haz\u0131rlay\u0131p tekrar deneyelim."
+    cluck: {fileID: 0}

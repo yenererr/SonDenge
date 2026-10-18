@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L1_T01
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L1_T01
+  levelId: L1
+  titleTr: "K\u0130TAPLI\u011EI SAB\u0130TLE"
+  descriptionTr: "Kitapl\u0131\u011F\u0131 se\xE7 ve F ile duvara sabitle."
+  whyItMattersTr: "A\u011F\u0131r ve devrilebilir mobilyalar sars\u0131nt\u0131da
+    tehlike yarat\u0131r."
+  hintTr: "A\u011F\u0131r ve devrilebilir mobilyalar\u0131 \xF6nceden duvara sabitlemek
+    \xF6nemlidir."
+  completionTr: "\u0130\u015Fte bu! Kitapl\u0131k art\u0131k daha g\xFCvenli."
+  reportTr: "Kitapl\u0131k sabitlendi ve sars\u0131nt\u0131da devrilmedi."
+  taskType: 1
+  prerequisiteTaskIds: []
+  safetyCritical: 1
+  scoreWeight: 1
+  protectionKey: anchor_bookshelf

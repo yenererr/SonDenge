@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L1_T02
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L1_T02
+  levelId: L1
+  titleTr: "BUZDOLABINI SAB\u0130TLE"
+  descriptionTr: "Mutfaktaki buzdolab\u0131n\u0131 se\xE7 ve F ile sabitle."
+  whyItMattersTr: "A\u011F\u0131r e\u015Fyalar sabit de\u011Filse sars\u0131nt\u0131da
+    tehlike yaratabilir."
+  hintTr: "Buzdolab\u0131 \xFCst katta, mutfakta. Se\xE7 ve F'ye bas."
+  completionTr: "Buzdolab\u0131 yerinde kalacak!"
+  reportTr: "Buzdolab\u0131 yerinde kald\u0131."
+  taskType: 1
+  prerequisiteTaskIds: []
+  safetyCritical: 1
+  scoreWeight: 1
+  protectionKey: anchor_fridge

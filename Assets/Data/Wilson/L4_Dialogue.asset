@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad24797fc3bb47148bf0e8a956dff761, type: 3}
+  m_Name: L4_Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.WilsonDialogueSet
+  speaker: WILSON
+  lines:
+  - id: L4_INTRO_01
+    trigger: 0
+    mood: 2
+    textTr: "G\u0131dak! G\xF6k g\xFCrl\xFCyor. Bu kez y\u0131ld\u0131r\u0131m tehlikesi
+      var!"
+    cluck: {fileID: 0}
+  - id: L4_INTRO_02
+    trigger: 0
+    mood: 5
+    textTr: "Elektrik ve y\u0131ld\u0131r\u0131m \xF6nlemleri f\u0131rt\u0131nadan
+      \xF6nce al\u0131n\u0131r."
+    cluck: {fileID: 0}
+  - id: L4_TASKS_01
+    trigger: 1
+    mood: 5
+    textTr: "\xD6nceden tasarlanm\u0131\u015F y\u0131ld\u0131r\u0131m koruma ba\u011Flant\u0131s\u0131n\u0131
+      tamamla, cihazlar\u0131n fi\u015Fini g\xFCvenliyken \xE7ek."
+    cluck: {fileID: 0}
+  - id: L4_TASKS_02
+    trigger: 1
+    mood: 5
+    textTr: "Uygun gerilim koruma cihaz\u0131n\u0131 yerle\u015Ftir. Ama bunun mutlak
+      koruma sa\u011Flamad\u0131\u011F\u0131n\u0131 unutma."
+    cluck: {fileID: 0}
+  - id: L4_READY
+    trigger: 2
+    mood: 1
+    textTr: "\u0130\u015Fimizi \u015Fimdi bitirelim; f\u0131rt\u0131nada elektrikli
+      cihazlara dokunmayal\u0131m!"
+    cluck: {fileID: 0}
+  - id: L4_TIME
+    trigger: 4
+    mood: 2
+    textTr: "G\u0131dak! G\xF6k g\xFCr\xFClt\xFCs\xFC yakla\u015F\u0131yor, fi\u015Fleri
+      unutma!"
+    cluck: {fileID: 0}
+  - id: L4_DISASTER
+    trigger: 5
+    mood: 2
+    textTr: "Y\u0131ld\u0131r\u0131m! Pencerelerden ve kablolu elektrikli cihazlardan
+      uzak dur!"
+    cluck: {fileID: 0}
+  - id: L4_REPORT_GOOD
+    trigger: 6
+    mood: 3
+    textTr: "\xD6nceden haz\u0131rl\u0131k yapmak riskleri azaltt\u0131!"
+    cluck: {fileID: 0}
+  - id: L4_REPORT_BAD
+    trigger: 7
+    mood: 4
+    textTr: "F\u0131rt\u0131na a\u011F\u0131r geldi. Ba\u011Flant\u0131y\u0131 ve
+      fi\u015Fleri \xF6nceden halledip tekrar deneyelim."
+    cluck: {fileID: 0}

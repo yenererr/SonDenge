@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L5_T04
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L5_T04
+  levelId: L5
+  titleTr: SU YALITIMINI KONTROL ET
+  descriptionTr: "Conta kitini al, s\u0131zd\u0131ran pencerenin yan\u0131nda E ile
+    uygula."
+  whyItMattersTr: "Yal\u0131t\u0131m s\u0131zmay\u0131 azalt\u0131r; tamamen s\u0131f\u0131rlamaz."
+  hintTr: "S\u0131z\u0131nt\u0131 alt kat penceresinde. Kiti oraya g\xF6t\xFCr."
+  completionTr: "S\u0131z\u0131nt\u0131 kapand\u0131!"
+  reportTr: "Yal\u0131t\u0131m onar\u0131m\u0131 i\xE7eri s\u0131zan suyu azaltt\u0131."
+  taskType: 3
+  prerequisiteTaskIds: []
+  safetyCritical: 0
+  scoreWeight: 1
+  protectionKey: waterproof_sealing

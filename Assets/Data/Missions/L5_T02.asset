@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L5_T02
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L5_T02
+  levelId: L5
+  titleTr: "DRENAJI A\xC7"
+  descriptionTr: "T\u0131kal\u0131 drenaj \u0131zgaras\u0131n\u0131n yan\u0131na
+    git ve E ile temizle."
+  whyItMattersTr: "A\xE7\u0131k drenaj, biriken suyu evden uzakla\u015Ft\u0131r\u0131r."
+  hintTr: "Izgara alt kat\u0131n kenar\u0131nda. Su basmadan \xF6nce temizle."
+  completionTr: "Drenaj a\xE7\u0131ld\u0131, su ak\u0131p gidecek!"
+  reportTr: "A\xE7\u0131k drenaj daha fazla suyu uzakla\u015Ft\u0131rd\u0131."
+  taskType: 2
+  prerequisiteTaskIds: []
+  safetyCritical: 1
+  scoreWeight: 1
+  protectionKey: drainage_channel

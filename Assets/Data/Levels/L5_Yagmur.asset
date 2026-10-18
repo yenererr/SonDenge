@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dde88ee7507b2f84c9d9c41dbd12d1c2, type: 3}
+  m_Name: L5_Yagmur
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.LevelDefinition
+  levelId: L5
+  levelNumber: 5
+  sceneName: Level5
+  nextSceneName: 
+  titleTr: SON DENGE
+  disasterNameTr: "\u015E\u0130DDETL\u0130 YA\u011EMUR"
+  disaster: 4
+  floorCount: 3
+  preparationSeconds: 140
+  disasterSeconds: 25
+  timeWarningSeconds: 20
+  tasks:
+  - {fileID: 11400000, guid: 19d6449f35ad39543aeb0a184d3852f2, type: 2}
+  - {fileID: 11400000, guid: 85260a3acc431e14cb8786c0a10d4b29, type: 2}
+  - {fileID: 11400000, guid: 6cecb6877e44a6246b53277adeb652f1, type: 2}
+  - {fileID: 11400000, guid: 9ec4bb3eff076574dbf60746f7e8e0bb, type: 2}
+  dialogue: {fileID: 11400000, guid: f58163b31b0115e48a48f5095f004188, type: 2}
+  safetyWarningsTr:
+  - "Islak ortamda priz, fi\u015F veya pompaya dokunma."
+  - Su basan yere girme.
+  realLifeTipTr: "Ger\xE7ek hayatta: su basan alanda elektri\u011Fe dokunma, y\xFCksek
+    ve g\xFCvenli yere ge\xE7; resm\xEE uyar\u0131lar\u0131 takip et."

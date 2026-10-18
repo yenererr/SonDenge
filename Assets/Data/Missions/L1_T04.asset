@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L1_T04
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L1_T04
+  levelId: L1
+  titleTr: "EV\u0130N DENGES\u0130N\u0130 KUR"
+  descriptionTr: "E\u015Fyalar\u0131 ta\u015F\u0131yarak evi 2 saniye boyunca 7\xB0'nin
+    alt\u0131nda tut."
+  whyItMattersTr: "Bu evde e\u015Fyalar b\xFCt\xFCn binay\u0131 e\u011Fer. Bu oyunun
+    fantastik kural\u0131d\u0131r."
+  hintTr: "Sivritepe'de bu evin e\u015Fyalar\u0131 b\xFCt\xFCn binay\u0131 e\u011Fiyor.
+    Bu bizim oyunumuzun fantastik kural\u0131!"
+  completionTr: "Denge tamam! G\xF6sterge ye\u015Filde."
+  reportTr: "Haz\u0131rl\u0131kta e\u011Fimi g\xFCvenli seviyeye indirdin."
+  taskType: 5
+  prerequisiteTaskIds: []
+  safetyCritical: 0
+  scoreWeight: 1
+  protectionKey: balanced

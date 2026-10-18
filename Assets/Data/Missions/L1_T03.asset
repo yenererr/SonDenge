@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cc3c47151efa344b2e595b952df61f, type: 3}
+  m_Name: L1_T03
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.TaskDefinition
+  id: L1_T03
+  levelId: L1
+  titleTr: "DEPREM \xC7ANTASINI HAZIRLA"
+  descriptionTr: "\xC7antay\u0131 E ile al, kap\u0131n\u0131n yan\u0131ndaki i\u015Faretli
+    alana b\u0131rak."
+  whyItMattersTr: "Acil durum \xE7antas\u0131 kolay ula\u015F\u0131labilir yerde
+    olmal\u0131."
+  hintTr: "Acil durum \xE7antas\u0131n\u0131 depremden \xF6nce eri\u015Filebilir
+    yerde haz\u0131r tut."
+  completionTr: "\xC7anta haz\u0131r! Gerekti\u011Finde hemen al\u0131r\u0131z."
+  reportTr: "Acil durum \xE7antas\u0131 eri\u015Filebilir konumdayd\u0131."
+  taskType: 0
+  prerequisiteTaskIds: []
+  safetyCritical: 0
+  scoreWeight: 1
+  protectionKey: emergency_bag

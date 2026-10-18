@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad24797fc3bb47148bf0e8a956dff761, type: 3}
+  m_Name: L2_Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.WilsonDialogueSet
+  speaker: WILSON
+  lines:
+  - id: L2_INTRO_01
+    trigger: 0
+    mood: 1
+    textTr: "G\u0131dak! Da\u011F\u0131n \xFCst\xFCnde r\xFCzg\xE2r \u015Faka yapm\u0131yor!"
+    cluck: {fileID: 0}
+  - id: L2_INTRO_02
+    trigger: 0
+    mood: 2
+    textTr: "F\u0131rt\u0131na gelmeden pencereyi, \xE7at\u0131y\u0131 ve balkonu
+      g\xFCvenli h\xE2le getirmeliyiz."
+    cluck: {fileID: 0}
+  - id: L2_TASKS_01
+    trigger: 1
+    mood: 5
+    textTr: "\xC7at\u0131 ba\u011Flant\u0131s\u0131n\u0131 g\xFC\xE7lendir, pencereleri
+      kilitle ve balkondaki gev\u015Fek e\u015Fyalar\u0131 i\xE7eri al."
+    cluck: {fileID: 0}
+  - id: L2_TASKS_02
+    trigger: 1
+    mood: 5
+    textTr: "Elektrikler kesilirse diye el fenerini de haz\u0131r tut."
+    cluck: {fileID: 0}
+  - id: L2_READY
+    trigger: 2
+    mood: 1
+    textTr: "R\xFCzg\xE2ra kar\u015F\u0131 haz\u0131rl\u0131k yapal\u0131m; dengemizi
+      de kaybetmeyelim!"
+    cluck: {fileID: 0}
+  - id: L2_TIME
+    trigger: 4
+    mood: 2
+    textTr: "G\u0131dak! F\u0131rt\u0131na geliyor, \xF6nce en \xF6nemli i\u015Fleri
+      bitir!"
+    cluck: {fileID: 0}
+  - id: L2_DISASTER
+    trigger: 5
+    mood: 2
+    textTr: "F\u0131rt\u0131na ba\u015Flad\u0131! Camlardan uzak, g\xFCvenli bir
+      yerde kal!"
+    cluck: {fileID: 0}
+  - id: L2_REPORT_GOOD
+    trigger: 6
+    mood: 3
+    textTr: "T\u0131k\u0131rt\u0131lar azald\u0131! \xD6nceden yapt\u0131\u011F\u0131m\u0131z
+      i\u015Fler fark yaratt\u0131."
+    cluck: {fileID: 0}
+  - id: L2_REPORT_BAD
+    trigger: 7
+    mood: 4
+    textTr: "R\xFCzg\xE2r bu sefer bizi yendi. Haz\u0131rl\u0131klar\u0131 tamamlay\u0131p
+      tekrar deneyelim."
+    cluck: {fileID: 0}

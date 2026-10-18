@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dde88ee7507b2f84c9d9c41dbd12d1c2, type: 3}
+  m_Name: L4_Yildirim
+  m_EditorClassIdentifier: Assembly-CSharp::Jam.Missions.LevelDefinition
+  levelId: L4
+  levelNumber: 4
+  sceneName: Level4
+  nextSceneName: Level5
+  titleTr: "G\xD6KY\xDCZ\xDCN\xDCN \xD6FKES\u0130"
+  disasterNameTr: YILDIRIM
+  disaster: 3
+  floorCount: 3
+  preparationSeconds: 110
+  disasterSeconds: 25
+  timeWarningSeconds: 20
+  tasks:
+  - {fileID: 11400000, guid: f9257fd06db8f6841820a3cc5faea8ac, type: 2}
+  - {fileID: 11400000, guid: 2375109e81d6e76468839fe92017447a, type: 2}
+  - {fileID: 11400000, guid: 8a6f5f62ecf16fc4784507c262365ffc, type: 2}
+  dialogue: {fileID: 11400000, guid: 704d6849581f1c54cb078f55cc034059, type: 2}
+  safetyWarningsTr:
+  - "Y\u0131ld\u0131r\u0131m s\u0131ras\u0131nda elektrikli cihaza dokunma."
+  - Pencerelerden uzak dur.
+  realLifeTipTr: "Ger\xE7ek hayatta: f\u0131rt\u0131nada elektrikli cihazlara ve
+    pencerelere yakla\u015Fma; paratoner kurulumu uzman i\u015Fidir."
