@@ -17,6 +17,12 @@ namespace Jam.Levels.Level1
             state == RoundState.GameOver || state == RoundState.Victory || state == RoundState.StartMenu;
         public int Budget => budget;
         public float TimeLeft => Mathf.Max(0f, timer);
+
+        /// <summary>Alt çubuktaki "AFETİN BİTMESİNE" düğmesi: kalan süreyi sıfırlar, afet süresi dolmuş gibi biter.</summary>
+        public void UiEndDisasterNow()
+        {
+            if (state == RoundState.Disaster) timer = 0f;
+        }
         public float PlanningDuration => PreparationSeconds;
         /// <summary>Pozitif değer: evin sağ tarafı aşağıda.</summary>
         public float TiltDegrees => -houseAngle * Mathf.Rad2Deg;

@@ -69,6 +69,7 @@ namespace Jam.Levels.Level1
         // ------------------------------------------------------------------ eylemler
         private void RequestDisaster()
         {
+            if (game != null && game.IsDisaster) { game.UiEndDisasterNow(); return; }
             if (game == null || !game.IsPlanning || countdownLeft >= 0f) return;
             if (!game.UiCanStartDisaster()) return;
             // Görev modunda eksik görevle başlatma engellenmez, yalnız onay istenir (şartname §4.4).
@@ -122,7 +123,7 @@ namespace Jam.Levels.Level1
                 var hasRadio = !string.IsNullOrEmpty(game.RadioLine);
                 radioLabel.gameObject.SetActive(hasRadio);
                 levelLabel.alignment = hasRadio ? TextAnchor.UpperLeft : TextAnchor.MiddleLeft;
-                levelLabel.rectTransform.offsetMin = new Vector2(116f, hasRadio ? 52f : 12f);
+                levelLabel.rectTransform.offsetMin = new Vector2(116f, hasRadio ? 68f : 12f);
                 levelIcon.sprite = game.UiLevelIcon;
                 levelIcon.enabled = levelIcon.sprite != null;
             }
@@ -160,7 +161,7 @@ namespace Jam.Levels.Level1
             shopButton.interactable = planning;
             shopButton.gameObject.SetActive(!game.missionMode);
             sellButton.gameObject.SetActive(!game.missionMode);
-            readyButton.interactable = planning;
+            readyButton.interactable = planning || game.IsDisaster;
             UpdateReadyButton();
 
             UpdateCountdown();
@@ -269,7 +270,7 @@ namespace Jam.Levels.Level1
             var top = UiKit.Rect(root, "TopHud", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
                 Vector2.zero, new Vector2(0f, 120f));
             var radio = UiKit.Rect(top, "RadioAlert", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
-                new Vector2(24f, -16f), new Vector2(550f, 110f));
+                new Vector2(24f, -16f), new Vector2(550f, 130f));
             PaperPanel(radio);
             var iconFrame = UiKit.Rect(radio, "Afet simgesi", new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
                 new Vector2(0f, 0.5f), new Vector2(18f, 0f), new Vector2(90f, 80f));
@@ -281,23 +282,23 @@ namespace Jam.Levels.Level1
                 new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             levelLabel = UiKit.Label(titleArea, "Seviye", levelTitle, 31, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
             Fit(levelLabel, 20, 31);
-            levelLabel.rectTransform.offsetMin = new Vector2(116f, 52f);
-            levelLabel.rectTransform.offsetMax = new Vector2(-17f, -13f);
+            levelLabel.rectTransform.offsetMin = new Vector2(116f, 68f);
+            levelLabel.rectTransform.offsetMax = new Vector2(-17f, -14f);
             radioLabel = UiKit.Label(titleArea, "Radyo", radioLine, 19, UiKit.Ink, TextAnchor.LowerLeft, FontStyle.Italic);
-            radioLabel.rectTransform.offsetMin = new Vector2(116f, 13f);
-            radioLabel.rectTransform.offsetMax = new Vector2(-17f, -56f);
+            radioLabel.rectTransform.offsetMin = new Vector2(116f, 14f);
+            radioLabel.rectTransform.offsetMax = new Vector2(-17f, -66f);
             Fit(radioLabel, 14, 19);
 
             // Üst orta: kompakt denge göstergesi (~260 px).
             // Su terazisi: ekranın üst ortasında, evi kapatmayacak ama net okunacak boyutta.
             const float trackWidth = 410f;
             var gauge = UiKit.Rect(top, "BalanceGauge", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -16f), new Vector2(510f, 126f));
+                new Vector2(0f, -16f), new Vector2(510f, 140f));
             PaperPanel(gauge);
             var gaugeTitle = UiKit.Label(gauge, "Başlık", "EV DENGESİ", 28, UiKit.Ink, TextAnchor.UpperCenter, FontStyle.Bold);
-            Pad(gaugeTitle, 8f, 9f);
+            Pad(gaugeTitle, 8f, 16f);
             gaugeTrack = UiKit.Rect(gauge, "Çubuk", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -45f), new Vector2(trackWidth, 27f));
+                new Vector2(0f, -56f), new Vector2(trackWidth, 27f));
             var trackImage = UiKit.Panel(gaugeTrack, new Color32(206, 222, 196, 255));
             UiKit.Border(trackImage, UiKit.Wood, 3f);
             var safeZone = UiKit.Rect(gaugeTrack, "GüvenliBölge", new Vector2(0.5f, 0f), new Vector2(0.5f, 1f),
@@ -318,7 +319,7 @@ namespace Jam.Levels.Level1
             gaugeMarkerImage = UiKit.Panel(gaugeMarker, UiKit.Teal);
             UiKit.Border(gaugeMarkerImage, UiKit.Wood, 2f);
             gaugeText = UiKit.Label(gauge, "Durum", "GÜVENLİ  +0.0°", 25, UiKit.Ink, TextAnchor.LowerCenter, FontStyle.Bold);
-            Pad(gaugeText, 8f, 12f);
+            Pad(gaugeText, 8f, 14f);
 
             // Sağ üst: bütçe ve süre.
             var economy = UiKit.Rect(top, "EconomyAndTimer", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f),
