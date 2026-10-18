@@ -19,6 +19,28 @@ namespace Jam.Levels.Level1
             wilson.Initialize(this, houseRoot, resident, wilsonModel, wilsonEggModel, wilsonTexture);
         }
 
+        private const string EggTipKey = "sondenge.v1.eggTipSeen";
+        private bool eggTipOpen;
+
+        /// <summary>Bölüm 1'de Wilson ilk kez yumurtlayınca oyun durur ve yumurtaları anlatan kısa pencere açılır (bir kez).</summary>
+        public bool IsEggTipOpen => eggTipOpen;
+
+        public void WilsonEggLaid(bool golden)
+        {
+            if (level != 1 || state != RoundState.Planning || PlayerPrefs.GetInt(EggTipKey, 0) == 1) return;
+            PlayerPrefs.SetInt(EggTipKey, 1);
+            PlayerPrefs.Save();
+            eggTipOpen = true;
+            SyncPause();
+            if (sfx != null) sfx.Play("confirm");
+        }
+
+        public void UiCloseEggTip()
+        {
+            eggTipOpen = false;
+            SyncPause();
+        }
+
         public void WilsonEggCollected(bool golden)
         {
             // Para ödülü yok (şartname §3.5): yumurta yalnız 5 kg denge yüküdür.

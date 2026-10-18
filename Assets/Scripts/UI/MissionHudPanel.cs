@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Jam.Missions;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Jam.UI
@@ -28,6 +29,11 @@ namespace Jam.UI
         private WilsonPortrait portrait;
         private Button hintButton, replayButton;
         private string currentId;
+        private RectTransform drawer;
+        private Text tabLabel;
+        private bool drawerOpen = true;
+        private float drawerT = 1f;
+        private const float CardWidth = 470f;
 
         /// <summary>Görevler sırayla açılır: sıradaki görev vurgulanır, sonrakiler kilitli görünür.</summary>
         public void SetCurrent(string taskId) => currentId = taskId;
@@ -48,15 +54,21 @@ namespace Jam.UI
         private void Build(RectTransform root)
         {
             group = root.gameObject.AddComponent<CanvasGroup>();
-            var card = UiKit.Rect(root, "Görev listesi", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
-                new Vector2(24f, -200f), new Vector2(470f, 330f));
+            // Kenardan açılır/kapanır çekmece: kart + sağ kenarında sekme düğmesi (Tab tuşu da çalışır).
+            drawer = UiKit.Rect(root, "Görev çekmecesi", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(24f, -200f), new Vector2(CardWidth, 330f));
+            var card = UiKit.Rect(drawer, "Görev listesi", Vector2.zero, Vector2.one, new Vector2(0f, 1f), Vector2.zero, Vector2.zero);
             var img = UiKit.Panel(card, new Color32(245, 239, 226, 235));
             UiKit.Border(img, UiKit.Wood, 3f);
-            header = UiKit.Label(card, "Başlık", "GÖREVLER 0/0", 28, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
+            header = UiKit.Label(card, "Başlık", "GÖREVLER 0/0", 30, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
             header.rectTransform.offsetMin = new Vector2(20f, 0f);
             header.rectTransform.offsetMax = new Vector2(-20f, -12f);
             list = UiKit.Rect(card, "Satırlar", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -56f), new Vector2(-28f, 260f));
+                new Vector2(0f, -58f), new Vector2(-28f, 260f));
+            var tab = UiKit.Rect(drawer, "Aç-Kapat", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f),
+                new Vector2(4f, -10f), new Vector2(54f, 150f));
+            var tabButton = UiKit.Button(tab, "◀", 30, new Color32(211, 162, 75, 255), UiKit.Ink, ToggleDrawer);
+            tabLabel = tabButton.GetComponentInChildren<Text>();
 
             var buttons = UiKit.Rect(root, "Wilson düğmeleri", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f),
                 new Vector2(24f, 150f), new Vector2(470f, 60f));
@@ -97,18 +109,27 @@ namespace Jam.UI
                 var rt = UiKit.Rect(list, task.id, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
                     new Vector2(0f, -y), new Vector2(0f, 58f));
                 var bg = UiKit.Panel(rt, new Color(1f, 1f, 1f, 0.35f));
-                var mark = UiKit.Label(rt, "İşaret", "○", 30, UiKit.Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
+                var mark = UiKit.Label(rt, "İşaret", "○", 32, UiKit.Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
                 mark.rectTransform.anchorMax = new Vector2(0f, 1f);
                 mark.rectTransform.sizeDelta = new Vector2(44f, 0f);
                 mark.rectTransform.anchoredPosition = new Vector2(22f, 0f);
-                var title = UiKit.Label(rt, "Ad", task.titleTr, 21, UiKit.Ink, TextAnchor.MiddleLeft, FontStyle.Bold);
-                title.rectTransform.offsetMin = new Vector2(50f, 0f);
-                title.rectTransform.offsetMax = new Vector2(-8f, 0f);
+                var title = UiKit.Label(rt, "Ad", Jam.UI.Menu.BriefingView.SentenceCase(task.titleTr), 25, UiKit.Ink,
+                    TextAnchor.MiddleLeft, FontStyle.Bold);
+                title.rectTransform.offsetMin = new Vector2(52f, 4f);
+                title.rectTransform.offsetMax = new Vector2(-10f, -4f);
+                // Uzun görev adları satıra sığsın: gerekirse iki satır ve küçülerek.
+                title.resizeTextForBestFit = true;
+                title.resizeTextMinSize = 17;
+                title.resizeTextMaxSize = 25;
+                title.verticalOverflow = VerticalWrapMode.Truncate;
+                title.lineSpacing = 0.9f;
                 rows.Add(new Row { task = task, mark = mark, title = title, background = bg });
                 y += 64f;
             }
-            ((RectTransform)list.parent).sizeDelta = new Vector2(470f, 70f + y);
+            drawer.sizeDelta = new Vector2(CardWidth, 74f + y);
         }
+
+        public void ToggleDrawer() => drawerOpen = !drawerOpen;
 
         public void SetVisible(bool visible)
         {
@@ -137,6 +158,12 @@ namespace Jam.UI
             var showToast = Time.unscaledTime < toastUntil;
             toastGroup.alpha = Mathf.MoveTowards(toastGroup.alpha, showToast ? 1f : 0f, Time.unscaledDeltaTime * 5f);
             if (!showToast && toastGroup.alpha <= 0f && portrait != null && !briefingUsesPortrait) portrait.SetActive(false);
+            var kb = Keyboard.current;
+            if (kb != null && kb.tabKey.wasPressedThisFrame && Visible) ToggleDrawer();
+            drawerT = Mathf.MoveTowards(drawerT, drawerOpen ? 1f : 0f, Time.unscaledDeltaTime * 5f);
+            var ease = drawerT * drawerT * (3f - 2f * drawerT);
+            drawer.anchoredPosition = new Vector2(Mathf.Lerp(-CardWidth, 24f, ease), drawer.anchoredPosition.y);
+            tabLabel.text = drawerOpen ? "◀" : "▶";
             if (missions == null) return;
             header.text = "GÖREVLER " + missions.CompletedCount + "/" + missions.TotalCount;
             foreach (var row in rows)
@@ -144,6 +171,7 @@ namespace Jam.UI
                 var state = missions.StateOf(row.task.id);
                 var isCurrent = state == TaskState.Pending && row.task.id == currentId;
                 var isLocked = state == TaskState.Pending && !isCurrent && currentId != null;
+                row.title.fontStyle = isCurrent ? FontStyle.Bold : FontStyle.Normal;
                 row.mark.text = state == TaskState.Completed ? "●" : state == TaskState.Missed ? "×" : isCurrent ? "►" : isLocked ? "–" : "○";
                 row.title.color = isLocked ? new Color(0.45f, 0.4f, 0.35f, 0.7f) : (Color)UiKit.Ink;
                 row.mark.color = state == TaskState.Completed ? new Color32(78, 150, 125, 255) :

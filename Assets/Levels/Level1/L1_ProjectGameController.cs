@@ -392,10 +392,10 @@ namespace Jam.Levels.Level1
         {
             var keyboard = Keyboard.current;
             if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && state != RoundState.StartMenu && !howToOpen &&
-                !PauseSubMenuOpen && !briefingOpen &&
+                !PauseSubMenuOpen && !briefingOpen && !eggTipOpen &&
                 !(marketOpen && !useLegacyHud))
                 ToggleMenu();
-            if (state == RoundState.StartMenu || menuOpen || howToOpen || briefingOpen || Time.timeScale <= 0f) return;
+            if (state == RoundState.StartMenu || menuOpen || howToOpen || briefingOpen || eggTipOpen || Time.timeScale <= 0f) return;
             if (warningUntil > 0f) warningUntil -= Time.deltaTime;
             lightningFlash = Mathf.MoveTowards(lightningFlash, 0f, Time.deltaTime * 2.5f);
             if (keyboard != null)
@@ -827,7 +827,7 @@ namespace Jam.Levels.Level1
 
         private void SyncPause()
         {
-            var playing = (state == RoundState.Planning || state == RoundState.Disaster) && !menuOpen && !howToOpen && !briefingOpen;
+            var playing = (state == RoundState.Planning || state == RoundState.Disaster) && !menuOpen && !howToOpen && !briefingOpen && !eggTipOpen;
             Time.timeScale = playing ? 1f : 0f;
             if (music != null)
             {

@@ -23,7 +23,7 @@ namespace Jam.Levels.Level1
             "GERÇEK HAYATTA: Oyundaki eşya taşıma gücü fantastiktir. Gerçek depremde eşya taşımayın; " +
             "ağır eşyaları önceden duvara sabitleyin ve deprem anında ÇÖK – KAPAN – TUTUN.";
 
-        private GameObject modalRoot, shopPanel, pausePanel, howToPanel, reportPanel;
+        private GameObject modalRoot, shopPanel, pausePanel, howToPanel, reportPanel, eggPanel;
         private RectTransform shopList;
         private Text shopBudget, shopFooter, musicLabel, reportTitle, reportSubtitle, reportBody, reportScore;
         private Image reportFrame;
@@ -55,6 +55,9 @@ namespace Jam.Levels.Level1
             if (pausePanel.activeSelf) musicLabel.text = game.MusicMuted ? "MÜZİK: KAPALI" : "MÜZİK: AÇIK";
 
             howToPanel.SetActive(game.IsHowToOpen);
+            eggPanel.SetActive(game.IsEggTipOpen);
+            if (game.IsEggTipOpen && (esc || (keyboard != null && (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame))))
+                game.UiCloseEggTip();
             // Kontrolcü, nasıl oynanır açıkken ESC'yi yok sayar; kapatmayı burada yaparız.
             if (game.IsHowToOpen && esc) game.UiCloseHowTo();
 
@@ -63,7 +66,7 @@ namespace Jam.Levels.Level1
             if (finished && !reportPanel.activeSelf) FillReport();
             reportPanel.SetActive(finished);
 
-            modalRoot.SetActive(shopOpen || pausePanel.activeSelf || howToPanel.activeSelf || finished);
+            modalRoot.SetActive(shopOpen || pausePanel.activeSelf || howToPanel.activeSelf || eggPanel.activeSelf || finished);
         }
 
         private void RefreshShop()
@@ -104,6 +107,7 @@ namespace Jam.Levels.Level1
             BuildShop(root);
             pausePanel = BuildPause(root);
             howToPanel = BuildHowTo(root);
+            eggPanel = BuildEggTip(root);
             reportPanel = BuildReport(root);
             modalRoot.SetActive(false);
         }
@@ -260,6 +264,32 @@ namespace Jam.Levels.Level1
             L1_HudSkin.Button(button, entry.affordable && !entry.locked && !entry.installed
                 ? L1_HudSkin.Surface.CopperButton : L1_HudSkin.Surface.PaperButton);
             button.interactable = entry.affordable && !entry.locked && !entry.installed;
+        }
+
+        /// <summary>Bölüm 1'de Wilson'ın ilk yumurtasında oyunu durduran kısa bilgi penceresi.</summary>
+        private GameObject BuildEggTip(Transform root)
+        {
+            var overlay = Overlay(root, "YumurtaBilgisi", 0.5f);
+            var frame = Frame(overlay, new Vector2(760f, 470f), UiKit.Wood);
+            var title = UiKit.Rect(frame, "Başlık", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(0f, -24f), new Vector2(680f, 64f));
+            UiKit.Label(title, "Yazı", "WILSON YUMURTLADI!", 40, UiKit.Wood, TextAnchor.MiddleCenter, FontStyle.Bold);
+            var body = UiKit.Rect(frame, "İçerik", new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 6f), new Vector2(-90f, -210f));
+            var text = UiKit.Label(body, "Yazı",
+                "●  Her yumurta düştüğü yerde <b>5 kg</b> yük olur ve evin dengesini etkiler.\n" +
+                "●  Yumurtayı toplamak için karakterle <b>üstünden geç</b>; yük kalkar.\n" +
+                "●  Wilson aynı anda en fazla <b>2 yumurta</b> bırakır.\n" +
+                "●  Nadiren <b>parlak altın yumurta</b> çıkar; Wilson çok sevinir (o da 5 kg).\n" +
+                "●  Evden aşağı düşen yumurta kaybolur.",
+                25, UiKit.Ink, TextAnchor.UpperLeft);
+            text.supportRichText = true;
+            text.lineSpacing = 1.2f;
+            var ok = UiKit.Rect(frame, "Tamam", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+                new Vector2(0f, 26f), new Vector2(300f, 66f));
+            L1_HudSkin.Button(UiKit.Button(ok, "ANLADIM", 28, UiKit.Orange, UiKit.Ink, () => game.UiCloseEggTip()),
+                L1_HudSkin.Surface.CopperButton);
+            return overlay.gameObject;
         }
 
         private GameObject BuildPause(Transform root)

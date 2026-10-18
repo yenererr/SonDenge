@@ -13,7 +13,7 @@ namespace Jam.Levels.Level1
         public bool IsDisaster => state == RoundState.Disaster;
         public bool IsPausedMenu => menuOpen || howToOpen;
         public bool IsMarketOpen => marketOpen;
-        public bool HasModal => (marketOpen && useLegacyHud) || menuOpen || howToOpen || briefingOpen || state == RoundState.Report ||
+        public bool HasModal => (marketOpen && useLegacyHud) || menuOpen || howToOpen || briefingOpen || eggTipOpen || state == RoundState.Report ||
             state == RoundState.GameOver || state == RoundState.Victory || state == RoundState.StartMenu;
         public int Budget => budget;
         public float TimeLeft => Mathf.Max(0f, timer);

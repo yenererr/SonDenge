@@ -226,6 +226,7 @@ namespace Jam.Levels.Level1
             var egg = root.AddComponent<L1_WilsonEgg>();
             egg.Golden = golden;
             eggs.Add(egg);
+            game.WilsonEggLaid(golden);
             if (golden)
             {
                 var light = root.AddComponent<Light>();
