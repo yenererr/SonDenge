@@ -171,19 +171,12 @@ namespace Jam.EditorTools
                     "Balkon boşaldı, savrulacak bir şey kalmadı!",
                     "Balkondan savrulabilecek eşyalar güvenli yere alındı.",
                     TaskType.CarryToTarget, "balcony_cleared", false),
-                Task("L2_T04", "EL FENERİNİ HAZIRLA", "El fenerini al ve işaretli kolay erişim alanına bırak.",
-                    "Elektrik kesilirse fener yolunu aydınlatır.",
-                    "Elektrikler kesilirse diye el fenerini de hazır tut.",
-                    "Fener hazır, karanlıktan korkmuyoruz!",
-                    "El feneri kolay erişilebilir yerdeydi.",
-                    TaskType.CarryToTarget, "flashlight", false),
             };
             var d = Dialogue("L2_Dialogue", new List<WilsonLine>
             {
                 Line("L2_INTRO_01", WilsonTrigger.Intro, WilsonMood.Heyecanli, "Gıdak! Dağın üstünde rüzgâr şaka yapmıyor!"),
                 Line("L2_INTRO_02", WilsonTrigger.Intro, WilsonMood.Endiseli, "Fırtına gelmeden pencereyi, çatıyı ve balkonu güvenli hâle getirmeliyiz."),
                 Line("L2_TASKS_01", WilsonTrigger.TaskPreview, WilsonMood.Anlatici, "Çatı bağlantısını güçlendir, pencereleri kilitle ve balkondaki gevşek eşyaları içeri al."),
-                Line("L2_TASKS_02", WilsonTrigger.TaskPreview, WilsonMood.Anlatici, "Elektrikler kesilirse diye el fenerini de hazır tut."),
                 Line("L2_READY", WilsonTrigger.PrepStart, WilsonMood.Heyecanli, "Rüzgâra karşı hazırlık yapalım; dengemizi de kaybetmeyelim!"),
                 Line("L2_TIME", WilsonTrigger.TimeWarning, WilsonMood.Endiseli, "Gıdak! Fırtına geliyor, önce en önemli işleri bitir!"),
                 Line("L2_DISASTER", WilsonTrigger.DisasterWarning, WilsonMood.Endiseli, "Fırtına başladı! Camlardan uzak, güvenli bir yerde kal!"),

@@ -545,7 +545,7 @@ namespace Jam.EditorTools
                     select = "Fırtına geliyor! Çatıyı, pencereleri ve balkonu birlikte güçlendirelim.",
                     brief = "Gıdak! Rüzgâr geliyor. Çatıyı, pencereleri ve balkonu kontrol edelim!",
                     safety = "Şiddetli rüzgârda pencerelerden uzak, güvenli bir iç alanda kal.",
-                    tasks = new[] { "roof", "window", "box", "flashlight" }, dch = false },
+                    tasks = new[] { "roof", "window", "box" }, dch = false },
                 new { sub = "Dumanın Ardında", ribbon = "C0392B", tint = "FFB48C", over = new Color(0.95f, 0.3f, 0.05f, 0.32f), icon = "extinguisher",
                     select = "Yangın çıkmadan önlem alalım: alarm, söndürücü ve açık bir kaçış yolu!",
                     brief = "Gıdak! Yangın çıkmadan önlem alalım. Alarmı, tüpü ve kaçış yolunu hazırlayalım!",

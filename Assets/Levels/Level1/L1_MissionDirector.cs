@@ -34,6 +34,9 @@ namespace Jam.Levels.Level1
         private DisasterResultPanel result;
         private DisasterReportPanel report;
         private Jam.UI.Menu.PauseMenuView pauseMenu;
+        private L1_TaskGuide guide;
+        [Tooltip("Karakter hedefe bu yatay mesafeden yakınsa tuş ipucu görünür (m).")]
+        [SerializeField] private float promptDistance = 1.5f;
         private L1_MissionSwitch[] switches = new L1_MissionSwitch[0];
         private float pollClock, tiltWarnClock;
         private bool timeWarned, started;
@@ -83,6 +86,7 @@ namespace Jam.Levels.Level1
             }
             // ESC'nin tek sahibi bölüm kontrolcüsü: GameManager ikinci kez duraklatmasın.
             if (Jam.Core.GameManager.Instance != null) Jam.Core.GameManager.Instance.PauseInputEnabled = false;
+            guide = L1_TaskGuide.Create(transform);
             hud.Bind(missions);
             hud.HintRequested = ShowHint;
             hud.ReplayRequested = () => OpenBriefing(true);
@@ -165,10 +169,10 @@ namespace Jam.Levels.Level1
                 {
                     var dt = pollClock;
                     pollClock = 0f;
-                    foreach (var task in tasks)
-                        if (task != null && missions.StateOf(task.taskId) == TaskState.Pending &&
-                            task.Evaluate(game, drag, dt))
-                            missions.Complete(task.taskId);
+                    // Görevler sırayla açılır: yalnız sıradaki görev değerlendirilir.
+                    var current = CurrentTask;
+                    var task = current != null ? TaskObject(current.id) : null;
+                    if (task != null && task.Evaluate(game, drag, dt)) missions.Complete(current.id);
                 }
                 if (!timeWarned && game.TimeLeft <= Level.timeWarningSeconds)
                 {
@@ -184,7 +188,121 @@ namespace Jam.Levels.Level1
                 }
             }
             else if (game.IsDisaster) game.AccumulateBehaviour(IsBehaviourSafe(), Time.deltaTime);
+            UpdateGuide();
         }
+
+        // ------------------------------------------------------------------ sıralı görevler + ok
+        /// <summary>Bölüm sırasındaki ilk bekleyen görev (yalnız o açıktır).</summary>
+        public TaskDefinition CurrentTask
+        {
+            get
+            {
+                if (Level == null || missions == null || missions.IsLocked) return null;
+                foreach (var task in Level.tasks)
+                    if (task != null && missions.StateOf(task.id) == TaskState.Pending) return task;
+                return null;
+            }
+        }
+
+        private L1_MissionTask TaskObject(string id)
+        {
+            foreach (var t in tasks) if (t != null && t.taskId == id) return t;
+            return null;
+        }
+
+        private void UpdateGuide()
+        {
+            if (guide == null) return;
+            var current = game.IsPlanning && !game.IsBriefingOpen && !game.IsPausedMenu ? CurrentTask : null;
+            var task = current != null ? TaskObject(current.id) : null;
+            hud.SetCurrent(CurrentTask != null ? CurrentTask.id : null);
+            if (task == null || !ResolveGuide(task, out var target, out var key))
+            {
+                guide.Show(null, null);
+                return;
+            }
+            guide.Show(target, IsNear(target) ? key : null);
+        }
+
+        private bool IsNear(Vector3 world)
+        {
+            if (game.resident == null) return false;
+            var player = game.houseRoot.InverseTransformPoint(game.resident.transform.position);
+            var target = game.houseRoot.InverseTransformPoint(world);
+            var feet = player.y - game.resident.footOffset;
+            return Mathf.Abs(player.x - target.x) <= promptDistance && target.y > feet - 0.6f && target.y < feet + 2.3f;
+        }
+
+        /// <summary>Görevin şu anki adımı için okun gideceği yer ve basılacak tuş.</summary>
+        private bool ResolveGuide(L1_MissionTask task, out Vector3 target, out string key)
+        {
+            target = task.HintTarget.position;
+            key = null;
+            var carried = drag != null ? drag.Carried : null;
+            switch (task.condition)
+            {
+                case L1_MissionTask.Condition.Switches:
+                    foreach (var s in task.switches)
+                    {
+                        if (s == null || s.Activated) continue;
+                        if (s.requiresItemInZone != null && s.requiredItem != null && !s.PrerequisiteMet)
+                            return ItemStep(s.requiredItem, s.requiresItemInZone, carried, out target, out key);
+                        target = s.transform.position;
+                        key = "E — " + Capital(s.actionTr);
+                        return true;
+                    }
+                    return false;
+                case L1_MissionTask.Condition.Anchored:
+                    foreach (var item in task.items)
+                    {
+                        if (item == null || item.IsAnchored) continue;
+                        target = item.transform.position;
+                        key = "Sol tık ile seç · F — Sabitle";
+                        return true;
+                    }
+                    return false;
+                case L1_MissionTask.Condition.ItemsInZone:
+                    foreach (var item in task.items)
+                        if (item != null && item.Body != null && (carried == item || !task.zone.Contains(item.Body.position)))
+                            return ItemStep(item, task.zone, carried, out target, out key);
+                    target = task.zone.transform.position;
+                    return true;
+                case L1_MissionTask.Condition.ZoneClear:
+                    foreach (var item in task.items)
+                    {
+                        if (item == null || item.Body == null || !item.gameObject.activeInHierarchy) continue;
+                        if (carried == item) { target = item.transform.position; key = "Alandan uzaklaş · E — Bırak"; return true; }
+                        if (!task.zone.Contains(item.Body.position)) continue;
+                        target = item.transform.position;
+                        key = item.carryable ? "E — Al ve alanın dışına bırak" : "Sol tık ile sürükleyip alandan çıkar";
+                        return true;
+                    }
+                    return false;
+                case L1_MissionTask.Condition.Balance:
+                    key = "Ağırlıkları evin ortasına taşı";
+                    return true;
+            }
+            return false;
+        }
+
+        private static bool ItemStep(L1_MovableProp item, L1_MissionZone zone, L1_MovableProp carried, out Vector3 target, out string key)
+        {
+            if (carried == item)
+            {
+                target = zone.transform.position;
+                key = "E — Buraya bırak";
+                return true;
+            }
+            target = item.transform.position;
+            key = item.carryable ? "E — " + (string.IsNullOrEmpty(item.displayName) ? "Eşyayı al" : item.displayName + " al")
+                : "Sol tık ile sürükleyip işaretli yere götür";
+            return true;
+        }
+
+        private static readonly System.Globalization.CultureInfo Tr = new System.Globalization.CultureInfo("tr-TR");
+
+        private static string Capital(string text) =>
+            string.IsNullOrEmpty(text) ? "Kullan" : char.ToUpper(text[0], Tr) + text.Substring(1).ToLower(Tr);
 
         private bool IsBehaviourSafe()
         {
@@ -216,11 +334,14 @@ namespace Jam.Levels.Level1
         {
             game.GrantProtection(task.protectionKey);
             foreach (var t in tasks) if (t != null && t.taskId == task.id) t.OnCompleted();
-            hud.Say(task.completionTr, WilsonMood.Sevincli, 2.2f);
+            var next = CurrentTask;
+            hud.Say(next != null ? task.completionTr + " Sıradaki: " + Jam.UI.Menu.BriefingView.SentenceCase(next.titleTr)
+                : task.completionTr + " Bütün görevler tamam!", WilsonMood.Sevincli, 3f);
         }
 
         private void OnDisasterStarted()
         {
+            if (guide != null) guide.Show(null, null);
             foreach (var s in switches) if (s != null) s.Locked = true;
             hud.SetButtonsVisible(false);
             var line = Level.dialogue != null ? Level.dialogue.First(WilsonTrigger.DisasterWarning) : null;
@@ -335,6 +456,14 @@ namespace Jam.Levels.Level1
                 if (d < bestDistance) { bestDistance = d; best = s; }
             }
             if (best == null) return false;
+            var current = CurrentTask;
+            var currentTask = current != null ? TaskObject(current.id) : null;
+            if (currentTask == null || System.Array.IndexOf(currentTask.switches, best) < 0)
+            {
+                hud.Say(current != null ? "Önce sıradaki görev: " + Jam.UI.Menu.BriefingView.SentenceCase(current.titleTr)
+                    : "Burada şimdilik yapılacak bir şey yok.", WilsonMood.Anlatici, 2.5f);
+                return true;
+            }
             if (!best.PrerequisiteMet)
             {
                 hud.Say("Orası hazır değil; önce gerekli eşyayı işaretli yere bırak.", WilsonMood.Anlatici, 2.5f);
@@ -348,8 +477,7 @@ namespace Jam.Levels.Level1
         {
             if (Level == null) return;
             TaskDefinition next = null;
-            foreach (var task in Level.tasks)
-                if (task != null && missions.StateOf(task.id) == TaskState.Pending && missions.PrerequisitesMet(task)) { next = task; break; }
+            next = CurrentTask;
             if (next == null)
             {
                 hud.Say(missions.CompletedCount == missions.TotalCount ? "Bütün görevler tamam! BOŞLUK ile afete hazır olduğunu söyle."

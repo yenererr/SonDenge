@@ -153,9 +153,6 @@ namespace Jam.EditorTools
             var potB = Prop("Balkon saksısı (küçük)", 6f, new Vector3(4.15f, Floor[1], -0.55f), new Vector3(0.3f, 0.42f, 0.3f), PotVisual);
             var storage = Zone("StormSafeStorageZone", new Vector3(1.2f, Floor[1], 0f), new Vector3(0.9f, 1.2f, 2.4f));
             Task("L2_T03", L1_MissionTask.Condition.ItemsInZone, new[] { potA, potB }, storage);
-            var torch = Prop("El feneri", 2f, new Vector3(-2.6f, Floor[1], 0f), new Vector3(0.36f, 0.2f, 0.2f), FlashlightVisual);
-            var torchZone = Zone("FlashlightZone", new Vector3(1.0f, Floor[0], 0f), new Vector3(0.7f, 1.2f, 2.4f));
-            Task("L2_T04", L1_MissionTask.Condition.ItemsInZone, new[] { torch }, torchZone);
         }
 
         // ================================================================ Bölüm 3 — Yangın

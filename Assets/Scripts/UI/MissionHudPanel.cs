@@ -27,6 +27,10 @@ namespace Jam.UI
         private float toastUntil;
         private WilsonPortrait portrait;
         private Button hintButton, replayButton;
+        private string currentId;
+
+        /// <summary>Görevler sırayla açılır: sıradaki görev vurgulanır, sonrakiler kilitli görünür.</summary>
+        public void SetCurrent(string taskId) => currentId = taskId;
 
         public Action HintRequested;
         public Action ReplayRequested;
@@ -138,11 +142,15 @@ namespace Jam.UI
             foreach (var row in rows)
             {
                 var state = missions.StateOf(row.task.id);
-                row.mark.text = state == TaskState.Completed ? "●" : state == TaskState.Missed ? "×" : "○";
+                var isCurrent = state == TaskState.Pending && row.task.id == currentId;
+                var isLocked = state == TaskState.Pending && !isCurrent && currentId != null;
+                row.mark.text = state == TaskState.Completed ? "●" : state == TaskState.Missed ? "×" : isCurrent ? "►" : isLocked ? "–" : "○";
+                row.title.color = isLocked ? new Color(0.45f, 0.4f, 0.35f, 0.7f) : (Color)UiKit.Ink;
                 row.mark.color = state == TaskState.Completed ? new Color32(78, 150, 125, 255) :
                     state == TaskState.Missed ? new Color32(197, 98, 86, 255) : (Color)UiKit.Ink;
                 row.background.color = state == TaskState.Completed ? new Color(0.31f, 0.59f, 0.49f, 0.22f) :
-                    state == TaskState.Missed ? new Color(0.77f, 0.38f, 0.34f, 0.18f) : new Color(1f, 1f, 1f, 0.35f);
+                    state == TaskState.Missed ? new Color(0.77f, 0.38f, 0.34f, 0.18f) :
+                    isCurrent ? new Color(0.96f, 0.72f, 0.25f, 0.4f) : new Color(1f, 1f, 1f, isLocked ? 0.15f : 0.35f);
             }
         }
 

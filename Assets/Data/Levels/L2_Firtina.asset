@@ -27,7 +27,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c6b0db72b795ecd4dbf44d2d80de3ece, type: 2}
   - {fileID: 11400000, guid: 3194f1b839aa39741a150e5ea77cf921, type: 2}
   - {fileID: 11400000, guid: 0fe27bca713ecd64a9ea86c38c14ea0f, type: 2}
-  - {fileID: 11400000, guid: 24d95b66ecf032846a8610d0a91d10cc, type: 2}
   dialogue: {fileID: 11400000, guid: 7b5e874b32eb8b6429c918a86dbab9e1, type: 2}
   safetyWarningsTr:
   - "F\u0131rt\u0131na s\u0131ras\u0131nda \xE7at\u0131ya veya balkona \xE7\u0131kma."
