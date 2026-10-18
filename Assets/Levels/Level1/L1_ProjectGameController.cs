@@ -262,6 +262,19 @@ namespace Jam.Levels.Level1
                 if (item.Body != null) item.Body.linearDamping = 0.85f;
                 if (item.gameObject.activeInHierarchy) item.AllowFallAtEdges(houseRoot);
             }
+            IgnoreFurnitureCollisions();
+        }
+
+        // Eşyalar birbirini itmez; her biri kendi başına kayar. Biri kilitlenince diğerleri yine serbest.
+        private void IgnoreFurnitureCollisions()
+        {
+            var colliders = new List<Collider>();
+            foreach (var item in furniture)
+                if (item != null) colliders.AddRange(item.GetComponentsInChildren<Collider>(true));
+            for (var i = 0; i < colliders.Count; i++)
+                for (var j = i + 1; j < colliders.Count; j++)
+                    if (colliders[i].attachedRigidbody != colliders[j].attachedRigidbody)
+                        UnityEngine.Physics.IgnoreCollision(colliders[i], colliders[j], true);
         }
 
         private void CacheFurnitureTemplates()
