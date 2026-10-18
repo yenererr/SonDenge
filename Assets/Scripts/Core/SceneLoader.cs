@@ -31,6 +31,55 @@ namespace Jam.Core
 
         public void ReloadCurrent() => Load(SceneManager.GetActiveScene().name);
 
+        public bool IsBusy => _busy;
+
+        /// <summary>
+        /// Gerçek async yükleme: progress(0..0.9) = Unity yükleme ilerlemesi, 1 = etkinleştirme.
+        /// Çok hızlı yüklemede ekran en az minVisibleSeconds görünür; sahte yüzde üretilmez.
+        /// Sahne build listesinde yoksa failed çağrılır ve hiçbir şey yüklenmez.
+        /// </summary>
+        public void LoadWithProgress(string sceneName, System.Action<float> progress, System.Action<string> failed,
+            float minVisibleSeconds = 0.5f)
+        {
+            if (_busy) return;
+            if (string.IsNullOrEmpty(sceneName) || !Application.CanStreamedLevelBeLoaded(sceneName))
+            {
+                failed?.Invoke("Bölüm sahnesi bulunamadı: " + sceneName);
+                return;
+            }
+            StartCoroutine(ProgressRoutine(sceneName, progress, failed, minVisibleSeconds));
+        }
+
+        private IEnumerator ProgressRoutine(string sceneName, System.Action<float> progress, System.Action<string> failed,
+            float minVisibleSeconds)
+        {
+            _busy = true;
+            var start = Time.unscaledTime;
+            var op = SceneManager.LoadSceneAsync(sceneName);
+            if (op == null)
+            {
+                _busy = false;
+                failed?.Invoke("Bölüm yüklenemedi: " + sceneName);
+                yield break;
+            }
+            op.allowSceneActivation = false;
+            while (op.progress < 0.9f)
+            {
+                progress?.Invoke(Mathf.Clamp01(op.progress / 0.9f) * 0.9f);
+                yield return null;
+            }
+            progress?.Invoke(0.9f);
+            while (Time.unscaledTime - start < minVisibleSeconds) yield return null;
+            progress?.Invoke(1f);
+            yield return Fade(0f, 1f);
+            op.allowSceneActivation = true;
+            while (!op.isDone) yield return null;
+            if (GameManager.Instance != null) GameManager.Instance.SetPaused(false);
+            Time.timeScale = 1f;
+            yield return Fade(1f, 0f);
+            _busy = false;
+        }
+
         public void Quit()
         {
 #if UNITY_EDITOR

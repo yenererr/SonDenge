@@ -39,6 +39,12 @@ namespace Jam.Core
 
         public void StopMusic() => _music.Stop();
 
+        /// <summary>Ayar değişince çalan müziğin sesini hemen günceller.</summary>
+        public void RefreshVolumes()
+        {
+            if (_music != null) _music.volume = musicVolume;
+        }
+
         /// <param name="pitchJitter">Tekrarlayan seslere hafif varyasyon (0.1 iyi bir değer).</param>
         public void PlaySfx(AudioClip clip, float volume = 1f, float pitchJitter = 0.05f)
         {
