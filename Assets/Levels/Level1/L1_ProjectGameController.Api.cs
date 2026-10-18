@@ -137,6 +137,12 @@ namespace Jam.Levels.Level1
             else if (growDownward) Advance(); else GoToNextLevel();
         }
         public int LevelNumber => level;
+        /// <summary>Görev modunda radyo yalnız gerçek hayatla çelişmeyen hazırlık uyarısı verir.</summary>
+        private string MissionRadioLine => level == 1 ? "RADYO SİVRİTEPE — Bu gece sarsıntı bekleniyor. Hazırlan!" :
+            level == 2 ? "RADYO SİVRİTEPE — Sert fırtına geliyor. Pencereleri kapatın, camlardan uzak durun!" :
+            level == 3 ? "RADYO SİVRİTEPE — Yangın riski yüksek. Duman alarmını ve kaçış yolunu kontrol edin!" :
+            level == 4 ? "RADYO SİVRİTEPE — Yıldırım uyarısı. Cihazların fişini fırtınadan önce çekin!" :
+            "RADYO SİVRİTEPE — Şiddetli yağmur geliyor. Girişi ve drenajı önceden hazırlayın!";
         public int TasksDone => missions != null ? missions.CompletedCount : 0;
         public int TasksTotal => missions != null ? missions.TotalCount : 0;
         public string DisasterName => missionMode && levelDefinition != null ? levelDefinition.disasterNameTr : "DEPREM";
@@ -157,7 +163,7 @@ namespace Jam.Levels.Level1
         /// <summary>Hazırlık süresi bitti; HUD 3-2-1 geri sayımını onay sormadan başlatır.</summary>
         public event System.Action ForcedDisasterRequested;
         public string LevelTitle => missionMode && levelDefinition != null ? levelDefinition.titleTr : level == 1 ? "İLK SARSINTI" : level == 2 ? "DAĞ FIRTINASI" : level == 3 ? "YANGIN" : level == 4 ? "YILDIRIM" : "ŞİDDETLİ YAĞMUR";
-        public string RadioLine => level == 1 ? "RADYO SİVRİTEPE — Bu gece sarsıntı bekleniyor. Hazırlan!" :
+        public string RadioLine => missionMode ? MissionRadioLine : level == 1 ? "RADYO SİVRİTEPE — Bu gece sarsıntı bekleniyor. Hazırlan!" :
             level == 2 ? "RADYO SİVRİTEPE — Dağdan sert fırtına geliyor. Ağır eşyaları rüzgârın tersine al!" :
             level == 3 ? "RADYO SİVRİTEPE — Yangın riski yüksek. Yangın tüpünü hazır et!" :
             level == 4 ? "RADYO SİVRİTEPE — Zirvede yıldırım uyarısı. Paratoner kur!" :

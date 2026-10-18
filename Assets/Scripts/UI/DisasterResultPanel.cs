@@ -75,7 +75,7 @@ namespace Jam.UI
             }
 
             scoreText = UiKit.Label(card, "Puan", "", 26, UiKit.Ink, TextAnchor.UpperLeft);
-            Box(scoreText.rectTransform, 60f, 290f, 520f, 260f);
+            Box(scoreText.rectTransform, 60f, 290f, 520f, 190f);
             linesText = UiKit.Label(card, "Sonuçlar", "", 24, UiKit.Ink, TextAnchor.UpperLeft);
             Box(linesText.rectTransform, 600f, 290f, 840f, 330f);
             linesText.lineSpacing = 1.15f;
@@ -95,8 +95,8 @@ namespace Jam.UI
             tipText.rectTransform.offsetMin = new Vector2(150f, 8f);
             tipText.rectTransform.offsetMax = new Vector2(-20f, -70f);
 
-            summaryText = UiKit.Label(card, "Özet", "", 26, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
-            Box(summaryText.rectTransform, 60f, 560f, 520f, 120f);
+            summaryText = UiKit.Label(card, "Özet", "", 21, UiKit.Ink, TextAnchor.UpperLeft, FontStyle.Bold);
+            Box(summaryText.rectTransform, 60f, 486f, 520f, 128f);
 
             var bar = UiKit.Rect(card, "Düğmeler", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
                 new Vector2(0f, 36f), new Vector2(1260f, 84f));
@@ -146,10 +146,11 @@ namespace Jam.UI
             {
                 var summary = "BEŞ BÖLÜM ÖZETİ\n";
                 for (var i = 1; i <= LevelProgressSave.LevelCount; i++)
-                    summary += "Bölüm " + i + ": " + new string('*', LevelProgressSave.BestStars(i)) +
-                               new string('-', 3 - LevelProgressSave.BestStars(i)) + "   ";
-                summaryText.text = summary + "\nAFETE HAZIRLIK HAYAT KURTARIR." +
-                                   (string.IsNullOrEmpty(d.finalLine) ? "" : "\n" + d.finalLine);
+                    summary += i + ": " + new string('●', LevelProgressSave.BestStars(i)) +
+                               new string('○', 3 - LevelProgressSave.BestStars(i)) + (i == 3 ? "\n" : "    ");
+                summaryText.text = summary + "\nAFETE HAZIRLIK HAYAT KURTARIR.";
+                // Wilson'ın final cümlesi, sonuç cümlesinin ardından aynı satırda gösterilir.
+                if (!string.IsNullOrEmpty(d.finalLine)) wilsonText.text += " " + d.finalLine;
             }
             else summaryText.text = "";
             nextButton.gameObject.SetActive(d.survived && (d.hasNext || finalMode));

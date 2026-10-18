@@ -110,7 +110,9 @@ namespace Jam.Levels.Level1
             if (game.LevelNumber != shownLevel)
             {
                 shownLevel = game.LevelNumber;
-                levelLabel.text = "SEVİYE " + shownLevel.ToString("00") + " · " + game.LevelTitle;
+                levelLabel.text = game.missionMode
+                    ? "BÖLÜM " + shownLevel.ToString("00") + " · " + game.DisasterName
+                    : "SEVİYE " + shownLevel.ToString("00") + " · " + game.LevelTitle;
                 radioLabel.text = game.RadioLine;
                 levelIcon.sprite = game.UiLevelIcon;
                 levelIcon.enabled = levelIcon.sprite != null;

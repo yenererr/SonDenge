@@ -64,3 +64,21 @@
 - Ekran görüntüsü: `docs/production/screenshots/L1_fail_report.jpg`.
 - Bilinen: Deprem sarsıntısı (quakeTiltPerAcceleration) maks. eğimi ~23°'ye çıkarıyor → denge puanı düşük (3/20). Ayar gerekebilir.
 - Kapı kararı: PASS. Sonraki faz: FAZ 6–9.
+
+## FAZ 6–9 — Level2 (Fırtına), Level3 (Yangın), Level4 (Yıldırım), Level5 (Şiddetli yağmur)
+- Üretim: `Jam > Wilson > Level2-5 sahnelerini Level1'den üret`. Level1 açılır, bölüm n görevleri kurulur, `LevelN.unity` olarak kaydedilir. Level2–4'ün mevcut sahne GUID'leri korundu (`3d5653c4…`, `c1c81bfd…`, `ff571958…`); `Level5.unity` yeni (`546315ad…`). Kişi 2/3/4 dallarına dokunulmadı (Lead kararı).
+- Bölüm verisi: L2 2 kat/100+12 sn, L3–L5 3 kat (3. kat + merdiven açılır, kamera yukarı kayar), 120+30 / 110+25 / 140+25 sn.
+- Görev nesneleri (low-poly, Unity primitive birleşimi + URP Lit materyal): çatı bağlantısı, kepenkli 3 pencere, 2 balkon saksısı, el feneri, duman alarmı (kur + test), ocak düğmesi, söndürücü (LowPolyInteriors prefab), 2 koli + kaçış yolu hacmi, yıldırım kontrol kutusu, 2 fiş, dekor bilgisayar, gerilim koruyucu, 2 kum torbası, drenaj ızgarası, radyo + albüm, conta kiti + sızıntı.
+- Play testleri (Unity öne alındı; bir kısım görev yerleştirmesi test hızında kodla, diğerleri gerçek girdiyle):
+  - **L2 PASS** — brifing "DAĞ FIRTINASI — FIRTINA"; pencere gerçek **E** ile kapandı; 4/4 görev; fırtına; rapor 48/100, 1 yıldız (pencere dibinde kalındığı için davranış 0 — doğru ölçüldü); L3 açıldı.
+  - **L3 PASS** — alarm testi kurulumdan önce reddedildi, kurulunca taşınan alarm monte görsele dönüştü; 4/4; tek küçük tutuşma; süre bitince açık kaçış yolundan **tahliye** başarı: 95/100, 3 yıldız.
+  - **L4 PASS** — TV fişi gerçek **E** ile çekildi; afet başladıktan sonra bilgisayar fişi **çekilemedi** (kilit) ve görev Missed; paratoner 2 darbeyi engelledi; 53/100, 1 yıldız.
+  - **L5 PASS** — kit sızıntıya uygulanınca tüketildi; pompa önceden kurulu/otomatik (oyuncu dokunmaz); 4/4; su içeri sızmadı (indoorFlood 0); final raporu "YENİDEN OYNA" + beş bölüm özeti + Wilson final cümlesi.
+- Testlerde bulunan ve düzeltilen: radyo satırları ("Ağır eşyaları rüzgârın tersine al!", "Paratoner kur!") gerçek güvenlikle çelişiyordu → güvenli metinler; "El feneri kesintide kullanılabildi" (olay yok) → "kolay erişilebilir yerdeydi"; gerilim koruması yalnız darbe geldiyse rapora yazılır; AK STUDIO söndürücü URP'de pembe → LowPolyInteriors; HUD başlığı taşıyordu → "BÖLÜM 03 · YANGIN"; 3 katta kamera üst katı kesiyordu → kadraj kaydırıldı; final özeti Wilson satırıyla çakışıyordu → yerleşim; sandık araması ("sandık"≠"sandığı") düzeltildi.
+- Kapı kararı: PASS (her bölüm Editor Play'de). Level4→Level5 sahne geçişi: **BLOCKED** — Level5 build listesinde değil (onay bekliyor).
+
+## FAZ 10 — Skor, rapor, menü, kayıt
+- `MainMenuUI`: OYNA → BÖLÜM SEÇ (5 bölüm, ●○ yıldız, KİLİTLİ), İLERLEMEYİ SIFIRLA; NASIL OYNANIR mağaza/altın yerine görev akışını anlatır; atıflara Wilson CC BY eklendi.
+- Kayıt (`sondenge.v1.*`): en iyi yıldız korunur (L1: 2 yıldızdan sonra 0 yıldızlık deneme 2'yi silmedi), 1+ yıldız sonraki bölümü açar, sıfırlama sonrası yalnız Bölüm 1 açık — **PASS** (Play'de görüldü).
+- Menü → Bölüm 1 → Wilson brifingi (SceneLoader ile) — **PASS**.
+- Ekran görüntüleri: `docs/production/screenshots/` (Menu_level_select, L2_preparation, L3_wilson_briefing, L3_preparation_3floors, L3_report_3stars, L1_fail_report).

@@ -20,7 +20,7 @@ MonoBehaviour:
   whyItMattersTr: "Elektrik kesilirse fener yolunu ayd\u0131nlat\u0131r."
   hintTr: "Elektrikler kesilirse diye el fenerini de haz\u0131r tut."
   completionTr: "Fener haz\u0131r, karanl\u0131ktan korkmuyoruz!"
-  reportTr: "El feneri kesintide kullan\u0131labildi."
+  reportTr: "El feneri kolay eri\u015Filebilir yerdeydi."
   taskType: 0
   prerequisiteTaskIds: []
   safetyCritical: 0

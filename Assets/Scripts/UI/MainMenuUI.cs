@@ -1,4 +1,5 @@
 using Jam.Core;
+using Jam.Missions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -13,6 +14,9 @@ namespace Jam.UI
     {
         [Header("Akış")]
         [SerializeField] private string firstLevelScene = "Level1";
+        [Tooltip("Bölüm seçiminde gösterilen sahneler ve başlıklar (sırayla 1..5).")]
+        [SerializeField] private string[] levelScenes = { "Level1", "Level2", "Level3", "Level4", "Level5" };
+        [SerializeField] private string[] levelTitles = { "DEPREM", "FIRTINA", "YANGIN", "YILDIRIM", "ŞİDDETLİ YAĞMUR" };
         [Header("Görsel")]
         [SerializeField] private Texture2D backdrop;
         [SerializeField] private Font font;
@@ -21,9 +25,10 @@ namespace Jam.UI
             "Son Denge — 48 saatlik game jam ekibi\n\n" +
             "3D paketler: LowPolyInteriorsFree, Low Poly Tavern Pack, 3Digitalis Interior Props, " +
             "Modular Sewer Props (Ata Khani), Roadside Tales Fences (EmaceArt), StylArts, MIX Furniture, FarmHouse " +
-            "— Unity Asset Store Standart EULA.\n\nAyrıntılı liste: docs/ASSET_ATTRIBUTIONS_LEVEL1.md";
+            "— Unity Asset Store Standart EULA.\n\nWilson 3D tavuk: Pjager (CC BY 4.0), yumurta: Casca_Servillius (CC BY 4.0) — ThirdParty/Wilson/CREDITS.md\n\nAyrıntılı liste: docs/ASSET_ATTRIBUTIONS_LEVEL1.md";
 
-        private GameObject howToPanel, settingsPanel, creditsPanel;
+        private GameObject howToPanel, settingsPanel, creditsPanel, levelPanel;
+        private RectTransform levelList;
         private GameObject openPanel;
 
         private void Awake()
@@ -47,7 +52,35 @@ namespace Jam.UI
 
         private void Play()
         {
-            if (SceneLoader.Instance != null) SceneLoader.Instance.Load(firstLevelScene);
+            RefreshLevelList();
+            Open(levelPanel);
+        }
+
+        private void LoadLevel(string scene)
+        {
+            if (SceneLoader.Instance != null) SceneLoader.Instance.Load(string.IsNullOrEmpty(scene) ? firstLevelScene : scene);
+        }
+
+        /// <summary>Beş bölüm: kilit, en iyi yıldız ve başlat düğmesi. Kayıt yoksa yalnız Bölüm 1 açık.</summary>
+        private void RefreshLevelList()
+        {
+            if (levelList == null) return;
+            foreach (Transform child in levelList) Destroy(child.gameObject);
+            for (var i = 0; i < levelScenes.Length; i++)
+            {
+                var number = i + 1;
+                var scene = levelScenes[i];
+                var unlocked = LevelProgressSave.IsUnlocked(number);
+                var stars = LevelProgressSave.BestStars(number);
+                var row = UiKit.Rect(levelList, "Bölüm " + number, Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f),
+                    Vector2.zero, new Vector2(0f, 70f));
+                var caption = "BÖLÜM " + number + " · " + (i < levelTitles.Length ? levelTitles[i] : "") + "     " +
+                              (unlocked ? new string('●', stars) + new string('○', 3 - stars) : "KİLİTLİ");
+                var button = UiKit.Button(row, caption, 28, unlocked ? UiKit.Paper : new Color(0.7f, 0.66f, 0.6f, 1f), UiKit.Ink,
+                    () => LoadLevel(scene));
+                button.interactable = unlocked;
+                if (font != null) button.GetComponentInChildren<Text>().font = font;
+            }
         }
 
         private void Quit()
@@ -127,14 +160,18 @@ namespace Jam.UI
             UiKit.Button(creditsButton, "Emeği geçenler / Atıflar", 22, UiKit.Paper, UiKit.Ink, () => Open(creditsPanel));
 
             howToPanel = BuildModal(canvas, "HowToPanel", "NASIL OYNANIR",
-                "• Sol fareyle bir eşyayı tut ve yalnız sağa–sola sürükle. Sağ fare sürüklemeyi iptal eder.\n" +
-                "• Ev sivri bir kayanın tepesinde durur. Ağır eşyalar kenara gittikçe ev o yöne eğilir; " +
-                "üstteki küçük su terazisini izle.\n" +
-                "• Eşyayı seçip SABİTLE (F) ile duvara bağla (30 altın). Sabit eşya depremde kaymaz.\n" +
-                "• MAĞAZA'dan yeni eşya ve deprem önlemi alabilirsin. Hazır olunca AFETE HAZIRIM'a bas.\n" +
+                "• Her bölümde Wilson önce görevleri anlatır. GÖREVLERE BAŞLA deyince hazırlık süresi akar.\n" +
+                "• A/D yürü, W/S merdiven. E ile küçük eşyayı al/bırak veya yakındaki görev noktasını kullan.\n" +
+                "• Büyük eşyayı fareyle sürükle; seçip F ile duvara sabitle. Sabit eşya afette kaymaz.\n" +
+                "• Ev sivri bir kayanın tepesinde durur: ağırlık bir kenara gidince ev o yöne eğilir. " +
+                "26°'yi 1 saniye aşarsa devrilir. Üstteki denge göstergesini izle.\n" +
+                "• Hazır olunca AFETE HAZIRIM (BOŞLUK). Süre biterse afet eksik görevlerle başlar.\n" +
+                "• Afet sonunda yıldızlı rapor: hazırlık, doğru davranış, denge ve eşya koruma.\n" +
                 "• Fare tekeri yakınlaştırır/uzaklaştırır, orta fare kaydırır, Home kadrajı sıfırlar. ESC duraklatır.\n\n" +
-                "GERÇEK HAYATTA: Oyundaki 'eşya taşıma gücü' fantastiktir. Gerçek depremde eşya taşıma! " +
-                "Ağır eşyaları önceden duvara sabitle, deprem anında ÇÖK – KAPAN – TUTUN.");
+                "GERÇEK HAYATTA: Evin ağırlıkla dengelenmesi bu oyunun hayal ürünü kuralıdır. Gerçek afette eşya taşıma! " +
+                "Önlemleri afetten ÖNCE al: ağır eşyaları sabitle, depremde ÇÖK – KAPAN – TUTUN, yangında güvenle tahliye ol, " +
+                "fırtınada camlardan ve elektrikten uzak dur.");
+            levelPanel = BuildLevelSelect(canvas);
             settingsPanel = BuildSettings(canvas);
             creditsPanel = BuildModal(canvas, "CreditsPanel", "EMEĞİ GEÇENLER / ATIFLAR", credits);
         }
@@ -187,6 +224,26 @@ namespace Jam.UI
             scroll.horizontal = false;
             scroll.movementType = ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity = 30f;
+            return root.gameObject;
+        }
+
+        private GameObject BuildLevelSelect(Transform canvas)
+        {
+            var root = ModalFrame(canvas, "LevelSelectPanel", "BÖLÜM SEÇ", out var body);
+            levelList = UiKit.Rect(body, "Bölümler", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), new Vector2(0f, 30f),
+                new Vector2(0f, -60f));
+            var layout = levelList.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 14f;
+            layout.childControlHeight = false;
+            layout.childForceExpandHeight = false;
+            layout.childControlWidth = true;
+            var reset = UiKit.Rect(body, "Sıfırla", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f),
+                new Vector2(0f, -40f), new Vector2(360f, 50f));
+            UiKit.Button(reset, "İLERLEMEYİ SIFIRLA", 22, UiKit.Paper, UiKit.Ink, () =>
+            {
+                LevelProgressSave.ResetAll();
+                RefreshLevelList();
+            });
             return root.gameObject;
         }
 

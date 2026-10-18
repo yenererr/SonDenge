@@ -175,7 +175,7 @@ namespace Jam.EditorTools
                     "Elektrik kesilirse fener yolunu aydınlatır.",
                     "Elektrikler kesilirse diye el fenerini de hazır tut.",
                     "Fener hazır, karanlıktan korkmuyoruz!",
-                    "El feneri kesintide kullanılabildi.",
+                    "El feneri kolay erişilebilir yerdeydi.",
                     TaskType.CarryToTarget, "flashlight", false),
             };
             var d = Dialogue("L2_Dialogue", new List<WilsonLine>

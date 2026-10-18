@@ -17,6 +17,7 @@ namespace Jam.Levels.Level1
         public MissionManager missions;
 
         private bool briefingOpen;
+        private bool cameraShiftedForUpperFloor;
         private float behaviourSafeSeconds, behaviourTotalSeconds;
         private bool evacuated;
         private MissionResult lastResult;
@@ -81,6 +82,13 @@ namespace Jam.Levels.Level1
             {
                 SetUpperFloorVisible(true);
                 RefreshFurniture();
+                // Üç kat birlikte görünsün: başlangıç kadrajını yukarı al ve biraz uzaklaş.
+                if (cameraRig == null && sceneCamera != null) cameraRig = sceneCamera.GetComponent<L1_CameraController>();
+                if (cameraRig != null && !cameraShiftedForUpperFloor)
+                {
+                    cameraShiftedForUpperFloor = true;
+                    cameraRig.ShiftRest(floorHeight * 0.55f, 6f);
+                }
             }
             // Şiddetli yağmurda pompa önceden kurulu, otomatik ve güvenli bir sistemdir; oyuncu
             // ıslak ortamda elektrikli pompaya dokunmaz (şartname §5 / §11).
@@ -186,6 +194,8 @@ namespace Jam.Levels.Level1
                 case "anchor_fridge": return !LostItemNamed("buzdolabı");
                 case "duman_dedektoru": return state != RoundState.Planning;
                 case "lightning_rod_system": return lightningBlocked > 0 || lightningHits == 0;
+                // Gerilim koruması yalnız gerçekten darbe geldiyse "etkiyi azalttı" denir.
+                case "surge_protector": return lightningHits > 0;
                 case "sandbags": return indoorFlood < 100f;
                 default: return true;
             }

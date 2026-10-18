@@ -19,7 +19,8 @@ namespace Jam.EditorTools
         private const string Level1Path = "Assets/Scenes/Level1.unity";
         private const string MatDir = "Assets/Levels/Level1/Materials/Missions";
         private const string WilsonDir = "Assets/Levels/Level1/Art/Characters/Wilson";
-        private const string ExtinguisherPrefab = "Assets/AK STUDIO ART/Fire Extinguisher/Prefabs/Fire Extinguisher.prefab";
+        // AK STUDIO prefab'ı URP'de pembe görünüyor; projedeki URP uyumlu LowPolyInteriors söndürücüsü kullanılır.
+        private const string ExtinguisherPrefab = "Assets/LowPolyInteriorsFree/Prefabs/20_Utility/SM_LPI_Util_Extinguisher_01.prefab";
         private static readonly float[] Floor = { -1.15f, 1.10f, 3.35f };
         private const float PropZ = 0.25f;
 
@@ -205,7 +206,7 @@ namespace Jam.EditorTools
         private static void Level5()
         {
             // Kapı önünü boşalt: çeyiz sandığı bu bölümde orta katta durur.
-            var chest = FindProp("sandık");
+            var chest = FindProp("sandığ");
             if (chest != null) chest.transform.localPosition = new Vector3(3.6f, Floor[1] + 0.27f, PropZ);
             var bags = new List<L1_MovableProp>();
             for (var i = 0; i < 2; i++)
