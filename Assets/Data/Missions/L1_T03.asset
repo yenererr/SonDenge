@@ -15,14 +15,13 @@ MonoBehaviour:
   id: L1_T03
   levelId: L1
   titleTr: "DEPREM \xC7ANTASINI HAZIRLA"
-  descriptionTr: "\xC7antay\u0131 E ile al, kap\u0131n\u0131n yan\u0131ndaki i\u015Faretli
-    alana b\u0131rak."
+  descriptionTr: "\xC7antan\u0131n yan\u0131na git, E ile s\u0131rt\u0131na tak."
   whyItMattersTr: "Acil durum \xE7antas\u0131 kolay ula\u015F\u0131labilir yerde
     olmal\u0131."
-  hintTr: "Acil durum \xE7antas\u0131n\u0131 depremden \xF6nce eri\u015Filebilir
-    yerde haz\u0131r tut."
-  completionTr: "\xC7anta haz\u0131r! Gerekti\u011Finde hemen al\u0131r\u0131z."
-  reportTr: "Acil durum \xE7antas\u0131 eri\u015Filebilir konumdayd\u0131."
+  hintTr: "K\u0131rm\u0131z\u0131 \xE7anta alt katta. Yan\u0131na git, \xFCst\xFCndeki
+    E'ye bas: s\u0131rt\u0131na tak\u0131l\u0131r."
+  completionTr: "\xC7anta s\u0131rt\u0131nda! Gerekti\u011Finde haz\u0131r."
+  reportTr: "Acil durum \xE7antas\u0131 deprem \xF6ncesinde haz\u0131rlanm\u0131\u015Ft\u0131."
   taskType: 0
   prerequisiteTaskIds: []
   safetyCritical: 0

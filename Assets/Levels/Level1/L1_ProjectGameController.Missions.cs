@@ -64,6 +64,26 @@ namespace Jam.Levels.Level1
 
         public bool HasProtection(string key) => equipment.Contains(key);
 
+        /// <summary>
+        /// Deprem çantasını karakterin sırtına takar: yerdeki modelin kopyası sırtta görünür,
+        /// çantanın kütlesi (bagMassKg) karakterle birlikte dengeye girer.
+        /// </summary>
+        public void EquipEmergencyBag(Transform sourceModel)
+        {
+            if (resident == null || bagAttached) return;
+            // Görsel modelin altına değil karakter köküne bağlanır; yan görünümde görünür kalması için
+            // L1_BackpackFollow çantayı baktığı yönün tersindeki sırt tarafında tutar.
+            var bag = sourceModel != null ? Instantiate(sourceModel.gameObject, resident.transform, false) : new GameObject();
+            bag.name = "Deprem çantası — sırtta";
+            bag.SetActive(true);
+            foreach (var c in bag.GetComponentsInChildren<Collider>(true)) Destroy(c);
+            bag.transform.localScale = Vector3.one * 0.85f;
+            bag.AddComponent<L1_BackpackFollow>().resident = resident;
+            bagAttached = true;
+            Warn("Deprem çantası sırtında (+" + Mathf.RoundToInt(bagMassKg) + " kg). Depremde BOŞLUK ile Çök–Kapan–Tutun!");
+            if (sfx != null) sfx.Play("confirm");
+        }
+
         /// <summary>Afet sırasında "güvenli davranış" süresini biriktirir (bölüme göre yönetmen hesaplar).</summary>
         public void AccumulateBehaviour(bool safe, float dt)
         {

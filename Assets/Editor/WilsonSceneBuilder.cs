@@ -122,9 +122,16 @@ namespace Jam.EditorTools
             var fridge = FindProp("buzdolabı");
             Task("L1_T01", L1_MissionTask.Condition.Anchored, new[] { bookshelf });
             Task("L1_T02", L1_MissionTask.Condition.Anchored, new[] { fridge });
-            var bag = Prop("Deprem çantası", 10f, new Vector3(-1.75f, Floor[0], 0f), new Vector3(0.42f, 0.48f, 0.3f), BagVisual);
-            var bagZone = Zone("EmergencyBagZone", new Vector3(3.05f, Floor[0], 0f), new Vector3(0.95f, 1.2f, 2.4f));
-            Task("L1_T03", L1_MissionTask.Condition.ItemsInZone, new[] { bag }, bagZone);
+            // Deprem çantası: yerde gerçek sırt çantası, üstünde E rozeti; E ile doğrudan sırta takılır.
+            var bag = Switch("EmergencyBag", new Vector3(-1.75f, Floor[0] + 0.45f, -0.25f), "ÇANTAYI SIRTINA TAK",
+                "Çanta sırtında!", false);
+            bag.reach = 0.9f;
+            bag.badgeOffset = new Vector3(0f, 0.55f, -0.2f);
+            var bagModel = new GameObject("Çanta modeli").transform;
+            bagModel.SetParent(bag.offVisual.transform, false);
+            bagModel.localPosition = new Vector3(0f, -0.45f, 0.5f);
+            BackpackVisual(bagModel);
+            Task("L1_T03", L1_MissionTask.Condition.Switches, null, null, new[] { bag });
             Task("L1_T04", L1_MissionTask.Condition.Balance, new L1_MovableProp[0]);
         }
 
@@ -281,9 +288,7 @@ namespace Jam.EditorTools
             off.transform.SetParent(go.transform, false);
             s.onVisual = on;
             s.offVisual = off;
-            // Küçük sarı "E" işareti: oyuncu noktayı bulabilsin.
-            var tag = Part(off.transform, PrimitiveType.Sphere, new Vector3(0f, 0.55f, -0.15f), new Vector3(0.14f, 0.14f, 0.14f), Mat("Isaret", new Color(1f, 0.82f, 0.25f), true));
-            tag.name = "E işareti";
+            // "E" rozeti çalışma anında L1_MissionSwitch tarafından kurulur.
             return s;
         }
 
@@ -348,6 +353,23 @@ namespace Jam.EditorTools
         }
 
         // ---------------------------------------------------------------- görseller (low-poly)
+        /// <summary>Düşük poligonlu sırt çantası (taban y=0): gövde, ön cep, kapak, askılar, sap, beyaz artı.</summary>
+        private static void BackpackVisual(Transform v)
+        {
+            var red = Mat("CantaKirmizi", new Color(0.78f, 0.16f, 0.13f));
+            var dark = Mat("CantaKoyu", new Color(0.45f, 0.08f, 0.07f));
+            var white = Mat("Beyaz", new Color(0.95f, 0.94f, 0.9f));
+            var strap = Mat("Siyah", new Color(0.12f, 0.12f, 0.13f));
+            Part(v, PrimitiveType.Capsule, new Vector3(0f, 0.23f, 0f), new Vector3(0.36f, 0.22f, 0.24f), red);
+            Part(v, PrimitiveType.Sphere, new Vector3(0f, 0.42f, 0f), new Vector3(0.36f, 0.12f, 0.26f), dark);
+            Part(v, PrimitiveType.Sphere, new Vector3(0f, 0.15f, -0.11f), new Vector3(0.27f, 0.2f, 0.12f), dark);
+            Part(v, PrimitiveType.Cube, new Vector3(0f, 0.16f, -0.175f), new Vector3(0.09f, 0.03f, 0.01f), white);
+            Part(v, PrimitiveType.Cube, new Vector3(0f, 0.16f, -0.175f), new Vector3(0.03f, 0.09f, 0.01f), white);
+            Part(v, PrimitiveType.Cube, new Vector3(-0.09f, 0.24f, 0.125f), new Vector3(0.045f, 0.36f, 0.02f), strap);
+            Part(v, PrimitiveType.Cube, new Vector3(0.09f, 0.24f, 0.125f), new Vector3(0.045f, 0.36f, 0.02f), strap);
+            Part(v, PrimitiveType.Cylinder, new Vector3(0f, 0.5f, 0f), new Vector3(0.025f, 0.06f, 0.025f), strap, new Vector3(0f, 0f, 90f));
+        }
+
         private static void BagVisual(Transform v, Vector3 s)
         {
             var red = Mat("CantaKirmizi", new Color(0.78f, 0.16f, 0.13f));

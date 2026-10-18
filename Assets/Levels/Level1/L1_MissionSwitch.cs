@@ -34,11 +34,18 @@ namespace Jam.Levels.Level1
         [Tooltip("Bu nokta ancak bu diğer nokta etkinleştikten sonra kullanılabilir (ör. önce kur, sonra test et).")]
         public L1_MissionSwitch requiresSwitch;
 
+        [Tooltip("Noktanın üstünde süzülen 'E' rozeti (oyuncu nerede E'ye basacağını görsün).")]
+        public bool showKeyBadge = true;
+        public Vector3 badgeOffset = new Vector3(0f, 0.75f, -0.35f);
+
         public bool Activated { get; private set; }
         public bool Locked { get; set; }
         public event System.Action<L1_MissionSwitch> Changed;
 
         private float animT = 1f;
+        private Transform badge;
+        private Material badgeMaterial;
+        private Vector3 badgeBase;
         private Quaternion rotateFrom, rotateTo;
 
         private void Awake()
@@ -97,6 +104,60 @@ namespace Jam.Levels.Level1
             if (onVisual != null) onVisual.SetActive(Activated);
             if (offVisual != null) offVisual.SetActive(!Activated);
             if (instant && rotatePart != null) rotatePart.localRotation = Activated ? rotateTo : rotateFrom;
+        }
+
+        private void Start()
+        {
+            if (showKeyBadge && interactable) BuildBadge();
+        }
+
+        /// <summary>Koyu yuvarlak zemin üstünde sarı "E" harfi; kameraya bakar.</summary>
+        private void BuildBadge()
+        {
+            badge = new GameObject("E rozeti").transform;
+            badge.SetParent(transform, false);
+            badge.localPosition = badgeBase = badgeOffset;
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            badgeMaterial = new Material(shader != null ? shader : Shader.Find("Sprites/Default"));
+            if (badgeMaterial.HasProperty("_BaseColor")) badgeMaterial.SetColor("_BaseColor", new Color(0.16f, 0.11f, 0.07f, 1f));
+            badgeMaterial.color = new Color(0.16f, 0.11f, 0.07f, 1f);
+            var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            Destroy(disc.GetComponent<Collider>());
+            disc.name = "Zemin";
+            disc.transform.SetParent(badge, false);
+            disc.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            disc.transform.localScale = new Vector3(0.26f, 0.01f, 0.26f);
+            var discRenderer = disc.GetComponent<Renderer>();
+            discRenderer.sharedMaterial = badgeMaterial;
+            discRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var letter = new GameObject("E").AddComponent<TextMesh>();
+            letter.transform.SetParent(badge, false);
+            letter.transform.localPosition = new Vector3(0f, 0f, -0.02f);
+            letter.text = "E";
+            letter.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            letter.GetComponent<MeshRenderer>().sharedMaterial = letter.font.material;
+            letter.fontSize = 64;
+            letter.characterSize = 0.035f;
+            letter.fontStyle = FontStyle.Bold;
+            letter.anchor = TextAnchor.MiddleCenter;
+            letter.alignment = TextAlignment.Center;
+            letter.color = new Color(1f, 0.82f, 0.25f);
+        }
+
+        private void LateUpdate()
+        {
+            if (badge == null) return;
+            var visible = !Activated && !Locked && interactable;
+            if (badge.gameObject.activeSelf != visible) badge.gameObject.SetActive(visible);
+            if (!visible) return;
+            badge.localPosition = badgeBase + Vector3.up * (Mathf.Sin(Time.time * 2.4f) * 0.04f);
+            var cam = Camera.main;
+            if (cam != null) badge.rotation = Quaternion.LookRotation(badge.position - cam.transform.position, Vector3.up);
+        }
+
+        private void OnDestroy()
+        {
+            if (badgeMaterial != null) Destroy(badgeMaterial);
         }
 
         private void Update()

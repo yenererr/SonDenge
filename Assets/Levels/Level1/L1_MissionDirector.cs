@@ -49,7 +49,11 @@ namespace Jam.Levels.Level1
             missions = game.missions;
             if (tasks == null || tasks.Length == 0) tasks = game.houseRoot.GetComponentsInChildren<L1_MissionTask>(true);
             switches = game.houseRoot.GetComponentsInChildren<L1_MissionSwitch>(true);
-            foreach (var s in switches) s.ResetSwitch();
+            foreach (var s in switches)
+            {
+                s.ResetSwitch();
+                s.Changed += OnSwitchChanged;
+            }
 
             portrait = WilsonPortrait.Create(transform, BuildPortraitModel);
             hud = MissionHudPanel.Create(transform, portrait);
@@ -72,12 +76,21 @@ namespace Jam.Levels.Level1
             retrying = false;
         }
 
+        /// <summary>Deprem çantası noktası: E ile alınınca çanta yerden kalkar, karakterin sırtına takılır.</summary>
+        private void OnSwitchChanged(L1_MissionSwitch s)
+        {
+            if (s == null || !s.Activated || s.switchId != "EmergencyBag") return;
+            var model = s.offVisual != null ? s.offVisual.transform.Find("Çanta modeli") : null;
+            game.EquipEmergencyBag(model);
+        }
+
         private Material BuildPortraitModel(Transform host) =>
             game.wilsonModel != null ? L1_WilsonChicken.BuildPortraitModel(game.wilsonModel, game.wilsonTexture, host, 0.62f) : null;
 
         private void OnDestroy()
         {
             if (missions != null) missions.TaskCompleted -= OnTaskCompleted;
+            foreach (var s in switches) if (s != null) s.Changed -= OnSwitchChanged;
             if (game != null) { game.DisasterStarted -= OnDisasterStarted; game.LevelFinished -= OnLevelFinished; }
             if (drag != null && drag.interactOverride == (System.Func<bool>)TryUseSwitch) drag.interactOverride = null;
         }

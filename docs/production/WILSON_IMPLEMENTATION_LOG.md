@@ -92,3 +92,10 @@
 
 ## FAZ 12 — Belgeler
 - `docs/production/FINAL_VALIDATION_REPORT.md`, `docs/production/SAFETY_REVIEW.md` (resmî kaynaklarla çevrim içi doğrulama yapılmadı, açıkça belirtildi), README "Wilson görev modu" bölümü, `ZORUNLU_KURALLAR.md` kural 18'e Level5 eklendi.
+
+## Geri bildirim 1 — Deprem çantası sırta takılır (Lead isteği)
+- Çanta artık düşük poligonlu gerçek bir sırt çantası (gövde, ön cep, kapak, askılar, sap, beyaz artı). Üstünde süzülen **"E" rozeti** var; rozet tüm görev noktalarında sarı kürenin yerini aldı.
+- E ile alınınca çanta yerden kalkar ve **doğrudan karakterin sırtına takılır** (`EquipEmergencyBag`). Yan görünümde görünsün diye `L1_BackpackFollow` çantayı baktığı yönün tersindeki sırt tarafında tutar.
+- Çantanın kütlesi (10 kg) karakterle birlikte dengeye girer: ölçülen karakter yükü 25 → 35 kg.
+- L1_T03 artık "Çantanın yanına git, E ile sırtına tak". Şartnamedeki bölgeye bırakma kuralı Lead isteğiyle değiştirildi.
+- Play (gerçek E/A/D girdisi): **PASS** — L1_T03 Completed, `bagAttached=True`. Ekran görüntüleri: `screenshots/L1_bag_E_badge.jpg`, `screenshots/L1_bag_on_back.jpg`.
