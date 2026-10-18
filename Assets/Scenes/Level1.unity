@@ -18393,7 +18393,7 @@ MonoBehaviour:
   roomHalfWidth: 5.3
   kitchenUpperFloor: 1
   absoluteTorque: 0
-  holdFurnitureWhilePlanning: 0
+  holdFurnitureWhilePlanning: 1
   collapseAngle: 26
   collapseHoldSeconds: 1
   autoStart: 1

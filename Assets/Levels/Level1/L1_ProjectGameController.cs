@@ -103,10 +103,16 @@ namespace Jam.Levels.Level1
         [Tooltip("Açıksa eğim, başlangıç dizilimine göre değil gerçek tork toplamına göre hesaplanır.")]
         public bool absoluteTorque = false;
         [Tooltip("Hazırlıkta mevcut eşyalar kaymaz; yeni yerleştirilenler 1,5 saniye sonra eğime tepki verir.")]
-        public bool holdFurnitureWhilePlanning = false;
+        public bool holdFurnitureWhilePlanning = true;
         [Tooltip("Eğimde eşyaları kaydıran ek ivme (m/sn²) ve en yüksek kayma hızı. Panel oyunu: 420 px/sn² ≈ 4.4.")]
         public float tiltSlideAccel = 4.4f;
-        public float maxSlideSpeed = 1.6f;
+        public float maxSlideSpeed = 0.6f;
+        [Tooltip("Bu açının (derece) altında sürtünme eşyayı tutar; deprem sarsıntısı yine iter.")]
+        public float minSlideTiltDeg = 4f;
+        [Tooltip("Eşya ağırlığının evi yatırabileceği en büyük açı (derece). Devrilme açısının altında kalırsa ev ancak afetin ekstra itişiyle devrilir.")]
+        public float maxTargetTiltDeg = 23f;
+        [Tooltip("Odanın iki yanındaki görünmez duvarların merkezden uzaklığı (m). Eşyalar evden dökülmez.")]
+        public float sideWallInnerX = 5.55f;
         [Tooltip("Devrilme açısı (derece) ve bu açıda kesintisiz kalma süresi (saniye).")]
         public float collapseAngle = 26f;
         public float collapseHoldSeconds = 1f;
@@ -179,6 +185,7 @@ namespace Jam.Levels.Level1
             SetUpperFloorVisible(false);
             if (drag != null) drag.floorTopsProvider = FloorTops;
             if (drag != null) drag.ManipulationStarted += ReleaseLevelEntryBalance;
+            BuildSideWalls();
             RefreshFurniture();
             CacheFurnitureTemplates();
             CacheHangingLamps();
@@ -381,6 +388,17 @@ namespace Jam.Levels.Level1
             }
         }
 
+        private void BuildSideWalls()
+        {
+            for (var side = -1; side <= 1; side += 2)
+            {
+                var wall = new GameObject(side < 0 ? "[L1] Görünmez sol duvar" : "[L1] Görünmez sağ duvar");
+                wall.transform.SetParent(houseRoot, false);
+                wall.transform.localPosition = new Vector3(side * (sideWallInnerX + 0.25f), 0f, 0f);
+                wall.AddComponent<BoxCollider>().size = new Vector3(0.5f, 40f, 12f);
+            }
+        }
+
         private void FixedUpdate()
         {
             if (balancePivot == null || houseRoot == null || state == RoundState.StartMenu ||
@@ -421,7 +439,8 @@ namespace Jam.Levels.Level1
             foreach (var item in furniture)
             {
                 if (item == null || !item.gameObject.activeInHierarchy || item.IsAnchored || item.Body == null || item.Body.isKinematic) continue;
-                if (holdFurnitureWhilePlanning && state == RoundState.Planning && !item.AllowPlanningSlide)
+                var heldByFriction = Mathf.Abs(houseAngle) < minSlideTiltDeg * Mathf.Deg2Rad && quake == 0f;
+                if (heldByFriction || holdFurnitureWhilePlanning && state == RoundState.Planning && !item.AllowPlanningSlide)
                 {
                     // Hazırlıkta eğim, eşyayı kendiliğinden kaydırıp zincirleme devrilme yaratmasın.
                     var right = houseRoot.right;
@@ -454,7 +473,8 @@ namespace Jam.Levels.Level1
                 (Mathf.Sqrt(torqueDelta * torqueDelta + 25f) - 5f);
             // Use the same limit before and during a disaster; switching states
             // must not release a previously clamped target in one step.
-            var target = Mathf.Clamp(-torqueDelta * torqueSensitivity + disturbance, -0.52f, 0.52f);
+            var maxTarget = maxTargetTiltDeg * Mathf.Deg2Rad;
+            var target = Mathf.Clamp(-torqueDelta * torqueSensitivity, -maxTarget, maxTarget) + disturbance;
             // The source game keeps the house nearly level from the fire stage
             // onward so those rounds are decided by their own hazards. Retain a
             // small visible response for the physical 3D house.
