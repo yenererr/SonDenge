@@ -206,7 +206,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &1438541875529557352
+--- !u!1 &2561757403404369920
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,9 +214,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 562465477249849692}
-  - component: {fileID: 4568047899912525885}
-  - component: {fileID: 3656935221931543304}
+  - component: {fileID: 7831197286991032623}
+  - component: {fileID: 2547664913330384598}
+  - component: {fileID: 718765728489015942}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -224,13 +224,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &562465477249849692
+--- !u!224 &7831197286991032623
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438541875529557352}
+  m_GameObject: {fileID: 2561757403404369920}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -243,21 +243,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -65}
   m_SizeDelta: {x: 0, y: -370}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &4568047899912525885
+--- !u!222 &2547664913330384598
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438541875529557352}
+  m_GameObject: {fileID: 2561757403404369920}
   m_CullTransparentMesh: 1
---- !u!114 &3656935221931543304
+--- !u!114 &718765728489015942
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1438541875529557352}
+  m_GameObject: {fileID: 2561757403404369920}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
@@ -570,7 +570,7 @@ MonoBehaviour:
   starOff: {fileID: 21300000, guid: bddea978f95954b42b4b82ccb9d99131, type: 3}
   durationText: {fileID: 4762049970439474135}
   lockGroup: {fileID: 7620987461428368056}
-  lockText: {fileID: 3656935221931543304}
+  lockText: {fileID: 718765728489015942}
   glow: {fileID: 475921478901991056}
   dim: {fileID: 7283863493596092693}
   liftPixels: 18
@@ -1502,7 +1502,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5939698981603028895}
-  - {fileID: 562465477249849692}
+  - {fileID: 7831197286991032623}
   m_Father: {fileID: 4353690663880466828}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
