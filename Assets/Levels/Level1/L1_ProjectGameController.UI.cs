@@ -319,7 +319,7 @@ namespace Jam.Levels.Level1
             Shade(width, height);
             var rect = new Rect((width - 500f) * 0.5f, (height - 395f) * 0.5f, 500f, 395f);
             Panel(rect, Stone, Border);
-            GUI.Label(new Rect(rect.x + 25f, rect.y + 42f, 450f, 54f), "SON DENGE", uiTitle);
+            GUI.Label(new Rect(rect.x + 25f, rect.y + 42f, 450f, 54f), "PALAS PANDIRAS", uiTitle);
             L1_PaperGui.Rule(rect.x + 89f, rect.y + 99f, 322f, Border);
             GUI.Label(new Rect(rect.x + 36f, rect.y + 105f, 428f, 34f), "Dengeyi Kur, 5 Büyük Afete Karşı Diren", uiCentered);
             GUI.Label(new Rect(rect.x + 40f, rect.y + 159f, 420f, 85f),

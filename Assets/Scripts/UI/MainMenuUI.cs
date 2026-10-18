@@ -22,7 +22,7 @@ namespace Jam.UI
         [SerializeField] private Font font;
         [SerializeField] private string version = "Game Jam 2026 · v0.3";
         [SerializeField, TextArea(3, 12)] private string credits =
-            "Son Denge — 48 saatlik game jam ekibi\n\n" +
+            "Palas Pandıras — 48 saatlik game jam ekibi\n\n" +
             "3D paketler: LowPolyInteriorsFree, Low Poly Tavern Pack, 3Digitalis Interior Props, " +
             "Modular Sewer Props (Ata Khani), Roadside Tales Fences (EmaceArt), StylArts, MIX Furniture, FarmHouse " +
             "— Unity Asset Store Standart EULA.\n\nWilson 3D tavuk: Pjager (CC BY 4.0), yumurta: Casca_Servillius (CC BY 4.0) — ThirdParty/Wilson/CREDITS.md\n\nAyrıntılı liste: docs/ASSET_ATTRIBUTIONS_LEVEL1.md";
@@ -132,7 +132,7 @@ namespace Jam.UI
 
             var title = UiKit.Rect(canvas, "TitleGroup", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
                 new Vector2(110f, -110f), new Vector2(620f, 190f));
-            var titleText = Label(title, "Başlık", "SON DENGE", 104, UiKit.Cream, TextAnchor.UpperLeft, FontStyle.Bold);
+            var titleText = Label(title, "Başlık", "PALAS PANDIRAS", 104, UiKit.Cream, TextAnchor.UpperLeft, FontStyle.Bold);
             titleText.horizontalOverflow = HorizontalWrapMode.Overflow;
             UiKit.Border(titleText, new Color(0.25f, 0.14f, 0.08f, 0.9f), 4f);
             var subtitle = Label(title, "AltBaşlık", "Afet gelmeden önce dengeni kur.", 34, UiKit.Mustard,

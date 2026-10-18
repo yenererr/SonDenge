@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Son Denge \u015Fu anda yaln\u0131z T\xFCrk\xE7e oynanabilir. Ba\u015Fka
+  m_text: "Palas Pand\u0131ras \u015Fu anda yaln\u0131z T\xFCrk\xE7e oynanabilir. Ba\u015Fka
     dil eklendi\u011Finde burada se\xE7ilebilecek."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f217f30112cd0249be0644c64d42975, type: 2}

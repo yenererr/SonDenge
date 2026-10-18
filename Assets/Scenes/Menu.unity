@@ -5106,7 +5106,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 304962e95a0a50a4597bbe2dd6f84d8c, type: 3}
     - {fileID: 21300000, guid: 42d9db4bf70febf488966bff20db3d2c, type: 3}
     showDropCoverHold: 0
-  - subtitle: Son Denge
+  - subtitle: "Palas Pand\u0131ras"
     ribbonColor: {r: 0.12156863, g: 0.43529412, b: 0.54509807, a: 1}
     thumbnailTint: {r: 0.5176471, g: 0.7058824, b: 0.8, a: 1}
     overlayTint: {r: 0.05, g: 0.3, b: 0.5, a: 0.38}
@@ -8170,7 +8170,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Son Denge, sivri bir da\u011F\u0131n zirvesindeki fantastik evin dengesini
+  m_text: "Palas Pand\u0131ras, sivri bir da\u011F\u0131n zirvesindeki fantastik evin dengesini
     korurken ger\xE7ek afet haz\u0131rl\u0131klar\u0131n\u0131 \xF6\u011Frendi\u011Fin
     fizik ve strateji oyunudur. E\u015Fyalar\u0131n\u0131 g\xFCvenli yerle\u015Ftir,
     g\xF6revleri tamamla, afetlere haz\u0131rl\u0131kl\u0131 ol."
@@ -10471,7 +10471,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Son Denge \u015Fu anda yaln\u0131z T\xFCrk\xE7e oynanabilir. Ba\u015Fka
+  m_text: "Palas Pand\u0131ras \u015Fu anda yaln\u0131z T\xFCrk\xE7e oynanabilir. Ba\u015Fka
     dil eklendi\u011Finde burada se\xE7ilebilecek."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f217f30112cd0249be0644c64d42975, type: 2}
@@ -11164,7 +11164,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Emre G\xFCndo\u011Fdu\nSon Denge ekibi"
+  m_text: "Emre G\xFCndo\u011Fdu\nPalas Pand\u0131ras ekibi"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f217f30112cd0249be0644c64d42975, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: b0211e72b5fe1f442bde919d5320c831, type: 2}
@@ -15663,7 +15663,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "T\xFClay Aktenli\nSon Denge ekibi"
+  m_text: "T\xFClay Aktenli\nPalas Pand\u0131ras ekibi"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f217f30112cd0249be0644c64d42975, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: b0211e72b5fe1f442bde919d5320c831, type: 2}
@@ -18684,7 +18684,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Sayg\u0131n \xC7amsoy\nSon Denge ekibi"
+  m_text: "Sayg\u0131n \xC7amsoy\nPalas Pand\u0131ras ekibi"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3f217f30112cd0249be0644c64d42975, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: b0211e72b5fe1f442bde919d5320c831, type: 2}

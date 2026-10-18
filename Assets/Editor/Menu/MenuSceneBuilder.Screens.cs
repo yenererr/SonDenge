@@ -388,7 +388,7 @@ namespace Jam.EditorTools
             var langBox = Anchored("Value", langRow, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-6, 0), new Vector2(430, 58));
             Img(langBox, "field", Color.white);
             Label(langBox, "Text", "Türkçe (varsayılan)", 28, Ink, TextAlignmentOptions.MidlineLeft, false, MatInk, 18);
-            Note(lang, "Son Denge şu anda yalnız Türkçe oynanabilir. Başka dil eklendiğinde burada seçilebilecek.");
+            Note(lang, "Palas Pandıras şu anda yalnız Türkçe oynanabilir. Başka dil eklendiğinde burada seçilebilecek.");
             // Erişilebilirlik
             var access = PanelArea("Panel_Erisilebilirlik");
             var motion = RowOf(SettingsToggleRow, access, "Hareketleri Azalt");
@@ -450,7 +450,7 @@ namespace Jam.EditorTools
             Img(left, "parchment", Color.white);
             Logo(left, 70, 40, 0.5f);
             Label(left, "Description",
-                "Son Denge, sivri bir dağın zirvesindeki fantastik evin dengesini korurken gerçek afet hazırlıklarını öğrendiğin fizik ve strateji oyunudur. Eşyalarını güvenli yerleştir, görevleri tamamla, afetlere hazırlıklı ol.",
+                "Palas Pandıras, sivri bir dağın zirvesindeki fantastik evin dengesini korurken gerçek afet hazırlıklarını öğrendiğin fizik ve strateji oyunudur. Eşyalarını güvenli yerleştir, görevleri tamamla, afetlere hazırlıklı ol.",
                 28, Ink, TextAlignmentOptions.TopLeft, false, MatInk, 50, 210, 640, 90);
             Label(left, "Safety", "Ev dengeleme sistemi kurgusaldır; gerçek afetlerde resmî güvenlik yönergelerini izleyin.",
                 22, Hex("8A3A2A"), TextAlignmentOptions.BottomLeft, true, MatInk, 50, 0, 640, 30);
@@ -475,9 +475,9 @@ namespace Jam.EditorTools
             (string icon, string text)[] roles =
             {
                 ("code", "Yener Er\nLead · Çekirdek, Menü, Bölüm 1"),
-                ("palette", "Emre Gündoğdu\nSon Denge ekibi"),
-                ("cube", "Tülay Aktenli\nSon Denge ekibi"),
-                ("image", "Saygın Çamsoy\nSon Denge ekibi"),
+                ("palette", "Emre Gündoğdu\nPalas Pandıras ekibi"),
+                ("cube", "Tülay Aktenli\nPalas Pandıras ekibi"),
+                ("image", "Saygın Çamsoy\nPalas Pandıras ekibi"),
                 ("clipboard", "Oyun Testi\nBütün ekip")
             };
             foreach (var role in roles)
@@ -556,7 +556,7 @@ namespace Jam.EditorTools
                     brief = "Gıdak! Gök gürültüsü yaklaşmadan elektrik güvenliği hazırlıklarını tamamlayalım!",
                     safety = "Gök gürlerken dışarı çıkma ve elektrikli cihazların fişini çekme.",
                     tasks = new[] { "shield", "plug", "bolt" }, dch = false },
-                new { sub = "Son Denge", ribbon = "1F6F8B", tint = "84B4CC", over = new Color(0.05f, 0.3f, 0.5f, 0.38f), icon = "drop",
+                new { sub = "Palas Pandıras", ribbon = "1F6F8B", tint = "84B4CC", over = new Color(0.05f, 0.3f, 0.5f, 0.38f), icon = "drop",
                     select = "Son bölüm! Suyun eve girmemesi için birlikte hazırlanalım.",
                     brief = "Gıdak! Çok yağmur yağacak! Suyun eve girmemesi için hazırlanalım!",
                     safety = "Su baskınında elektrikli cihazlardan uzak dur; güvenli yere geç.",
