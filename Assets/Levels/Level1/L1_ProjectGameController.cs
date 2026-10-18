@@ -124,8 +124,8 @@ namespace Jam.Levels.Level1
         [Tooltip("Hazırlıkta mevcut eşyalar kaymaz; yeni yerleştirilenler 1,5 saniye sonra eğime tepki verir.")]
         public bool holdFurnitureWhilePlanning = true;
         [Tooltip("Eğimde eşyaları kaydıran ek ivme (m/sn²) ve en yüksek kayma hızı. Panel oyunu: 420 px/sn² ≈ 4.4.")]
-        public float tiltSlideAccel = 4.4f;
-        public float maxSlideSpeed = 0.6f;
+        public float tiltSlideAccel = 1.5f;
+        public float maxSlideSpeed = 0.35f;
         [Tooltip("Bu açının (derece) altında sürtünme eşyayı tutar; deprem sarsıntısı yine iter.")]
         public float minSlideTiltDeg = 4f;
         [Tooltip("Eşya ağırlığının evi yatırabileceği en büyük açı (derece). Devrilme açısının altında kalırsa ev ancak afetin ekstra itişiyle devrilir.")]
@@ -477,10 +477,10 @@ namespace Jam.Levels.Level1
                 var wind = state == RoundState.Disaster && level == 2 ? (equipment.Contains("storm_brace") ? 0.8f : 2.5f) : 0f;
                 item.Body.AddForce(houseRoot.right * (slope + shake + wind), ForceMode.Acceleration);
                 var along = Vector3.Dot(item.Body.linearVelocity, houseRoot.right);
-                var excessSpeed = Mathf.Max(0f, Mathf.Abs(along) - maxSlideSpeed);
+                // Sert hız sınırı: eşya ivmelenip hızlanmaz, oyuncu yakalayıp düzenleyebilir.
+                var excessSpeed = Mathf.Abs(along) - maxSlideSpeed;
                 if (excessSpeed > 0f)
-                    item.Body.AddForce(-houseRoot.right * (Mathf.Sign(along) * excessSpeed * 4f),
-                        ForceMode.Acceleration);
+                    item.Body.linearVelocity -= houseRoot.right * (Mathf.Sign(along) * excessSpeed);
             }
 
             // Positive weight on the right lowers the right side: clockwise / negative Z.
