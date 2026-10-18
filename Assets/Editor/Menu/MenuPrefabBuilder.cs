@@ -437,16 +437,11 @@ namespace Jam.EditorTools
         private static GameObject BuildLogo()
         {
             var root = Root("UI_BrandLogo", 640, 300);
-            var sign = Stretch("Sign", root);
-            Img(sign, "wood_sign", Color.white);
-            Leaf(root, new Vector2(0f, 1f), new Vector2(26, -20), 0f);
-            Leaf(root, new Vector2(1f, 1f), new Vector2(-26, -20), 0f, true);
-            Leaf(root, new Vector2(0f, 0f), new Vector2(40, 16), 180f, true);
-            Leaf(root, new Vector2(1f, 0f), new Vector2(-40, 16), 180f);
-            var son = Label(root, "Son", "SON", 128, Cream, TextAlignmentOptions.Center, true, MatTitle, 20, 4, 20, 150);
-            var denge = Label(root, "Denge", "DENGE", 138, Cream, TextAlignmentOptions.Center, true, MatTitle, 20, 132, 20, 4);
-            son.characterSpacing = denge.characterSpacing = -2f;
-            son.textWrappingMode = denge.textWrappingMode = TextWrappingModes.NoWrap;
+            // Palas Pandıras logosu (şeffaf PNG); kutudan biraz taşar, oranı korunur.
+            var logo = Stretch("Logo", root);
+            logo.offsetMin = new Vector2(0, -50);
+            logo.offsetMax = new Vector2(0, 40);
+            Img(logo, "logo_palas_pandiras", Color.white, false, false);
             return root.gameObject;
         }
 
