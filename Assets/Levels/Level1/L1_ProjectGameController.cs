@@ -126,6 +126,8 @@ namespace Jam.Levels.Level1
         [Tooltip("Eğimde eşyaları kaydıran ek ivme (m/sn²) ve en yüksek kayma hızı. Panel oyunu: 420 px/sn² ≈ 4.4.")]
         public float tiltSlideAccel = 1.5f;
         public float maxSlideSpeed = 0.35f;
+        [Tooltip("Hazırlıkta (Hold Furniture While Planning açıkken) eşyaların en yüksek kayma hızı (m/sn). 0 = hiç kaymaz.")]
+        public float planningMaxSlideSpeed = 0.12f;
         [Tooltip("Bu açının (derece) altında sürtünme eşyayı tutar; deprem sarsıntısı yine iter.")]
         public float minSlideTiltDeg = 4f;
         [Tooltip("Eşya ağırlığının evi yatırabileceği en büyük açı (derece). Devrilme açısının altında kalırsa ev ancak afetin ekstra itişiyle devrilir.")]
@@ -474,7 +476,8 @@ namespace Jam.Levels.Level1
             {
                 if (item == null || !item.gameObject.activeInHierarchy || item.IsAnchored || item.Body == null || item.Body.isKinematic) continue;
                 var heldByFriction = Mathf.Abs(houseAngle) < minSlideTiltDeg * Mathf.Deg2Rad && quake == 0f;
-                if (heldByFriction || holdFurnitureWhilePlanning && state == RoundState.Planning && !item.AllowPlanningSlide)
+                var slowPlanning = holdFurnitureWhilePlanning && state == RoundState.Planning && !item.AllowPlanningSlide;
+                if (heldByFriction || slowPlanning && planningMaxSlideSpeed <= 0f)
                 {
                     // Hazırlıkta eğim, eşyayı kendiliğinden kaydırıp zincirleme devrilme yaratmasın.
                     var right = houseRoot.right;
@@ -491,7 +494,7 @@ namespace Jam.Levels.Level1
                 item.Body.AddForce(houseRoot.right * (slope + shake + wind), ForceMode.Acceleration);
                 var along = Vector3.Dot(item.Body.linearVelocity, houseRoot.right);
                 // Sert hız sınırı: eşya ivmelenip hızlanmaz, oyuncu yakalayıp düzenleyebilir.
-                var excessSpeed = Mathf.Abs(along) - maxSlideSpeed;
+                var excessSpeed = Mathf.Abs(along) - (slowPlanning ? planningMaxSlideSpeed : maxSlideSpeed);
                 if (excessSpeed > 0f)
                     item.Body.linearVelocity -= houseRoot.right * (Mathf.Sign(along) * excessSpeed);
             }
