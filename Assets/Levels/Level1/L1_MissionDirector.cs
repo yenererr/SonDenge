@@ -437,6 +437,8 @@ namespace Jam.Levels.Level1
                 data.onPrimary = isFinal ? (System.Action)ReplayAll : Next;
             }
             report.Show(data);
+            // Oyunun sonu: Bölüm 5 kazanıldıysa final videoları sırayla oynar, ardından "SON" yazısı; sonra rapor görünür.
+            if (isFinal && r.survived) L1_EndingCinematic.Play(transform, null);
         }
 
         private static string StripPrefix(string tip) =>
