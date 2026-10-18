@@ -3,14 +3,13 @@ using UnityEngine;
 namespace Jam.Levels.Level1
 {
     /// <summary>
-    /// Kayıtlı sesler (Assets/Audio/Resources/Sfx): adım, merdiven, afet döngüleri, eşya sabitleme.
+    /// Kayıtlı sesler (Assets/Audio/Resources/Sfx): adım, afet döngüleri, eşya sabitleme.
     /// Sesler Resources'tan yüklendiği için sahnelere elle atama gerekmez.
     /// </summary>
     public sealed partial class L1_ProjectGameController
     {
         [Header("Ses — adım ve afet döngüleri")]
         [Tooltip("İki ayak sesi arası süre (sn).")] public float footstepInterval = 0.34f;
-        [Tooltip("Merdivende iki gıcırtı arası süre (sn).")] public float ladderStepInterval = 0.42f;
         [Range(0f, 1f)] public float footstepVolume = 0.45f;
         [Range(0f, 1f)] public float loopVolume = 0.55f;
 
@@ -51,13 +50,12 @@ namespace Jam.Levels.Level1
             var delta = position - lastResidentPosition;
             lastResidentPosition = position;
             if (dt <= 0f || delta.sqrMagnitude > 1f) return; // ışınlanma / yeniden doğma
-            var climbing = resident.IsClimbing;
-            var speed = (climbing ? Mathf.Abs(delta.y) : Mathf.Abs(delta.x)) / dt;
-            if (speed < 0.4f || resident.IsHiding) { stepClock = 0f; return; }
+            var speed = Mathf.Abs(delta.x) / dt;
+            if (speed < 0.4f || resident.IsHiding || resident.IsClimbing) { stepClock = 0f; return; }
             stepClock -= dt;
             if (stepClock > 0f) return;
-            stepClock = climbing ? ladderStepInterval : footstepInterval;
-            sfx.PlayClip(climbing ? "ladder" : "step", footstepVolume, 0.08f);
+            stepClock = footstepInterval;
+            sfx.PlayClip("step", footstepVolume, 0.08f);
         }
     }
 }
